@@ -178,15 +178,13 @@ Forthword_ NOT, INLINE_OPT, "not"
 @ ( -- 0 )
 @ place a value 0 on TOS
 Forthword_ ZERO, INLINE_OPT, "0"
-  pushtos_
-  mov tos, #0
+  zero_
   bx lr
 
 @ ( -- -1 )
 @ leaves the value -1 (true) on TOS
 Forthword_ TRUE, INLINE_OPT, "true"
-  pushtos_
-  mov tos, #0
+  zero_
   mvn tos, tos
   bx lr
 
@@ -206,4 +204,16 @@ Forthword_ TWO, 0, "2"
 @ place a value 10 on TOS
 Forthword_ TEN, 0, "10"
   doliteral_ 10
+  bx lr
+
+@ ( n1 n2 -- n3)
+@ logically shift n1 left n2 times
+forthword_ LSHIFT, INLINE_OPT, "<<"
+  lshift_
+  bx lr
+
+@ ( n1 n2 -- n3)
+@ logically shift n1 right n2 times
+forthword_ RSHIFT, INLINE_OPT, ">>"
+  rshift_
   bx lr

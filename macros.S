@@ -154,7 +154,7 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .endm
 
 .macro twoslash_
-    asr tos, #1
+    lsr tos, #1
 .endm
 
 .macro twostar_
@@ -165,6 +165,22 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     cmp tos, #0
 .endm
 
+.macro zero_
+    pushtos_
+    mov tos, #0
+.endm
+
+.macro lshift_
+  ldm dsp!, {r0}
+  lsl r0, tos
+  mov tos, r0
+.endm
+
+.macro rshift_
+  ldm dsp!, {r0}
+  lsr r0, tos
+  mov tos, r0
+.endm
 
 .macro Forthword_ lbl, Flags, Name
 
