@@ -29,6 +29,7 @@ topstack:
 main:
     push {lr} @ save return
     @ initialize data stack
+    bl set_input_mode
     ldr dsp, addr_stack
 
 
@@ -46,6 +47,9 @@ main:
 
     bl PHEX
     bl CR
+    bl KEY
+    bl EMIT
+    bl CR
 
     doliteral_ 12
     @bl
@@ -59,3 +63,4 @@ addr_stack: .word topstack
 
 /* External calls*/
 .global putchar
+.global getchar

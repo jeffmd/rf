@@ -24,3 +24,12 @@ Forthword_ CR, 0, "cr"
 Forthword_ BL, 0, "bl"
     doliteral_ 32
     bx lr
+
+@ ( -- key )
+@ fetch key vector and EXEC it, should leave a single character on TOS
+Forthword_ KEY, 0, "key"
+  push {lr}
+  bl getchar
+  pushtos_
+  mov tos, r0
+  pop {pc}

@@ -3,11 +3,13 @@ INCS = *.S
 
 all: rf
 
-main : rf.o
+rf : rf.o input.o
 	gcc -o $@ $+
 
 rf.o : main.S $(INCS)
 	as -o $@ $<
 
+lst:
+	objdump -S rf > test.s
 clean:
 	rm -vf rf *.o
