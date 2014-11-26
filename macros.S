@@ -1,10 +1,11 @@
 @ macros.S
 
+sysvar .req r5 @ system variables base pointer
 tos .req r6 @ parameter top of stack [TOS] register
 dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 
 @ header flags
-.set HFLAGS, 0xFF00
+.set HFLAGS, 0xFF
 @ low byte is word count : 0 - 255
 @ high byte is flags for word
 @ enable inlining of word
@@ -35,6 +36,7 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 @ bit 2 : disable tail call optimization
 .set DIS_CALL_OPT_FB, 2
 
+
 .macro opdat op, reg, sym
   \op \reg, [r1, #(\sym-Data)]
 .endm
@@ -55,6 +57,18 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 
 .macro dup_
   pushtos_
+.endm
+
+.macro sysv_ sym
+    #(\sym - sysvar_base)
+.endm
+
+.macro pushsysv_ sym
+    dup_
+    ldr tos, 7f
+    bx lr
+7:
+    .word \sym
 .endm
 
 @ Push small constant on datastack
@@ -182,17 +196,21 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   mov tos, r0
 .endm
 
-.macro Forthword_ lbl, Flags, Name
+.macro ascii_ str, flg=0
+  .p2align 1 @ Align to even locations
+  .byte (8f - 7f)
+  .byte \flg
+7:  .ascii "\str"
+8:
+  .p2align 1
+.endm
 
-        .p2align 1        @ Align to even locations
+.macro Forthword_ lbl, flags, Name
+
 VE_\lbl:
+    ascii_ "\name", HFLAGS & ~(\flags)
 
-        .byte 8f - 7f     @ Calculate length of name field
-        .byte \Flags      @  Flag field
-7:      .ascii "\Name"    @ name string
-8:      .p2align 1        @ 1 Bit 0 - Realign
-
-        .word VE_HEAD
-        .set VE_HEAD, VE_\lbl
+    .word VE_HEAD
+    .set VE_HEAD, VE_\lbl
 \lbl:
 .endm

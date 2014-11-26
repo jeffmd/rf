@@ -12,6 +12,11 @@ pstack:
 topstack:
   .word 0
 
+.balign 2
+sysvar_base:
+
+ram_sharptib: .space 2
+
 
 .text
 .balign 2
@@ -28,9 +33,11 @@ topstack:
 .thumb_func
 main:
     push {lr} @ save return
-    @ initialize data stack
     bl set_input_mode
+    @ initialize data stack
     ldr dsp, addr_stack
+    @ initialize sysvar pointer
+    ldr sysvar, addr_sysvar
 
 
     bl ONE
@@ -47,7 +54,14 @@ main:
 
     bl PHEX
     bl CR
+LOOP:
     bl KEY
+    cmp tos, #0
+    bgt CONT
+    poptos_
+    @bl PHEX
+    b LOOP
+CONT:
     bl EMIT
     bl CR
 
@@ -58,8 +72,9 @@ main:
     pop {pc}
 
 .balign 4
+@ ram pointers that need relocation on startup
 addr_stack: .word topstack
-
+addr_sysvar: .word sysvar_base
 
 /* External calls*/
 .global putchar
