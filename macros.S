@@ -67,8 +67,10 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     dup_
     ldr tos, 7f
     bx lr
+.balign 4
 7:
     .word \sym
+.balign 2
 .endm
 
 @ Push small constant on datastack

@@ -1,5 +1,18 @@
 @ interpret.S
 
+@ ( -- addr )
+@ terminal input buffer address
+Forthword_ TIB, 0, "tib"
+    pushsysv_  ram_tib
+
+
+@ ( -- addr )
+@ variable holding the number of characters in TIB
+Forthword_ SHARPTIB, 0, "#tib"
+    pushsysv_ ram_sharptib
+
+
+
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ EMIT, 0, "emit"

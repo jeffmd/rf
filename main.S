@@ -3,6 +3,9 @@
 
 .include "macros.S"
 
+@ size of the Terminal Input Buffer
+.set TIBSIZE, 80
+
 .bss
 .balign 4
 
@@ -16,6 +19,7 @@ topstack:
 sysvar_base:
 
 ram_sharptib: .space 2
+ram_tib: .space TIBSIZE
 
 
 .text
