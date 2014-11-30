@@ -76,7 +76,7 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 @ Push small constant on datastack
 .macro doliteral_ val
   pushtos_
-  movs tos, #\val
+  mov tos, #\val
 .endm
 
 
@@ -124,12 +124,12 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   drop_
 .endm
 
-.macro add__
+.macro plus_
   ldm dsp!, {r0}
   add tos, r0
 .endm
 
-.macro sub__
+.macro minus_
   ldm dsp!, {r0}
   sub tos, r0, tos
 .endm
@@ -177,8 +177,17 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     lsl tos, #1
 .endm
 
+.macro neg_
+    rsbs tos, #0
+.endm
+
 .macro dupzerosense_
     cmp tos, #0
+.endm
+
+.macro zerosense_
+    cmp tos, #0
+    poptos_
 .endm
 
 .macro zero_
@@ -196,6 +205,18 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   ldm dsp!, {r0}
   lsr r0, tos
   mov tos, r0
+.endm
+
+.macro fetch_
+  ldr tos, [tos]
+.endm
+
+.macro hfetch_
+  ldrh tos, [tos]
+.endm
+
+.macro cfetch_
+  ldrb tos, [tos]
 .endm
 
 .macro ascii_ str, flg=0

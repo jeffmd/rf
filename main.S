@@ -47,9 +47,9 @@ main:
     bl ONE
 
     doliteral_ 5
-    add__
+    plus_
     bl TWO
-    sub__
+    minus_
     twostar_
     pushtos_
 
@@ -59,12 +59,12 @@ main:
     bl PHEX
     bl CR
 LOOP:
-    bl KEY
-    cmp tos, #0
-    bgt CONT
+    bl ACCEPT
+    dupzerosense_
+    bne CONT
     poptos_
-    @bl PHEX
     b LOOP
+
 CONT:
     bl EMIT
     bl CR

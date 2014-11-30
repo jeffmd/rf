@@ -114,44 +114,60 @@ Forthword_ TO_R, INLINE_OPT, ">r"
 
 @@@@@@@@@@@@@ Arithmatic @@@@@@@@@@@@@
 
-Forthword_ ADD_, INLINE_OPT, "+"
-  add__
+@ ( n1 n2 -- n3)
+@ add n1 and n2
+Forthword_ PLUS, INLINE_OPT, "+"
+  plus_
   bx lr
 
-Forthword_ SUB_, INLINE_OPT, "-"
-  sub__
+@ ( n1|u1 n2|u2 -- n3|u3 )
+@ subtract n2 from n1
+Forthword_ MINUS_, INLINE_OPT, "-"
+  minus_
   bx lr
 
+@ ( n1|u1 -- n2|u2 )
+@ optimized increment
 Forthword_ ONEPLUS, INLINE_OPT, "1+"
   oneplus_
   bx lr
 
-
+@ (S: n1 -- n2 )
+@ optimized decrement
 Forthword_ ONEMINUS, INLINE_OPT, "1-"
   oneminus_
   bx lr
 
+@ ( n1|u1 -- n2|u2 )
+@ optimized two increment
 Forthword_ TWOPLUS, INLINE_OPT, "2+"
   twoplus_
   bx lr
 
-
+@ (S: n1 -- n2 )
+@ optimized decrement
 Forthword_ TWOMINUS, INLINE_OPT, "2-"
   twominus_
   bx lr
 
+@ ( n1 -- n2 )
+@ arithmetic shift left, filling with zero
 Forthword_ TWOSTAR, INLINE_OPT, "2*"
   twostar_
   bx lr
 
+@ ( n1 -- n2 )
+@ arithmetic shift right
 Forthword_ TWOSLASH, INLINE_OPT, "2/"
   twoslash_
   bx lr
 
 Forthword_ NEGATE, INLINE_OPT, "neg"
-  rsbs tos, #0
+  neg_
   bx lr
 
+@ ( n1 n2 -- n3 )
+@ bitwise and
 Forthword_ AND_, INLINE_OPT, "and"
   and__
   bx lr
@@ -216,4 +232,86 @@ forthword_ LSHIFT, INLINE_OPT, "<<"
 @ logically shift n1 right n2 times
 forthword_ RSHIFT, INLINE_OPT, ">>"
   rshift_
+  bx lr
+
+
+@ ( a-addr -- n32 )
+@ read 1 cell (32 bits) from RAM address
+Forthword_ FETCH, INLINE_OPT, "@"
+  fetch_
+  bx lr
+
+@ ( n32 a-addr -- )
+@ store a word (32 bits) to RAM address
+Forthword_ STORE, 0, "!"
+  ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+  str r0, [tos]      @ Popping both saves a cycle.
+  movs tos, r1
+  bx lr
+
+@ ( n32 a-addr -- )
+@ add n32 to content of cell RAM address a-addr
+Forthword_ PLUSSTORE, 0, "+!"
+  ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+  ldr  r2, [tos]     @ Load the current cell value
+  add r2, r0         @ Do the add
+  str  r2, [tos]     @ Store it back
+  movs tos, r1
+  bx lr
+
+
+@ ( a-addr -- n16 )
+@ read half cell (16 bits) from RAM address
+Forthword_ HFETCH, INLINE_OPT, "h@"
+  hfetch_
+  bx lr
+
+@ ( n16 a-addr -- )
+@ store a half word (16 bits) to RAM address
+Forthword_ HSTORE, 0, "h!"
+  ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+  strh r0, [tos]     @ Popping both saves a cycle.
+  movs tos, r1
+  bx lr
+
+@ ( n16 a-addr -- )
+@ add n16 to content of half cell RAM address a-addr
+Forthword_ HPLUSSTORE, 0, "h+!"
+  ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+HPLUSSTORE_do:
+  ldrh r2, [tos]     @ Load the current cell value
+  add r2, r0         @ Do the add
+  strh r2, [tos]     @ Store it back
+  movs tos, r1
+  bx lr
+
+@ ( a-addr -- )
+@ add 1 to content of half cell RAM address a-addr
+Forthword_ ONEHPLUSSTORE, 0, "1h+!"
+  ldm dsp!, {r1}
+  mov r0, #1
+  b HPLUSSTORE_do
+
+@ ( a-addr -- n8 )
+@ read byte (8 bits) from RAM address
+Forthword_ CFETCH, INLINE_OPT, "c@"
+  cfetch_
+  bx lr
+
+@ ( c a-addr -- )
+@ store a single byte to RAM address
+Forthword_ CSTORE, 0, "c!"
+  ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+  strb r0, [tos]     @ Popping both saves a cycle.
+  movs tos, r1
+  bx lr
+
+@ ( c a-addr -- )
+@ add c byte to content of byte RAM address a-addr
+Forthword_ CPLUSSTORE, 0, "c+!"
+  ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+  ldrb r2, [tos]     @ Load the current cell value
+  add r2, r0         @ Do the add
+  strb r2, [tos]     @ Store it back
+  movs tos, r1
   bx lr
