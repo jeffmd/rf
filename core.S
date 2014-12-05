@@ -200,8 +200,7 @@ Forthword_ ZERO, INLINE_OPT, "0"
 @ ( -- -1 )
 @ leaves the value -1 (true) on TOS
 Forthword_ TRUE, INLINE_OPT, "true"
-  zero_
-  mvn tos, tos
+  true_
   bx lr
 
 @ ( -- 1 )
@@ -245,9 +244,19 @@ Forthword_ FETCH, INLINE_OPT, "@"
 @ store a word (32 bits) to RAM address
 Forthword_ STORE, 0, "!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+STORE_it:
   str r0, [tos]      @ Popping both saves a cycle.
   movs tos, r1
   bx lr
+
+@ ( a-addr -- )
+@ store 0 (32 bits) to RAM address
+Forthword_ ZEROSTORE, 0, "0!"
+  mov r0, #0
+  str r0, [tos]
+  poptos_
+  bx lr
+
 
 @ ( n32 a-addr -- )
 @ add n32 to content of cell RAM address a-addr
@@ -272,6 +281,14 @@ Forthword_ HSTORE, 0, "h!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
   strh r0, [tos]     @ Popping both saves a cycle.
   movs tos, r1
+  bx lr
+
+@ ( a-addr -- )
+@ store 0 (16 bits) to RAM address
+Forthword_ ZEROHSTORE, 0, "0h!"
+  mov r0, #0
+  strh r0, [tos]
+  poptos_
   bx lr
 
 @ ( n16 a-addr -- )
@@ -306,6 +323,14 @@ Forthword_ CSTORE, 0, "c!"
   movs tos, r1
   bx lr
 
+@ ( a-addr -- )
+@ store 0 (16 bits) to RAM address
+Forthword_ ZEROCSTORE, 0, "0c!"
+  mov r0, #0
+  strb r0, [tos]
+  poptos_
+  bx lr
+
 @ ( c a-addr -- )
 @ add c byte to content of byte RAM address a-addr
 Forthword_ CPLUSSTORE, 0, "c+!"
@@ -314,4 +339,11 @@ Forthword_ CPLUSSTORE, 0, "c+!"
   add r2, r0         @ Do the add
   strb r2, [tos]     @ Store it back
   movs tos, r1
+  bx lr
+
+@ ( n1 n2 -- n2 ) A: n1
+@ Extended VM
+@ Remove next on stack and write to A register (Extended VM)
+Forthword_ NIPTOA, INLINE_OPT, "nip>a"
+  niptoa_
   bx lr

@@ -31,19 +31,10 @@ ram_tib: .space TIBSIZE
 .include "interpret.S"
 .include "minimum.S"
 
-
-
-.global main
-.thumb_func
-main:
-    push {lr} @ save return
-    bl set_input_mode
-    @ initialize data stack
-    ldr dsp, addr_stack
-    @ initialize sysvar pointer
-    ldr sysvar, addr_sysvar
-
-
+@ ( nx* -- ) (R: ny* -- )
+@ initialize asforth further. EXECs turnkey operation and go to quit
+Forthword_ WARM, 0, "warm"
+    push {lr}
     bl ONE
 
     doliteral_ 5
@@ -59,21 +50,33 @@ main:
     bl PHEX
     bl CR
 LOOP:
-    bl ACCEPT
-    dupzerosense_
+    bl REFILL
+    zerosense_
     bne CONT
-    poptos_
     b LOOP
 
 CONT:
-    bl EMIT
-    bl CR
 
     doliteral_ 12
-    @bl
 
     mov r0, tos
     pop {pc}
+
+.global main
+@ ( -- )
+@ start up asforth.
+Forthword_ COLD, 0, "cold"
+.thumb_func
+main:
+    push {lr} @ save return
+    bl set_input_mode
+    @ initialize data stack
+    ldr dsp, addr_stack
+    @ initialize sysvar pointer
+    ldr sysvar, addr_sysvar
+    pop {r0}
+    mov lr, r0
+    b WARM
 
 .balign 4
 @ ram pointers that need relocation on startup

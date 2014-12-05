@@ -56,11 +56,17 @@ Forthword_ KEY, 0, "key"
   mov tos, r0
   pop {pc}
 
+@ ( -- f )
+@ refills the input buffer
+Forthword_ REFILL, 0, "refill"
+  push {lr}
+  bl REFILLTIB
+  pop {pc}
+
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.
 @ flag will be true if input buffer needs to be processed ie interpreted
 @ flag will be false if more input needed
-
 Forthword_ ACCEPT, 0, "accept"
     push {lr}
     @ <begin>
@@ -151,4 +157,16 @@ ACCEPT_checkmaxinput:
 ACCEPT_atmaxinput:
     @ max number of characters in input buffer so have it processed
     bl TRUE
+    pop {pc}
+
+@ ( -- f )
+@ refills the input buffer - flag is true if buffer has something
+Forthword_ REFILLTIB, 0, "reftib"
+    push {lr}
+    bl ACCEPT                  @ ( f )
+    dupzerosense_              @ ( f )
+    beq REFILLTIB_exit
+    bl CR
+
+REFILLTIB_exit:
     pop {pc}

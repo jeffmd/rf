@@ -1,5 +1,6 @@
 @ macros.S
 
+areg .req r4 @ A register used for memory pointer operations
 sysvar .req r5 @ system variables base pointer
 tos .req r6 @ parameter top of stack [TOS] register
 dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
@@ -186,13 +187,18 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .endm
 
 .macro zerosense_
-    cmp tos, #0
+    dupzerosense_
     poptos_
 .endm
 
 .macro zero_
     pushtos_
     mov tos, #0
+.endm
+
+.macro true_
+  zero_
+  mvn tos, tos
 .endm
 
 .macro lshift_
@@ -218,6 +224,11 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .macro cfetch_
   ldrb tos, [tos]
 .endm
+
+.macro niptoa_
+  ldm dps!, {areg}
+.endm
+
 
 .macro ascii_ str, flg=0
   .p2align 1 @ Align to even locations

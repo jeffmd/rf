@@ -11,13 +11,13 @@ void
 reset_input_mode (void)
 {
   tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
+  fprintf (stdout, "stdin terminal attributes restored\n");
 }
 
 void
 set_input_mode (void)
 {
   struct termios tattr;
-  char *name;
 
   /* Make sure stdin is a terminal. */
   if (!isatty (STDIN_FILENO))
