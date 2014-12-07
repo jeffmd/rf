@@ -191,6 +191,10 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     poptos_
 .endm
 
+.macro zeroless_
+  asr tos, #31    @ Turn MSB into 0xffffffff or 0x00000000
+.endm
+
 .macro zero_
     pushtos_
     mov tos, #0

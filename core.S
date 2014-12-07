@@ -190,6 +190,69 @@ Forthword_ NOT, INLINE_OPT, "not"
   not_
   bx lr
 
+@ ( n1 n2 -- flag)
+@ flag is true if n1 is not equal to n2
+Forthword_ NOTEQUAL, INLINE_OPT, "<>"
+  xor__
+  bx lr
+
+@ ( n1 n2 -- flag )
+@ flag is true if TOS and NOS are equal
+Forthword_ EQUAL, 0, "="
+  ldm dsp!, {r0}
+  sub tos, r0
+  sub tos, #1
+  sbc tos, tos
+  bx lr
+
+@ ( n1 n2 -- flag)
+@ flag is true if n1 is less than n2
+Forthword_ LESS, 0, "<"
+  ldm dsp!, {r0}
+  cmp r0, tos
+  bge 1f
+  mov tos, #0
+  mvn tos, tos
+  bx lr
+1:
+  mov tos, #0
+  bx lr
+
+@ ( n1 n2 -- flag )
+@ flag is true if n1 is greater than n2
+Forthword_ GREATER, 0, ">"
+  ldm dsp!, {r0}     @ Get x1 into a register.
+  cmp r0, tos        @ Is x2 greater?
+  ble 1f
+  mov tos, #0
+  mvn tos, tos
+  bx lr
+1:
+  mov tos, #0
+  bx lr
+
+@ ( u1 u2 -- flag )
+@ flag is true if u1 > u2 (unsigned)
+Forthword_ UGREATER, 0, "u>"
+  ldm dsp!, {r0}
+  sub tos, r0
+  sbc tos, tos
+  bx lr
+
+@ ( u1 u2 -- flag)
+@ flag is true if u1 < u2 (unsigned)
+Forthword_ ULESS, 0, "u<"
+  ldm dsp!, {r0}
+  sub tos, r0, tos
+@ TOS = a-b  -- carry set if a is less than b
+  sbc tos, tos
+  bx lr
+
+@ ( n1 -- flag)
+@ flag is true if TOS is less than zero
+forthword_ ZEROLESS, INLINE_OPT, "0<"
+  zeroless_
+  bx lr
 
 @ ( -- 0 )
 @ place a value 0 on TOS
