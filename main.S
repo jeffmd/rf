@@ -56,6 +56,9 @@ LOOP:
     b LOOP
 
 CONT:
+    bl STIB
+    bl TYPE
+    bl CR
 
     doliteral_ 12
 

@@ -11,7 +11,7 @@ void
 reset_input_mode (void)
 {
   tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
-  fprintf (stdout, "stdin terminal attributes restored\n");
+  fprintf (stdout, "\nstdin terminal attributes restored\n");
 }
 
 void

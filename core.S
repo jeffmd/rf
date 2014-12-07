@@ -347,3 +347,40 @@ Forthword_ CPLUSSTORE, 0, "c+!"
 Forthword_ NIPTOA, INLINE_OPT, "nip>a"
   niptoa_
   bx lr
+
+@ ( -- n )
+@ Read a word (32bit) from memory pointed to by register A (Extended VM)
+Forthword_ AFETCH, INLINE_OPT, "a@"
+    afetch_
+    bx lr
+
+@ ( -- n )
+@ Read a half word (32bit) from memory pointed to by register A (Extended VM)
+Forthword_ AHFETCH, INLINE_OPT, "ah@"
+    ahfetch_
+    bx lr
+
+@ ( -- n )
+@ Read a byte from memory pointed to by register A (Extended VM)
+Forthword_ ACFETCH, INLINE_OPT, "ac@"
+    acfetch_
+    bx lr
+
+@ ( -- )
+@ update register A with post increment 4+ from last memory operation (Extended VM)
+Forthword_ APLUS, INLINE_OPT, "a+"
+    aplus_
+    bx lr
+
+@ ( -- )
+@ update register A with post increment 2+ from last memory operation (Extended VM)
+Forthword_ AHPLUS, INLINE_OPT, "ah+"
+    ahplus_
+    bx lr
+
+
+@ ( -- )
+@ update register A with post increment 1+ from last memory operation (Extended VM)
+Forthword_ ACPLUS, INLINE_OPT, "ac+"
+    acplus_
+    bx lr

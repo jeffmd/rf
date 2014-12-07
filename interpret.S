@@ -21,7 +21,6 @@ Forthword_ STIB, 0, "stib"
     bl HFETCH
     pop {pc}
 
-
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ EMIT, 0, "emit"
@@ -62,6 +61,35 @@ Forthword_ REFILL, 0, "refill"
   push {lr}
   bl REFILLTIB
   pop {pc}
+
+@ ( addr n -- )
+@ print a counted string
+Forthword_ TYPE, 0, "type"
+   push {lr}
+   niptoa_           @ Address of string
+   dupzerosense_
+   b TYPE2
+
+TYPE1:
+   acfetch_
+   acplus_
+   bl EMIT
+   oneminus_
+
+TYPE2:
+   bne TYPE1
+
+   drop_
+   pop {pc}
+
+@ ( addr -- addr+1 n )
+@ get string address and length information out of a counted string in flash
+Forthword_ ICOUNT, 0, "$l"
+    dup_
+    oneplus_
+    swap_
+    hfetch_
+    bx lr
 
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.
