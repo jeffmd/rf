@@ -87,7 +87,7 @@ TYPE2:
 Forthword_ SLASHSTRING, 0, "/$"
     push {lr}
     over_         @ ( -- addr1 u1 n u1 )
-    bl MIN      @ ( -- addr1 u1 n|u1 )
+    bl MIN        @ ( -- addr1 u1 n|u1 )
     bl ROT        @ ( -- u1 n addr1 )
     over_         @ ( -- u1 n addr1 n )
     plus_         @ ( -- u1 n addr2 )
