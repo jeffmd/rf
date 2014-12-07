@@ -82,6 +82,19 @@ TYPE2:
    drop_
    pop {pc}
 
+@ ( addr1 u1 n -- addr2 u2 )
+@ adjust string from addr1 to addr1+n, reduce length from u1 to u2 by n
+Forthword_ SLASHSTRING, 0, "/$"
+    push {lr}
+    over_         @ ( -- addr1 u1 n u1 )
+    @bl MIN      @ ( -- addr1 u1 n|u1 )
+    bl ROT        @ ( -- u1 n addr1 )
+    over_         @ ( -- u1 n addr1 n )
+    plus_         @ ( -- u1 n addr2 )
+    bl RROT       @ ( -- addr2 u1 n )
+    minus_        @ ( -- addr2 u2)
+    pop {pc}
+
 @ ( addr -- addr+1 n )
 @ get string address and length information out of a counted string in flash
 Forthword_ ICOUNT, 0, "$l"

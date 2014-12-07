@@ -44,3 +44,12 @@ Forthword_ PHEX, 0, ".$"
     mov tos, #32
     bl EMIT
     pop {pc}
+
+@ ( n1 -- u1 )
+@ get the absolute value
+Forthword_ ABS, 0, "abs"
+  dupzerosense_
+  bpl 1f
+  neg_
+1:
+  bx lr
