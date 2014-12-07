@@ -1,5 +1,26 @@
 @ minimum.S
 
+@ ( n1 n2 -- n1|n2 )
+@ compare two values leave the smaller one
+Forthword_ MIN, 0, "min"
+  ldm dsp!, {r0}
+  cmp r0, tos
+  bge 1f
+  movs tos, r0
+1:
+  bx lr
+
+@ ( n1 n2 -- n1|n2 )
+@ compare two values, leave the bigger one
+Forthword_ MAX, 0, "max"
+  ldm dsp!, {r0}
+  cmp r0, tos
+  blt 1f
+  mov tos, r0
+1:
+  bx lr
+
+
 @ ( val -- char )
 @ convert low byte of val to a printable hex character
 Forthword_ NHEX, 0, "#h"
