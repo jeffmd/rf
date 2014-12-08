@@ -139,6 +139,44 @@ Forthword_ DOSLIT, 0, "(slit)"
   poptos_
   bx lr
 
+@ ( -- )
+@ send the READY prompt to the command line
+Forthword_ PROMPTRDY, 0, ".>"
+    push {lr}
+    bl CR
+    bl DOSLIT
+    ascii_ "> "
+    bl TYPE
+    pop {pc}
+
+@ ( -- )
+@ send the READY prompt to the command line
+Forthword_ PROMPTCOMPILE, 0, ".:"
+    push {lr}
+    bl CR
+    bl DOSLIT
+    ascii_ ": "
+    bl TYPE
+    pop {pc}
+
+@ ( -- )
+@ send the OK prompt to the command line
+Forthword_ PROMPTOK, 0, ".ok"
+    push {lr}
+    bl DOSLIT
+    ascii_ " ok"
+    bl TYPE
+    pop {pc}
+
+@ ( n -- )
+@ process the error prompt
+Forthword_ PROMPTERROR, 0, ".??"
+    push {lr}
+    bl DOSLIT
+    ascii_ " ?? "
+    bl TYPE
+    bl PHEX
+    pop {pc}
 
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.

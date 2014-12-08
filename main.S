@@ -35,6 +35,7 @@ user_g_in: .space 2
 @ initialize asforth further. EXECs turnkey operation and go to quit
 Forthword_ WARM, 0, "warm"
     push {lr}
+    bl PROMPTRDY
     bl ONE
 
     doliteral_ 5
