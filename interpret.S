@@ -21,6 +21,13 @@ Forthword_ STIB, 0, "stib"
     bl HFETCH
     pop {pc}
 
+@ ( -- a-addr )
+@ index to current read position in input buffer
+@ is half cell size
+Forthword_ G_IN, 0, ">in"
+    pushsysv_ user_g_in
+
+
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ EMIT, 0, "emit"
@@ -103,6 +110,35 @@ Forthword_ ICOUNT, 0, "$l"
     swap_
     hfetch_
     bx lr
+
+@ ( -- addr len )
+@ runtime portion of sliteral
+@ string literal is located starting at return cell
+@ return cell is string length
+@ string then occupies the following cells: c2c1 c4c3 ...
+Forthword_ DOSLIT, 0, "(slit)"
+  @ get return address to get string length, calculate string address start,
+  @ and calculate return address
+  pushtos_
+  mov tos, lr    @ ( raddr )  (R: raddr -- )
+  dup_           @ ( raddr raddr )
+  @ get the string length
+  oneminus_      @ account for odd address number because using thumb instructions
+  hfetch_        @ ( raddr slength )
+  over_          @ ( raddr slength raddr )
+  @ calculate string address
+  oneplus_       @ ( raddr slength straddr )
+  @ calculate the number of words to skip over for return address
+  bl FLIP        @ ( straddr slength raddr )
+  over_          @ ( straddr slength raddr slength)
+  bl HALIGN      @ ( straddr slength raddr k )
+  plus_          @ ( straddr slength raddr+k )
+  @ also skip string length
+  twoplus_       @ ( straddr slength raddr+k+2 )
+  mov lr, tos
+  poptos_
+  bx lr
+
 
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.

@@ -20,7 +20,7 @@ sysvar_base:
 
 ram_sharptib: .space 2
 ram_tib: .space TIBSIZE
-
+user_g_in: .space 2
 
 .text
 .balign 2
@@ -59,6 +59,10 @@ CONT:
     bl STIB
     bl TYPE
     bl CR
+
+    bl DOSLIT
+    ascii_ "This a test\n"
+    bl TYPE
 
     doliteral_ 12
 

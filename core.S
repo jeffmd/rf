@@ -69,6 +69,14 @@ Forthword_ TUCK, 0, "tuck"
     str r0, [dsp]
     bx lr
 
+@ ( n1 n2 n3 -- n3 n2 n1)
+@ exchange TOS and stack cell before NOS, same as SWAP ROT
+Forthword_ FLIP, 0, "flip"
+    mov r0, tos
+    ldr tos, [dsp, #4]
+    str r0, [dsp, #4]
+    bx lr
+
 @ ( n1 n2 n3 -- n2 n3 n1)
 @ rotate the three top level cells
 Forthword_ ROT, 0, "rot"
@@ -294,6 +302,16 @@ forthword_ LSHIFT, INLINE_OPT, "<<"
 @ logically shift n1 right n2 times
 forthword_ RSHIFT, INLINE_OPT, ">>"
   rshift_
+  bx lr
+
+@ ( n1 -- n2/2 )
+@ convert byte length to half word align length
+@ round number up to even value
+Forthword_ HALIGN, 0, "h_"
+  oneplus_
+  mov r0, #1
+  mvn r0, r0
+  and tos, r0
   bx lr
 
 
