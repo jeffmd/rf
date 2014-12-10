@@ -178,6 +178,54 @@ Forthword_ PROMPTERROR, 0, ".??"
     bl PHEX
     pop {pc}
 
+@ ( -- )
+@ check if a ready prompt is required
+Forthword_ QP_RD, 0, "?prd"
+    push {lr}
+    bl STATEFETCH
+    @ output ready prompt if in interpret mode
+    @ <-if>
+    zerosense_
+    bne QP_RD_exit
+      bl PROMPTRDY
+      pop {pc}
+QP_RD_exit:
+    @ <then>
+      bl PROMPTCOMPILE
+      pop {pc}
+
+@ ( -- )
+@ wait for the input buffer to be refilled then interpret
+Forthword_ DOREFILL, 0, "(refill)"
+  push {lr}
+  @ if just starting new input line then check prompt and reset input position
+  bl G_IN                  @ ( >inaddr )
+  hfetch_                  @ ( >in )
+  zerosense_               @ ( )
+  beq DOREFILL_do
+    bl G_IN                @ ( >inaddr )
+    bl ZEROHSTORE          @ (  )
+    @ reset input buffer cursor position
+    bl SHARPTIB            @ ( #tibaddr )
+    bl ZEROHSTORE          @ ( )
+    bl QP_RD
+    pop {pc}
+
+DOREFILL_do:
+  @ refill the input buffer
+  bl REFILL                @ ( f )
+  @ <if>
+  zerosense_
+  beq DOREFILL_end
+
+    @ there is something in the input buffer, try interpreting it
+    @bl DOINTERPRET
+    pop {pc}
+DOREFILL_end:
+  @ <then>
+  pop {pc}
+
+
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.
 @ flag will be true if input buffer needs to be processed ie interpreted

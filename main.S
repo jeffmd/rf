@@ -21,6 +21,7 @@ sysvar_base:
 ram_sharptib: .space 2
 ram_tib: .space TIBSIZE
 user_g_in: .space 2
+state: .space 2
 
 .text
 .balign 2
@@ -28,6 +29,7 @@ user_g_in: .space 2
 .set VE_HEAD, 0
 
 .include "core.S"
+.include "compiler.S"
 .include "interpret.S"
 .include "minimum.S"
 
@@ -35,7 +37,7 @@ user_g_in: .space 2
 @ initialize asforth further. EXECs turnkey operation and go to quit
 Forthword_ WARM, 0, "warm"
     push {lr}
-    bl PROMPTRDY
+    bl DOREFILL
     bl ONE
 
     doliteral_ 5
