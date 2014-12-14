@@ -12,7 +12,7 @@
 
 pstack:
   .space 400
-topstack:
+topdstack:
   .word 0
 
 .balign 2
@@ -22,6 +22,11 @@ ram_sharptib: .space 2
 ram_tib: .space TIBSIZE
 user_g_in: .space 2
 state: .space 2
+fflags: .space 2
+rstack0: .space 4
+ram_LATEST: .space 4
+COLON_SMUDGE: .space 4
+
 
 .text
 .balign 2
@@ -37,7 +42,26 @@ state: .space 2
 @ initialize asforth further. EXECs turnkey operation and go to quit
 Forthword_ WARM, 0, "warm"
     push {lr}
-    bl DOREFILL
+    pushtos_
+    mov tos, sp
+    bl RP0
+    bl STORE
+    bl QUIT
+    pop {pc}
+
+.global main
+@ ( -- )
+@ start up asforth.
+Forthword_ COLD, 0, "cold"
+.thumb_func
+main:
+    push {lr} @ save return
+    bl set_input_mode
+    @ initialize data stack
+    ldr dsp, addr_dstack
+    @ initialize sysvar pointer
+    ldr sysvar, addr_sysvar
+    bl WARM
     bl ONE
 
     doliteral_ 5
@@ -52,11 +76,6 @@ Forthword_ WARM, 0, "warm"
 
     bl PHEX
     bl CR
-LOOP:
-    bl REFILL
-    zerosense_
-    bne CONT
-    b LOOP
 
 CONT:
     bl STIB
@@ -72,25 +91,9 @@ CONT:
     mov r0, tos
     pop {pc}
 
-.global main
-@ ( -- )
-@ start up asforth.
-Forthword_ COLD, 0, "cold"
-.thumb_func
-main:
-    push {lr} @ save return
-    bl set_input_mode
-    @ initialize data stack
-    ldr dsp, addr_stack
-    @ initialize sysvar pointer
-    ldr sysvar, addr_sysvar
-    pop {r0}
-    mov lr, r0
-    b WARM
-
 .balign 4
 @ ram pointers that need relocation on startup
-addr_stack: .word topstack
+addr_dstack: .word topdstack
 addr_sysvar: .word sysvar_base
 
 /* External calls*/

@@ -64,17 +64,23 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     #(\sym - sysvar_base)
 .endm
 
+.macro bittest_ v
+    mov r0, #\v
+    tst tos, r0
+    poptos_
+.endm
+
 .macro pushsysv_ sym
     dup_
-    ldr tos, 7f
+    ldr tos, 1f
     bx lr
 .balign 4
-7:
+1:
     .word \sym
 .balign 2
 .endm
 
-@ Push small constant on datastack
+@ Push small 8 bit constant on datastack
 .macro doliteral_ val
   pushtos_
   mov tos, #\val
@@ -135,17 +141,17 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   sub tos, r0, tos
 .endm
 
-.macro and__
+.macro and_
   ldm dsp!, {r0}
   and tos, r0
 .endm
 
-.macro or__
+.macro or_
   ldm dsp!, {r0}
   orr tos, r0
 .endm
 
-.macro xor__
+.macro xor_
   ldm dsp!, {r0}
   eor tos, r0
 .endm
@@ -166,8 +172,16 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   add tos, #2
 .endm
 
+.macro fourplus_
+  add tos, #4
+.endm
+
 .macro twominus_
   sub tos, #2
+.endm
+
+.macro fourminus_
+  sub tos, #4
 .endm
 
 .macro twoslash_
@@ -198,6 +212,16 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .macro zero_
     pushtos_
     mov tos, #0
+.endm
+
+.macro one_
+  pushtos_
+  mov tos, #1
+.endm
+
+.macro two_
+  pushtos_
+  mov tos, #2
 .endm
 
 .macro true_

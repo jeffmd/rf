@@ -98,6 +98,21 @@ Forthword_ RROT, 0, "-rot"
     mov tos, r0
     bx lr
 
+@ (  -- addr )
+@ current data stack pointer
+Forthword_ SP_FETCH, INLINE_OPT, "sp@"
+    pushtos_
+    mov tos, dsp
+    bx lr
+
+@ ( addr -- i*x)
+@ set data stack pointer to addr
+Forthword_ SP_STORE, INLINE_OPT, "sp!"
+    mov dsp, tos
+    poptos_
+    bx lr
+
+
 @@@@@@@@@@@@@ Return Stack @@@@@@@@@@@@@
 
 @ ( -- n ) (R: n --)
@@ -118,7 +133,21 @@ Forthword_ TO_R, INLINE_OPT, ">r"
     to_r_
     bx lr
 
+@ (  -- n)
+@ current return stack pointer address
+Forthword_ RP_FETCH, 0, "rp@"
+    pushtos_
+    mov tos, SP
+    bx lr
 
+@ ( addr  -- ) (R: -- x*y)
+@ set return stack pointer
+@ must be called
+Forthword_ RP_STORE, 0, "rp!"
+    @ keep the return address
+    mov SP, tos
+    poptos_
+    bx lr
 
 @@@@@@@@@@@@@ Arithmatic @@@@@@@@@@@@@
 
@@ -158,6 +187,18 @@ Forthword_ TWOMINUS, INLINE_OPT, "2-"
   twominus_
   bx lr
 
+@ ( n1|u1 -- n2|u2 )
+@ optimized four increment
+Forthword_ FOURPLUS, INLINE_OPT, "4+"
+  fourplus_
+  bx lr
+
+@ (S: n1 -- n2 )
+@ optimized decrement
+Forthword_ FOURMINUS, INLINE_OPT, "4-"
+  fourminus_
+  bx lr
+
 @ ( n1 -- n2 )
 @ arithmetic shift left, filling with zero
 Forthword_ TWOSTAR, INLINE_OPT, "2*"
@@ -177,19 +218,19 @@ Forthword_ NEGATE, INLINE_OPT, "neg"
 @ ( n1 n2 -- n3 )
 @ bitwise and
 Forthword_ AND_, INLINE_OPT, "and"
-  and__
+  and_
   bx lr
 
 @ ( n1 n2 -- n3 )
 @ logical or
 Forthword_ OR, INLINE_OPT, "or"
-  or__
+  or_
   bx lr
 
 @ ( n1 n2 -- n3)
 @ exclusive or
 Forthword_ XOR, INLINE_OPT, "xor"
-  xor__
+  xor_
   bx lr
 
 @ ( n1 -- n2)
@@ -201,7 +242,7 @@ Forthword_ NOT, INLINE_OPT, "not"
 @ ( n1 n2 -- flag)
 @ flag is true if n1 is not equal to n2
 Forthword_ NOTEQUAL, INLINE_OPT, "<>"
-  xor__
+  xor_
   bx lr
 
 @ ( n1 n2 -- flag )
@@ -343,12 +384,19 @@ Forthword_ ZEROSTORE, 0, "0!"
 @ add n32 to content of cell RAM address a-addr
 Forthword_ PLUSSTORE, 0, "+!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+PLUSSTORE_do:
   ldr  r2, [tos]     @ Load the current cell value
   add r2, r0         @ Do the add
   str  r2, [tos]     @ Store it back
   movs tos, r1
   bx lr
 
+@ ( n32 a-addr -- )
+@ add 1 to content of cell RAM address a-addr
+Forthword_ ONEPLUSSTORE, 0, "1+!"
+  ldm dsp!, {r1}
+  mov r0, #1
+  b PLUSSTORE_do
 
 @ ( a-addr -- n16 )
 @ read half cell (16 bits) from RAM address
@@ -374,9 +422,9 @@ Forthword_ ZEROHSTORE, 0, "0h!"
 
 @ ( n16 a-addr -- )
 @ add n16 to content of half cell RAM address a-addr
-Forthword_ HPLUSSTORE, 0, "h+!"
+Forthword_ PLUSHSTORE, 0, "+h!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
-HPLUSSTORE_do:
+PLUSHSTORE_do:
   ldrh r2, [tos]     @ Load the current cell value
   add r2, r0         @ Do the add
   strh r2, [tos]     @ Store it back
@@ -385,10 +433,10 @@ HPLUSSTORE_do:
 
 @ ( a-addr -- )
 @ add 1 to content of half cell RAM address a-addr
-Forthword_ ONEHPLUSSTORE, 0, "1h+!"
+Forthword_ ONEPLUSHSTORE, 0, "1+h!"
   ldm dsp!, {r1}
   mov r0, #1
-  b HPLUSSTORE_do
+  b PLUSHSTORE_do
 
 @ ( a-addr -- n8 )
 @ read byte (8 bits) from RAM address
@@ -414,13 +462,21 @@ Forthword_ ZEROCSTORE, 0, "0c!"
 
 @ ( c a-addr -- )
 @ add c byte to content of byte RAM address a-addr
-Forthword_ CPLUSSTORE, 0, "c+!"
+Forthword_ PLUSCSTORE, 0, "+c!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
+PLUSCSTORE_do:
   ldrb r2, [tos]     @ Load the current cell value
   add r2, r0         @ Do the add
   strb r2, [tos]     @ Store it back
   movs tos, r1
   bx lr
+
+@ ( a-addr -- )
+@ add 1 to content of byte cell RAM address a-addr
+Forthword_ ONEPLUSCSTORE, 0, "1+c!"
+  ldm dsp!, {r1}
+  mov r0, #1
+  b PLUSHSTORE_do
 
 @ ( n1 n2 -- n2 ) A: n1
 @ Extended VM

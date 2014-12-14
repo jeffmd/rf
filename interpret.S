@@ -1,6 +1,14 @@
 @ interpret.S
 
 @ ( -- addr )
+@ flags address
+Forthword_ FFLAGS, 0, "fflags"
+    pushsysv_  fflags
+    .set TERMINATE_F, 1
+    @ bit 0 - Terminate Tasks
+
+
+@ ( -- addr )
 @ terminal input buffer address
 Forthword_ TIB, 0, "tib"
     pushsysv_  ram_tib
@@ -225,6 +233,95 @@ DOREFILL_end:
   @ <then>
   pop {pc}
 
+@ ( -- )
+@ set terminate flag which indicates request to exit forth interpreter
+Forthword_ BYE, 0, "bye"
+    push {lr}
+    bl SHARPTIB
+    hfetch_
+    cmp tos, #5
+    poptos_
+    bne BYE_CONT
+    one_
+    bl FFLAGS
+    hfetch_
+    or_
+    bl FFLAGS
+    bl HSTORE
+
+BYE_CONT:
+    pop {pc}
+
+@ ( -- )
+@ Fetch pause vector and EXEC it. may make a context/task switch
+Forthword_ PAUSE, 0, "pause"
+    push {lr}
+    @bl DODEFER
+    @.word USER_PAUSE
+    bl BYE
+    pop {pc}
+
+@ ( -- )
+@ main loop - iterate through scheduled tasks
+Forthword_ DOTASKS, 0, "(tasks)"
+    @ <begin>
+    push {lr}
+DOTASKS1:
+    bl DOREFILL
+    bl PAUSE
+
+    @ check to see if tasks should be terminated
+    bl FFLAGS
+    hfetch_
+    bittest_ TERMINATE_F
+    @ <again>
+    beq DOTASKS1
+    pop {pc}
+
+@ ( -- )
+@ reset stacks and start over again
+Forthword_ QUIT, 0, "quit"
+    push {lr}
+    @ reset data stack
+    bl SP0
+    bl SP_STORE
+    @ reset return stack pointers
+    bl RP0
+    fetch_
+    bl RP_STORE
+    bl SMUDGE
+    bl ZEROSTORE
+
+    @ switch to interpret mode
+    bl LBRACKET
+
+    bl DOTASKS
+    pop {pc}
+
+@ ( -- )
+@ interpret what is in the input buffer
+Forthword_ DOINTERPRET, 0, "(interp)"
+  push {lr}
+  @ input buffer has something so try to interpret it
+  @ setup exception handling in case of error
+  @doliteral_ INTERPRET
+  @bl CATCH
+  @ check to make sure no throws
+  bl QDUP
+  @ <if>
+  zerosense_
+  beq DOINTERPRET_ok
+    bl PROMPTERROR
+    bl QUIT
+
+  @ <then>
+DOINTERPRET_ok:
+  @ make sure in buf pointer is not at zero
+  bl G_IN               @ ( 1 >inaddr )
+  bl ONEPLUSHSTORE      @ ( )
+  bl PROMPTOK
+  pop {pc}
+
 
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.
@@ -281,7 +378,7 @@ ACCEPT_dodelete:
     @ decrease cursor position by one
     bl TRUE           @ ( -1 )
     bl SHARPTIB       @ ( -1 #tibaddr )
-    bl HPLUSSTORE     @ ( )
+    bl PLUSHSTORE     @ ( )
     b ACCEPT_checkmaxinput
 
 
@@ -303,7 +400,7 @@ ACCEPT_echo:
     bl CSTORE            @ ( )
 
     bl SHARPTIB          @ ( 1 #tibaddr )
-    bl ONEHPLUSSTORE     @ ( )
+    bl ONEPLUSHSTORE     @ ( )
 
 ACCEPT_checkmaxinput:
     @ check if max number of char input

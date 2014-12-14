@@ -74,3 +74,15 @@ Forthword_ ABS, 0, "abs"
   neg_
 1:
   bx lr
+
+@ ( -- addr)
+@ start address of the data stack
+Forthword_ SP0, 0, "sp0"
+  pushtos_
+  ldr tos, addr_dstack
+  bx lr
+
+@ ( -- addr)
+@ start address of return stack
+Forthword_ RP0, 0, "rp0"
+  pushsysv_ rstack0
