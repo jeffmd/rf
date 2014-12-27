@@ -80,6 +80,14 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .balign 2
 .endm
 
+.macro douser_ sym
+    pushtos_
+    mov tos, #(\sym-sysvar_base)
+    add tos, sysvar
+    bx lr
+.endm
+
+
 @ Push small 8 bit constant on datastack
 .macro doliteral_ val
   pushtos_

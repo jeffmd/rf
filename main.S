@@ -18,14 +18,14 @@ topdstack:
 .balign 2
 sysvar_base:
 
-ram_sharptib: .space 2
-ram_tib: .space TIBSIZE
+COLON_SMUDGE: .space 4
 user_g_in: .space 2
 state: .space 2
 fflags: .space 2
 rstack0: .space 4
 ram_LATEST: .space 4
-COLON_SMUDGE: .space 4
+ram_sharptib: .space 2
+ram_tib: .space TIBSIZE
 
 
 .text
@@ -34,6 +34,7 @@ COLON_SMUDGE: .space 4
 .set VE_HEAD, 0
 
 .include "core.S"
+.include "defer.S"
 .include "compiler.S"
 .include "interpret.S"
 .include "minimum.S"

@@ -4,7 +4,7 @@
 @ system state variable. 0 is interpret mode. Not 0 is compile mode
 @ is half word
 Forthword_ STATE, 0, "state"
-    pushsysv_ state
+    douser_ state
 
 Forthword_ STATEFETCH, 0, "state@"
     push {lr}
@@ -16,13 +16,13 @@ Forthword_ STATEFETCH, 0, "state@"
 @ ( -- addr )
 @ system LATEST. Get flash program address of latest word being compiled.
 Forthword_ LATEST, 0, "latest"
-    pushsysv_ ram_LATEST
+    douser_ ram_LATEST
 
 
 @ ( -- addr )
 @ system SMUDGE. Get flash program address of latest word being compiled.
 Forthword_ SMUDGE, 0, "smudge"
-    pushsysv_ COLON_SMUDGE
+    douser_ COLON_SMUDGE
 
 @ ( --  )
 @ enter compiler mode

@@ -11,14 +11,15 @@ Forthword_ FFLAGS, 0, "fflags"
 @ ( -- addr )
 @ terminal input buffer address
 Forthword_ TIB, 0, "tib"
-    pushsysv_  ram_tib
+    douser_  ram_tib
 
 
 @ ( -- addr-half )
 @ variable holding the number of characters in TIB
 @ is half cell size
 Forthword_ SHARPTIB, 0, "#tib"
-    pushsysv_ ram_sharptib
+    @pushsysv_ ram_sharptib
+    douser_ ram_sharptib
 
 @ ( -- addr len )
 @ address and current length of the input buffer
@@ -33,7 +34,7 @@ Forthword_ STIB, 0, "stib"
 @ index to current read position in input buffer
 @ is half cell size
 Forthword_ G_IN, 0, ">in"
-    pushsysv_ user_g_in
+    douser_ user_g_in
 
 
 @ ( c -- )
