@@ -3,7 +3,7 @@
 @ ( -- addr )
 @ flags address
 Forthword_ FFLAGS, 0, "fflags"
-    pushsysv_  fflags
+    douser_  fflags
     .set TERMINATE_F, 1
     @ bit 0 - Terminate Tasks
 
