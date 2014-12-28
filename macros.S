@@ -1,5 +1,6 @@
 @ macros.S
 
+breg .req r3 @ B register used for general purpose operations
 sysvar .req r4 @ system variables base pointer
 areg .req r5 @ A register used for memory pointer operations
 tos .req r6 @ parameter top of stack [TOS] register
@@ -64,6 +65,7 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     #(\sym - sysvar_base)
 .endm
 
+@ test with 8 bit constant
 .macro bittest_ v
     mov r0, #\v
     tst tos, r0
@@ -265,9 +267,46 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   ldm dsp!, {areg}
 .endm
 
+.macro niptob_
+  ldm dsp!, {breg}
+.endm
+
+.macro copytoa_
+    mov areg, tos
+.endm
+
+.macro copytob_
+    mov breg, tos
+.endm
+
+.macro toa_
+    mov areg, tos
+    poptos_
+.endm
+
+.macro tob_
+    mov breg, tos
+    poptos_
+.endm
+
+.macro geta_
+    pushtos_
+    mov tos, areg
+.endm
+
+.macro getb_
+    pushtos_
+    mov tos, breg
+.endm
+
 .macro afetch_
   pushtos_
   ldr tos, [areg]
+.endm
+
+.macro bfetch_
+  pushtos_
+  ldr tos, [breg]
 .endm
 
 .macro ahfetch_
@@ -275,21 +314,43 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   ldrh tos, [areg]
 .endm
 
+.macro bhfetch_
+  pushtos_
+  ldrh tos, [breg]
+.endm
+
 .macro acfetch_
   pushtos_
   ldrb tos, [areg]
+.endm
+
+.macro bcfetch_
+  pushtos_
+  ldrb tos, [breg]
 .endm
 
 .macro aplus_
   add areg, #4
 .endm
 
+.macro bplus_
+  add breg, #4
+.endm
+
 .macro ahplus_
   add areg, #2
 .endm
 
+.macro bhplus_
+  add breg, #2
+.endm
+
 .macro acplus_
   add areg, #1
+.endm
+
+.macro bcplus_
+  add breg, #1
 .endm
 
 .macro ascii_ str, flg=0

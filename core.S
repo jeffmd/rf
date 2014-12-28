@@ -479,11 +479,52 @@ Forthword_ ONEPLUSCSTORE, 0, "1+c!"
   b PLUSHSTORE_do
 
 @ ( n1 n2 -- n2 ) A: n1
-@ Extended VM
 @ Remove next on stack and write to A register (Extended VM)
 Forthword_ NIPTOA, INLINE_OPT, "nip>a"
   niptoa_
   bx lr
+
+@ ( n1 n2 -- n2 ) B: n1
+@ Remove next on stack and write to B register (Extended VM)
+Forthword_ NIPTOB, INLINE_OPT, "nip>b"
+  niptob_
+  bx lr
+
+@ ( n -- ) A: n
+@ Move TOS to A register (Extended VM)
+Forthword_ TO_A, INLINE_OPT, ">a"
+    toa_
+    bx lr
+
+@ ( n -- ) B: n
+@ Move TOS to B register (Extended VM)
+Forthword_ TO_B, INLINE_OPT, ">b"
+    tob_
+    bx lr
+
+@ ( n -- n ) A: n
+@ copy TOS to A register (Extended VM)
+Forthword_ _A, INLINE_OPT, ":a"
+    copytoa_
+    bx lr
+
+@ ( n -- n ) B: n
+@ copy TOS to B register (Extended VM)
+Forthword_ _B, INLINE_OPT, ":b"
+    copytob_
+    bx lr
+
+@ ( -- n )
+@ read the A register (Extended VM)
+Forthword_ A_, INLINE_OPT, "a"
+    geta_
+    bx lr
+
+@ ( -- n )
+@ read the B register (Extended VM)
+Forthword_ B_, INLINE_OPT, "b"
+    getb_
+    bx lr
 
 @ ( -- n )
 @ Read a word (32bit) from memory pointed to by register A (Extended VM)

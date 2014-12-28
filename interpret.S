@@ -120,6 +120,98 @@ Forthword_ ICOUNT, 0, "$l"
     hfetch_
     bx lr
 
+@ ( addr1 n1 c -- n2 )
+@ skips leading occurances in string at addr1/n1 leaving n2 as an index pointing to the 1st non-c character
+Forthword_ CSKIP, 0, "cskip"
+    tob_                 @ ( addr1 n1 ) B: c
+    niptoa_              @ ( n1 ) A: addr1
+    dup_                 @ ( n1 n1 )
+PFA_CSKIP1:
+    dupzerosense_        @ ( n1 n')
+    beq PFA_CSKIP2
+    acfetch_             @ ( n1 n' c' )
+    aplus_
+    cmp tos, breg        @ ( n1 n' c' )
+    drop_                @ ( n1 n' )
+    bne PFA_CSKIP2
+    oneminus_
+    b PFA_CSKIP1
+
+PFA_CSKIP2:
+    minus_               @ ( n1-n' )
+    bx lr
+
+@ ( addr1 n1 c -- addr1 n2 )
+@ Scan string at addr1/n1 for the first occurance of c, leaving addr1 n2,
+@ char at n2 is first c character
+Forthword_ CSCAN, 0, "cscan"
+    tob_                 @ ( addr1 n1 ) B: c
+    over_                @ ( addr1 n1 addr1 )
+    toa_                 @ ( addr1 n1 ) A: addr1
+    dup_                 @ ( addr1 n1 n1 )
+PFA_CSCAN1:
+    dupzerosense_        @ ( addr1 n1 n')
+    beq PFA_CSCAN2
+    acfetch_             @ ( addr1 n1 n' c' )
+    acplus_
+    cmp tos, breg        @ ( addr1 n1 n' c' )
+    drop_                @ ( addr1 n1 n' )
+    beq PFA_CSCAN2
+    oneminus_
+    b PFA_CSCAN1
+
+PFA_CSCAN2:
+    minus_               @ ( addr1 n1-n' )
+    bx lr
+
+@ ( -- srcaddr len  )
+@ Adjust the source addr using >in.
+Forthword_ SRCIN, 0, "srcin"
+    push {lr}
+    bl STIB            @ ( srcaddr len )
+    bl G_IN            @ ( srcaddr len ginaddr )
+    hfetch_            @ ( srcaddr len gin)
+    bl SLASHSTRING     @ ( srcaddr' len' )
+    pop {pc}
+
+
+@ ( -- )
+@ skip space in input source.
+Forthword_ SKIPBL, 0, "skipbl"
+    push {lr}
+    bl SRCIN             @ ( srcaddr len )
+    bl BL                @ ( srcaddr' len' c )
+    bl CSKIP             @ ( n2 )
+
+    @ adjust >IN
+    bl G_IN              @ ( n2 ginaddr )
+    bl PLUSHSTORE        @ (  )
+    pop {pc}
+
+@ ( char "ccc<char>" -- c-addr u )
+@ in input buffer parse ccc delimited string by the delimiter char.
+Forthword_ PARSE, 0, "parse"
+    push {lr}
+    bl SRCIN         @ ( -- c addr len)
+    bl ROT           @ ( -- addr' len' c)
+    bl CSCAN         @ ( -- len'')
+    dup_             @ ( -- addr' len'' len'')
+    oneplus_         @ ( -- addr' len'' len''+1 )
+    bl G_IN          @ ( -- addr' len'' len''+1 >in)
+    bl PLUSHSTORE    @ ( -- addr' len'')
+    pop {pc}
+
+
+@ ( "<name>" -- c-addr len )
+@ In the SOURCE buffer parse whitespace delimited string. Returns string address within SOURCE.
+Forthword_ PNAME, 0, "pname"
+    push {lr}
+    bl SKIPBL
+    bl BL
+    bl PARSE
+    pop {pc}
+
+
 @ ( -- addr len )
 @ runtime portion of sliteral
 @ string literal is located starting at return cell
@@ -147,6 +239,29 @@ Forthword_ DOSLIT, 0, "(slit)"
   mov lr, tos
   poptos_
   bx lr
+
+@ ( -- ) (R: i*x - j*x )
+@ interpret input word by word.
+Forthword_ INTERPRET, 0, "interp"
+    push {lr}
+INTERPRET_DO:
+    @ begin
+    bl PNAME            @ ( -- addr len )
+
+    @ ?while
+    dupzerosense_       @ ( -- addr len )
+    beq INTERPRET_END
+
+    @bl RECX             @ ( )
+    @bl QSTACK           @ ( )
+    ddrop_
+    @ repeat
+    b INTERPRET_DO
+
+INTERPRET_END:
+    ddrop_
+    pop {pc}
+
 
 @ ( -- )
 @ send the READY prompt to the command line
@@ -228,8 +343,8 @@ DOREFILL_do:
   beq DOREFILL_end
 
     @ there is something in the input buffer, try interpreting it
-    @bl DOINTERPRET
-    pop {pc}
+    bl DOINTERPRET
+
 DOREFILL_end:
   @ <then>
   pop {pc}
@@ -238,19 +353,12 @@ DOREFILL_end:
 @ set terminate flag which indicates request to exit forth interpreter
 Forthword_ BYE, 0, "bye"
     push {lr}
-    bl SHARPTIB
-    hfetch_
-    cmp tos, #5
-    poptos_
-    bne BYE_CONT
     one_
     bl FFLAGS
     hfetch_
     or_
     bl FFLAGS
     bl HSTORE
-
-BYE_CONT:
     pop {pc}
 
 @ ( -- )
@@ -259,7 +367,6 @@ Forthword_ PAUSE, 0, "pause"
     push {lr}
     @bl DODEFER
     @.word USER_PAUSE
-    bl BYE
     pop {pc}
 
 @ ( -- )
@@ -306,7 +413,9 @@ Forthword_ DOINTERPRET, 0, "(interp)"
   @ input buffer has something so try to interpret it
   @ setup exception handling in case of error
   @doliteral_ INTERPRET
+  bl INTERPRET
   @bl CATCH
+  zero_
   @ check to make sure no throws
   bl QDUP
   @ <if>
@@ -321,6 +430,7 @@ DOINTERPRET_ok:
   bl G_IN               @ ( 1 >inaddr )
   bl ONEPLUSHSTORE      @ ( )
   bl PROMPTOK
+    bl BYE
   pop {pc}
 
 
