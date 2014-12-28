@@ -24,6 +24,7 @@ state: .space 2
 fflags: .space 2
 rstack0: .space 4
 ram_LATEST: .space 4
+ram_handler: .space 4
 ram_sharptib: .space 2
 ram_tib: .space TIBSIZE
 

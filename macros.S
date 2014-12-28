@@ -117,6 +117,16 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   ldr tos, [dsp, #4]
 .endm
 
+.macro spfetch_
+  pushtos_
+  mov tos, dsp
+.endm
+
+.macro spstore_
+  mov dsp, tos
+  poptos_
+.endm
+
 .macro to_r_
   dup_r_
   drop_
@@ -127,6 +137,15 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   pop {tos}
 .endm
 
+.macro rpfetch_
+  pushtos_
+  mov tos, sp
+.endm
+
+.macro rpstore_
+  mov sp, tos
+  poptos_
+.endm
 
 .macro nip_
   add dsp, #4

@@ -85,4 +85,33 @@ Forthword_ SP0, 0, "sp0"
 @ ( -- addr)
 @ start address of return stack
 Forthword_ RP0, 0, "rp0"
-  pushsysv_ rstack0
+  douser_ rstack0
+
+@ USER variable used by catch/throw
+Forthword_ HANDLER, 0, "handler"
+  douser_ ram_handler
+
+@ ( i*x xt -- j*x 0 | i*x n )
+@ setup handler to catch exceptions and then EXEC XT.
+Forthword_ CATCH, 0, "catch"
+    push {lr}
+    @ sp@ >r
+    spfetch_            @ ( xt SP )
+    to_r_               @ ( xt ) (R: ret -- callerret SP )
+    @ handler @ >r
+    bl HANDLER          @ ( xt haddr )
+    fetch_              @ ( xt hxt )
+    to_r_               @ ( xt ) (R: callerret SP hxt )
+    @ rp@ handler !
+    rpfetch_            @ ( xt RP ) (R: callerret SP hxt)
+    bl HANDLER          @ ( xt RP haddr )
+    bl STORE            @ ( xt )
+    bl EXEC
+    @ restore handler
+    @ r> handler !
+    r_from_             @ ( hxt ) (R: callerret SP )
+    bl HANDLER          @ ( hxt haddr )
+    bl STORE            @ ( )
+    r_drop_             @ ( ) (R: callerret)
+    zero_
+    pop {pc}

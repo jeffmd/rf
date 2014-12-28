@@ -1,5 +1,12 @@
 @ core.S
 
+@ ( xt -- )
+@ execute XT
+Forthword_ EXEC, 0, "exec"
+    mov r0, tos
+    poptos_
+    mov pc, r0
+
 @@@@@@@@@@@@@ Parameter Stack  Manipulation @@@@@@@@@@@@@@
 
 @ ( n -- n n )
@@ -101,15 +108,13 @@ Forthword_ RROT, 0, "-rot"
 @ (  -- addr )
 @ current data stack pointer
 Forthword_ SP_FETCH, INLINE_OPT, "sp@"
-    pushtos_
-    mov tos, dsp
+    spfetch_
     bx lr
 
 @ ( addr -- i*x)
 @ set data stack pointer to addr
 Forthword_ SP_STORE, INLINE_OPT, "sp!"
-    mov dsp, tos
-    poptos_
+    spstore_
     bx lr
 
 
@@ -135,18 +140,16 @@ Forthword_ TO_R, INLINE_OPT, ">r"
 
 @ (  -- n)
 @ current return stack pointer address
-Forthword_ RP_FETCH, 0, "rp@"
-    pushtos_
-    mov tos, SP
+Forthword_ RP_FETCH, INLINE_OPT, "rp@"
+    rpfetch_
     bx lr
 
 @ ( addr  -- ) (R: -- x*y)
 @ set return stack pointer
 @ must be called
-Forthword_ RP_STORE, 0, "rp!"
+Forthword_ RP_STORE, INLINE_OPT, "rp!"
     @ keep the return address
-    mov SP, tos
-    poptos_
+    rpstore_
     bx lr
 
 @@@@@@@@@@@@@ Arithmatic @@@@@@@@@@@@@
