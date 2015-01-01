@@ -3,7 +3,8 @@
 @ ( xt -- )
 @ execute XT
 Forthword_ EXEC, 0, "exec"
-    mov r0, tos
+    mov r0, #1
+    orr r0, tos
     poptos_
     mov pc, r0
 

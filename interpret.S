@@ -412,9 +412,9 @@ Forthword_ DOINTERPRET, 0, "(interp)"
   push {lr}
   @ input buffer has something so try to interpret it
   @ setup exception handling in case of error
-  @doliteral_ INTERPRET
-  bl INTERPRET
-  @bl CATCH
+  pushtos_
+  ldr tos, =INTERPRET
+  bl CATCH
   zero_
   @ check to make sure no throws
   bl QDUP

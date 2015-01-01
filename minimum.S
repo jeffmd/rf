@@ -95,6 +95,9 @@ Forthword_ HANDLER, 0, "handler"
 @ setup handler to catch exceptions and then EXEC XT.
 Forthword_ CATCH, 0, "catch"
     push {lr}
+    bl EXEC
+    pop {pc} @ test
+
     @ sp@ >r
     spfetch_            @ ( xt SP )
     to_r_               @ ( xt ) (R: ret -- callerret SP )
