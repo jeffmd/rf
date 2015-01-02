@@ -415,7 +415,6 @@ Forthword_ DOINTERPRET, 0, "(interp)"
   pushtos_
   ldr tos, =INTERPRET
   bl CATCH
-  zero_
   @ check to make sure no throws
   bl QDUP
   @ <if>
@@ -430,7 +429,7 @@ DOINTERPRET_ok:
   bl G_IN               @ ( 1 >inaddr )
   bl ONEPLUSHSTORE      @ ( )
   bl PROMPTOK
-    bl BYE
+  bl BYE
   pop {pc}
 
 

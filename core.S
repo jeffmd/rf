@@ -4,9 +4,10 @@
 @ execute XT
 Forthword_ EXEC, 0, "exec"
     mov r0, #1
+    @ make sure its a thumb address mode
     orr r0, tos
     poptos_
-    mov pc, r0
+    bx r0
 
 @@@@@@@@@@@@@ Parameter Stack  Manipulation @@@@@@@@@@@@@@
 

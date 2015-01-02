@@ -87,6 +87,19 @@ Forthword_ SP0, 0, "sp0"
 Forthword_ RP0, 0, "rp0"
   douser_ rstack0
 
+@ ( -- n )
+@ number of single-cell values contained in the data stack before n was placed on the stack.
+Forthword_ DEPTH, 0, "depth"
+    push {lr}
+    bl SP0
+    spfetch_
+    minus_
+    twoslash_
+    oneminus_
+    pop {pc}
+
+
+
 @ USER variable used by catch/throw
 Forthword_ HANDLER, 0, "handler"
   douser_ ram_handler
@@ -95,8 +108,8 @@ Forthword_ HANDLER, 0, "handler"
 @ setup handler to catch exceptions and then EXEC XT.
 Forthword_ CATCH, 0, "catch"
     push {lr}
-    bl EXEC
-    pop {pc} @ test
+    @bl EXEC
+    @pop {pc} @ test
 
     @ sp@ >r
     spfetch_            @ ( xt SP )
