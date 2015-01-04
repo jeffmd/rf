@@ -217,8 +217,16 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     lsr tos, #1
 .endm
 
+.macro fourslash_
+    lsr tos, #2
+.endm
+
 .macro twostar_
     lsl tos, #1
+.endm
+
+.macro fourstar_
+    lsl tos, #2
 .endm
 
 .macro neg_

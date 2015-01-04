@@ -88,14 +88,29 @@ Forthword_ RP0, 0, "rp0"
   douser_ rstack0
 
 @ ( -- n )
-@ number of single-cell values contained in the data stack before n was placed on the stack.
+@ number of single-cell (4 byte) values contained in the data stack before n was placed on the stack.
 Forthword_ DEPTH, 0, "depth"
     push {lr}
     bl SP0
     spfetch_
     minus_
-    twoslash_
+    fourslash_
+    @ acount for value push on data stack
     oneminus_
+    pop {pc}
+
+@ ( --  )
+@ check stack underflow, throw exception -4
+Forthword_ QSTACK, 0, "?sp"
+    push {lr}
+    bl DEPTH
+    zeroless_
+    zerosense_
+    beq PFA_QSTACKFIN
+      @doliteral_ 0xBEF
+      one_
+      bl THROW
+PFA_QSTACKFIN:
     pop {pc}
 
 
@@ -130,4 +145,27 @@ Forthword_ CATCH, 0, "catch"
     bl STORE            @ ( )
     r_drop_             @ ( ) (R: callerret)
     zero_
+    pop {pc}
+
+@ ( n -- )
+@ throw an exception
+Forthword_ THROW, 0, "throw"
+    dupzerosense_
+    bne PFA_THROW1
+    drop_
+    bx lr
+
+PFA_THROW1:
+    push {lr}
+    bl HANDLER         @ ( n haddr )
+    fetch_             @ ( n RP_handler )
+    rpstore_           @ ( n ) (R: callerret SP hxt)
+    r_from_            @ ( n hxt ) (R: callerret SP )
+    bl HANDLER         @ ( n hxt haddr )
+    bl STORE           @ ( n )
+    r_from_            @ ( n SP ) (R: callerret )
+    swap_              @ ( SP n ) (R: callerret )
+    to_r_              @ ( SP ) (R: callerret n )
+    spstore_           @ ( ... )
+    r_from_            @ ( ... n )
     pop {pc}

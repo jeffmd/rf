@@ -240,6 +240,49 @@ Forthword_ DOSLIT, 0, "(slit)"
   poptos_
   bx lr
 
+@ ( addr len -- )
+@ recognize and execute name of word in ram using recognizer list.
+Forthword_ RECX, 0, "recx"
+    bl TWOOVER            @ ( addr len addr len  )
+    @ put addr and len on return stack so that
+    @ stack can be manipulated by interpreted word
+    to_r_                 @ ( addr len addr ) (R: len )
+    to_r_                 @ ( addr len ) (R: len addr )
+    @ test if its a word
+    @bl REC_WORD           @ ( flag ) ( R: len addr )
+    toa_                  @ ( ) A: flag
+    r_from_               @ ( addr ) (R: n len )
+    r_from_               @ ( addr len ) (R: n )
+    geta_                 @ ( addr len flag ) A:
+    @ <if>
+    zerosense_            @ ( addr len )
+    bne RECX_DONE
+    bl TWOOVER            @ ( addr len addr len  )
+    to_r_                 @ ( addr len addr ) (R: len )
+    to_r_                 @ ( addr len ) (R: len addr )
+    @ test if its a number
+    @bl REC_NUM            @ ( flag ) ( R: len addr )
+    toa_                  @ ( ) A: flag
+    r_from_               @ ( addr ) (R: n len )
+    r_from_               @ ( addr len ) (R: n )
+    geta_                 @ ( addr len flag ) A:
+    zerosense_            @ ( addr len )
+    bne RECX_DONE
+    @ not recognized so throw
+    bl CR
+    @ print unrecognized word
+    bl TYPE
+    @doliteral_ 0xBAD
+    one_
+
+    bl THROW
+    pop {pc}
+
+RECX_DONE:
+    ddrop_               @ ( )
+    pop {pc}
+
+
 @ ( -- ) (R: i*x - j*x )
 @ interpret input word by word.
 Forthword_ INTERPRET, 0, "interp"
@@ -253,7 +296,7 @@ INTERPRET_DO:
     beq INTERPRET_END
 
     @bl RECX             @ ( )
-    @bl QSTACK           @ ( )
+    bl QSTACK           @ ( )
     ddrop_
     @ repeat
     b INTERPRET_DO
