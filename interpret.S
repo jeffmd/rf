@@ -295,7 +295,7 @@ INTERPRET_DO:
     dupzerosense_       @ ( -- addr len )
     beq INTERPRET_END
 
-    @bl RECX             @ ( )
+    bl RECX             @ ( )
     bl QSTACK           @ ( )
     ddrop_
     @ repeat

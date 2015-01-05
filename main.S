@@ -21,7 +21,11 @@ sysvar_base:
 COLON_SMUDGE: .space 4
 user_g_in: .space 2
 state: .space 2
+ram_CURRENT: .space 4
+ram_CONTEXTidx: .space 2
+ram_CONTEXT: .space 4 * 10 @ 10 wordlists max
 fflags: .space 2
+ram_dp: .space 4
 rstack0: .space 4
 ram_LATEST: .space 4
 ram_handler: .space 4
@@ -76,6 +80,9 @@ main:
     bl BL
     bl EMIT
 
+    bl PHEX
+    bl CR
+    bl DEPTH
     bl PHEX
     bl CR
 
