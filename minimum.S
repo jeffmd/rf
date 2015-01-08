@@ -169,3 +169,7 @@ PFA_THROW1:
     spstore_           @ ( ... )
     r_from_            @ ( ... n )
     pop {pc}
+
+@ must be last word in core
+Forthword_ WIPE, 0, "WIPE"
+    bx lr

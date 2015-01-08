@@ -140,6 +140,19 @@ Forthword_ TO_R, INLINE_OPT, ">r"
     to_r_
     bx lr
 
+@ ( n -- n ) (R: -- n )
+@ copy TOS to TOR
+Forthword_ DUP_R, INLINE_OPT, "r>r"
+    dup_r_
+    bx lr
+
+@ ( -- n) (R: n -- n )
+@ put a copy of TOR on TOS
+Forthword_ R_FETCH, 0, "r"
+    pushtos_
+    ldr tos, [sp, #4]
+    bx lr
+
 @ (  -- n)
 @ current return stack pointer address
 Forthword_ RP_FETCH, INLINE_OPT, "rp@"
@@ -314,6 +327,12 @@ Forthword_ ZERO, INLINE_OPT, "0"
   zero_
   bx lr
 
+@ ( -- 0 )
+@ set TOS to 0
+Forthword_ ZEROSET, INLINE_OPT, "0:"
+    zerotos_
+    bx lr
+
 @ ( -- -1 )
 @ leaves the value -1 (true) on TOS
 Forthword_ TRUE, INLINE_OPT, "true"
@@ -337,6 +356,18 @@ Forthword_ TWO, 0, "2"
 Forthword_ TEN, 0, "10"
   doliteral_ 10
   bx lr
+
+@ ( n1 -- n2 )
+@ convert byte length to half word align length
+@ round number up to even value
+
+forthword_ WALIGN, 0, "w_"
+    oneplus_
+    mov r0, #2
+    neg r0, r0
+    and tos, r0
+    bx lr
+
 
 @ ( n1 n2 -- n3)
 @ logically shift n1 left n2 times

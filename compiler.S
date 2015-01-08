@@ -85,3 +85,32 @@ Forthword_ LBRACKET, IMMEDIATE_EN, "["
     bl STATE
     bl ZEROHSTORE
     pop {pc}
+
+@ ( nfa -- lfa )
+@ get the link field address from the name field address
+Forthword_ NFA2LFA, 0, "nfa>lfa"
+    push {lr}                   @ ( nfa )
+    bl STRINGLEN                @ ( nfa+2 len+flags )
+    @ mask out flags in len, allow up to 31 characters
+    mov r0, #31
+    and tos, r0                 @ ( nfa+2 len )
+    bl WALIGN
+    plus_
+    pop {pc}
+
+@ ( nfa -- [ 0 ] | [ xt xtflags] )
+@ convert name field address to xt and xtflags
+Forthword_ NFATOXTF, 0, "nfa>xtf"
+    push {lr}
+    dupzerosense_               @ ( n )
+    beq NFATOXTF_EXIT
+
+    dup_                        @ ( nfa nfa )
+    hfetch_                     @ ( nfa xtflags )
+    to_r_                       @ ( nfa ) (R: xtflags)
+    bl NFA2LFA                  @ ( lfa )
+    fourplus_   @ lfa>xt        @ ( xt )
+    r_from_                     @ ( xt xtflags )
+
+NFATOXTF_EXIT:
+    pop {pc}
