@@ -18,7 +18,6 @@ Forthword_ TIB, 0, "tib"
 @ variable holding the number of characters in TIB
 @ is half cell size
 Forthword_ SHARPTIB, 0, "#tib"
-    @pushsysv_ ram_sharptib
     douser_ ram_sharptib
 
 @ ( -- addr len )
@@ -27,7 +26,7 @@ Forthword_ STIB, 0, "stib"
     push {lr}
     bl TIB
     bl SHARPTIB
-    bl HFETCH
+    hfetch_
     pop {pc}
 
 @ ( -- a-addr )
@@ -52,14 +51,14 @@ Forthword_ CR, 0, "cr"
   push {lr}
   doliteral_ 13
   bl EMIT
-  bl TEN
+  ten_
   bl EMIT
   pop {pc}
 
 @ ( -- 32 )
 @ put ascii code of the blank/space character to the stack
 Forthword_ BL, 0, "bl"
-    doliteral_ 32
+    bl_
     bx lr
 
 @ ( -- key )
@@ -122,7 +121,7 @@ Forthword_ MCMP, 0, "mcmp"
     eor tos, breg            @ ( r-addr r-len f-addr flag )
     @ if
     zerosense_               @ ( r-addr r-len f-addr )
-    beq PFA_ICOMPARE_SAMELEN
+    beq MCMP_SAMELEN
 
     @ strings are not the same length
     dnip_
@@ -130,18 +129,18 @@ Forthword_ MCMP, 0, "mcmp"
     pop {pc}
 
     @ then
-PFA_ICOMPARE_SAMELEN:
+MCMP_SAMELEN:
     @twostar_                @ ( r-addr len f-addr*2 )
     toa_                     @ ( r-addr len ) A: f-addr
     oneplus_                 @ ( r-addr len+1 )
     twoslash_                @ ( r-addr (len+1)/2 )
 
     @ begin
-PFA_ICOMPARE_LOOP:
+MCMP_LOOP:
     copytob_                 @ ( r-addr len ) B: len
     @ while
     zerosense_               @ ( r-addr )
-    beq PFA_ICOMPARE_DONE
+    beq MCMP_DONE
 
     dup_                     @ ( r-addr r-addr )
     hfetch_                  @ ( r-addr r-cc )
@@ -157,31 +156,31 @@ PFA_ICOMPARE_LOOP:
     bl ULESS                 @ ( r-addr r-cc f-cc flag)
     @ if
     zerosense_
-    beq PFA_ICOMPARE_LASTCELL
+    beq MCMP_LASTCELL
     swap_                    @ ( r-addr f-cc r-cc)
     mov r0, #255
     and tos, r0              @ ( r-addr f-cc 0:r-cc)
     @ then
-PFA_ICOMPARE_LASTCELL:
+MCMP_LASTCELL:
     xor_                     @ ( r-addr flag)
     @ if
     zerosense_               @ ( r-addr )
-    beq PFA_ICOMPARE_NEXTLOOP
+    beq MCMP_NEXTLOOP
 
     @ strings don't match
     zerotos_                 @ ( 0 )
     pop {pc}
 
     @ then
-PFA_ICOMPARE_NEXTLOOP:
+MCMP_NEXTLOOP:
     twoplus_                 @ ( r-addr+2 )
     getb_                    @ ( r-addr+2 len )
     oneminus_                @ ( r-addr+2 len-1 )
 
     @ repeat
-    b PFA_ICOMPARE_LOOP
+    b MCMP_LOOP
 
-PFA_ICOMPARE_DONE:
+MCMP_DONE:
     @ strings are the same
     drop_
     true_
@@ -207,7 +206,7 @@ PFA_CSKIP1:
     dupzerosense_        @ ( n1 n')
     beq PFA_CSKIP2
     acfetch_             @ ( n1 n' c' )
-    aplus_
+    acplus_
     cmp tos, breg        @ ( n1 n' c' )
     drop_                @ ( n1 n' )
     bne PFA_CSKIP2
@@ -257,7 +256,7 @@ Forthword_ SRCIN, 0, "srcin"
 Forthword_ SKIPBL, 0, "skipbl"
     push {lr}
     bl SRCIN             @ ( srcaddr len )
-    bl BL                @ ( srcaddr' len' c )
+    bl_                  @ ( srcaddr' len' c )
     bl CSKIP             @ ( n2 )
 
     @ adjust >IN
@@ -284,7 +283,7 @@ Forthword_ PARSE, 0, "parse"
 Forthword_ PNAME, 0, "pname"
     push {lr}
     bl SKIPBL
-    bl BL
+    bl_
     bl PARSE
     pop {pc}
 
@@ -313,7 +312,7 @@ FINDNFA_BEGIN:
 FINDNFA_CHECK:
     to_r_                       @ ( c-addr len ) (R: nfa )
     bl TWOOVER                  @ ( c-addr len c-addr len )
-    bl R_FETCH                  @ ( c-addr len c-addr len nfa )
+    r_fetch_                    @ ( c-addr len c-addr len nfa )
     bl STRINGLEN                @ ( c-addr len c-addr len f-addr len )
     mov r0, #31
     and tos, r0                 @ ( c-addr len c-addr len f-addr 0:len )
@@ -338,13 +337,16 @@ FINDNFA_NEXT:
 @ ( addr len --  0 | nfa )
 @ search root wordlists for the name from string addr/len
 Forthword_ FINDROOT, 0, "froot"
+    push {lr}
     @ put root wid on stack
     pushtos_
     @ search root
     ldr tos, FINDROOTdata
     b FINDNFA_BEGIN
+.balign 4
 FINDROOTdata:
     .word VE_WIPE
+.balign 2
 
 @ ( addr len idx -- 0 | nfa )
 FINDWI:
@@ -358,8 +360,8 @@ FINDWI:
 
 FINDLAST:
       drop_
-      b FINDROOT
-
+      bl FINDROOT
+      pop {pc}
 
 @ ( addr len --  0 | nfa )
 @ search wordlists for the name from string addr/len
@@ -477,6 +479,7 @@ REC_WORD_OK:
 @ ( addr len -- )
 @ recognize and execute name of word in ram using recognizer list.
 Forthword_ RECX, 0, "recx"
+    push {lr}
     bl TWOOVER            @ ( addr len addr len  )
     @ put addr and len on return stack so that
     @ stack can be manipulated by interpreted word
@@ -496,12 +499,14 @@ Forthword_ RECX, 0, "recx"
     to_r_                 @ ( addr len ) (R: len addr )
     @ test if its a number
     @bl REC_NUM            @ ( flag ) ( R: len addr )
+    poptos_ @****************
+    poptos_ @****************
     toa_                  @ ( ) A: flag
     r_from_               @ ( addr ) (R: n len )
     r_from_               @ ( addr len ) (R: n )
     geta_                 @ ( addr len flag ) A:
     zerosense_            @ ( addr len )
-    bne RECX_DONE
+    @bne RECX_DONE
     @ not recognized so throw
     bl CR
     @ print unrecognized word
@@ -531,7 +536,7 @@ INTERPRET_DO:
 
     bl RECX             @ ( )
     bl QSTACK           @ ( )
-    ddrop_
+
     @ repeat
     b INTERPRET_DO
 
@@ -596,6 +601,18 @@ QP_RD_exit:
       pop {pc}
 
 @ ( -- )
+@ Reset the input buffer
+Forthword_ INRESET, 0, "in_"
+  push {lr}
+  bl G_IN                @ ( >inaddr )
+  bl ZEROHSTORE          @ (  )
+  @ reset input buffer cursor position
+  bl SHARPTIB            @ ( #tibaddr )
+  bl ZEROHSTORE          @ ( )
+  bl QP_RD
+  pop {pc}
+
+@ ( -- )
 @ wait for the input buffer to be refilled then interpret
 Forthword_ DOREFILL, 0, "(refill)"
   push {lr}
@@ -604,12 +621,7 @@ Forthword_ DOREFILL, 0, "(refill)"
   hfetch_                  @ ( >in )
   zerosense_               @ ( )
   beq DOREFILL_do
-    bl G_IN                @ ( >inaddr )
-    bl ZEROHSTORE          @ (  )
-    @ reset input buffer cursor position
-    bl SHARPTIB            @ ( #tibaddr )
-    bl ZEROHSTORE          @ ( )
-    bl QP_RD
+    bl INRESET
     pop {pc}
 
 DOREFILL_do:
@@ -677,6 +689,9 @@ Forthword_ QUIT, 0, "quit"
     bl SMUDGE
     bl ZEROSTORE
 
+    @ reset input buffer
+    bl INRESET
+
     @ switch to interpret mode
     bl LBRACKET
 
@@ -706,7 +721,6 @@ DOINTERPRET_ok:
   bl G_IN               @ ( 1 >inaddr )
   bl ONEPLUSHSTORE      @ ( )
   bl PROMPTOK
-  bl BYE
   pop {pc}
 
 
@@ -759,7 +773,7 @@ ACCEPT_dodelete:
     and tos, r0
     dup_              @ ( k k )
     bl EMIT           @ ( k )
-    bl BL             @ ( k bl )
+    bl_               @ ( k bl )
     bl EMIT           @ ( k )
     bl EMIT           @ ( )
     @ decrease cursor position by one
@@ -775,7 +789,7 @@ ACCEPT_checkcontrol:
     bge ACCEPT_echo
     drop_
     @ replace control key with a space
-    bl BL
+    bl_
 
 ACCEPT_echo:
     @ emit the key

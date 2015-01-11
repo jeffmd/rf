@@ -150,7 +150,7 @@ Forthword_ DUP_R, INLINE_OPT, "r>r"
 @ put a copy of TOR on TOS
 Forthword_ R_FETCH, 0, "r"
     pushtos_
-    ldr tos, [sp, #4]
+    ldr tos, [sp]
     bx lr
 
 @ (  -- n)
@@ -342,19 +342,19 @@ Forthword_ TRUE, INLINE_OPT, "true"
 @ ( -- 1 )
 @ place a value 1 on TOS
 Forthword_ ONE, 0, "1"
-  doliteral_ 1
+  one_
   bx lr
 
 @ ( -- 2 )
 @ place a value 2 on TOS
 Forthword_ TWO, 0, "2"
-  doliteral_ 2
+  two_
   bx lr
 
 @ ( -- 10 )
 @ place a value 10 on TOS
 Forthword_ TEN, 0, "10"
-  doliteral_ 10
+  ten_
   bx lr
 
 @ ( n1 -- n2 )

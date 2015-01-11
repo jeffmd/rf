@@ -137,6 +137,11 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   pop {tos}
 .endm
 
+.macro r_fetch_
+  pushtos_
+  ldr tos, [sp]
+.endm
+
 .macro rpfetch_
   pushtos_
   mov tos, sp
@@ -256,13 +261,19 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .endm
 
 .macro one_
-  pushtos_
-  mov tos, #1
+  doliteral_ 1
 .endm
 
 .macro two_
-  pushtos_
-  mov tos, #2
+  doliteral_ 2
+.endm
+
+.macro ten_
+  doliteral_ 10
+.endm
+
+.macro bl_
+  doliteral_ 32
 .endm
 
 .macro true_
@@ -393,7 +404,7 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   .p2align 1
 .endm
 
-.macro Forthword_ lbl, flags, Name
+.macro Forthword_ lbl, flags, name
 
 VE_\lbl:
     ascii_ "\name", HFLAGS & ~(\flags)

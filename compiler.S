@@ -114,3 +114,30 @@ Forthword_ NFATOXTF, 0, "nfa>xtf"
 
 NFATOXTF_EXIT:
     pop {pc}
+
+@ ( -- )
+@ set the context and current to root forth vocabulary and remove
+@ other vocabularies
+Forthword_ ONLY, IMMEDIATE_EN, "only"
+    push {lr}
+    @ forth vocab always takes slot 0
+    pushtos_
+    ldr tos, EE_FORTHWORDLIST_P
+    dup_
+    bl CONTEXT
+    bl STORE
+    @ make current also forth vocab
+    bl CURRENT
+    bl STORE
+    @ move index to next slot
+    one_
+    bl CONTEXT
+    twominus_
+    bl HSTORE
+    @ make second slot have no vocab
+    bl CONTEXT
+    twoplus_
+    bl ZEROSTORE
+    pop {pc}
+
+EE_FORTHWORDLIST_P: .word EE_FORTHWORDLIST
