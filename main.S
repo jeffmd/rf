@@ -21,6 +21,7 @@ sysvar_base:
 COLON_SMUDGE: .space 4
 user_g_in: .space 2
 state: .space 2
+USER_BASE: .space 2
 ram_CURRENT: .space 4
 ram_CONTEXTidx: .space 2
 ram_CONTEXT: .space 4 * 10 @ 10 wordlists max
@@ -78,6 +79,7 @@ Forthword_ WARM, 0, "warm"
     bl RP0
     bl STORE
     bl ONLY
+    bl DECIMAL
     bl DOSLIT
     ascii_ "rf 0.1"
     bl TYPE

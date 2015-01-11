@@ -426,6 +426,29 @@ Forthword_ DOSLIT, 0, "(slit)"
   poptos_
   bx lr
 
+@ ( addr len -- [n] f )
+@ recognizer for integer numbers
+Forthword_ REC_NUM, 0, "rec#"
+    push {lr}
+    @ try converting to a number
+    bl NUMBER              @ ( [n] f )
+    zerosense_
+    beq REC_NONUMBER
+
+    bl STATEFETCH          @ ( n state )
+    zerosense_
+    beq REC_NUMBER_OK
+    @bl LIT
+
+REC_NUMBER_OK:
+    true_                  @ ( n true )
+    pop {pc}
+
+REC_NONUMBER:
+    zero_                  @ ( 0 )
+    pop {pc}
+
+
 @ ( addr len -- f )
 @ recognize a word in the dictionary
 Forthword_ REC_WORD, 0, "recw"
@@ -498,15 +521,13 @@ Forthword_ RECX, 0, "recx"
     to_r_                 @ ( addr len addr ) (R: len )
     to_r_                 @ ( addr len ) (R: len addr )
     @ test if its a number
-    @bl REC_NUM            @ ( flag ) ( R: len addr )
-    poptos_ @****************
-    poptos_ @****************
+    bl REC_NUM            @ ( flag ) ( R: len addr )
     toa_                  @ ( ) A: flag
     r_from_               @ ( addr ) (R: n len )
     r_from_               @ ( addr len ) (R: n )
     geta_                 @ ( addr len flag ) A:
     zerosense_            @ ( addr len )
-    @bne RECX_DONE
+    bne RECX_DONE
     @ not recognized so throw
     bl CR
     @ print unrecognized word
@@ -705,7 +726,7 @@ Forthword_ DOINTERPRET, 0, "(interp)"
   @ input buffer has something so try to interpret it
   @ setup exception handling in case of error
   pushtos_
-  ldr tos, =INTERPRET
+  ldr tos, INTERPRET_P
   bl CATCH
   @ check to make sure no throws
   bl QDUP
@@ -723,6 +744,9 @@ DOINTERPRET_ok:
   bl PROMPTOK
   pop {pc}
 
+.balign 4
+INTERPRET_P: .word INTERPRET
+.balign 2
 
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.
