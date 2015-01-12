@@ -90,18 +90,15 @@ Forthword_ PNIB, 0, ".h"
 @ simple 16 bit hex print
 Forthword_ PHEX, 0, ".$"
     push {lr}
-    dup_
-    lsr tos, #16
+    doliteral_ 28
+PHEX_BEGIN:
+    bl TWOOVER
+    rshift_
     bl PNIB
-    dup_
-    lsr tos, #12
-    bl PNIB
-    dup_
-    lsr tos, #8
-    bl PNIB
-    dup_
-    lsr tos, #4
-    bl PNIB
+    sub tos, #4
+    bne PHEX_BEGIN
+
+    drop_
     dup_
     bl PNIB
     mov tos, #32
