@@ -87,7 +87,7 @@ Forthword_ PNIB, 0, ".h"
     pop {pc}
 
 @ ( n -- )
-@ simple 16 bit hex print
+@ simple 32 bit hex print
 Forthword_ PHEX, 0, ".$"
     push {lr}
     doliteral_ 28

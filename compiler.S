@@ -70,6 +70,22 @@ Forthword_ DPPLUSONE, 0, "dp+1"
     b DPPLUS
 
 @ ( -- )
+@ tail call optimize: change last rcall/call into rjmp/jmp
+Forthword_ TAILOPT, 0, ";opt"
+    push {lr}
+    @ optimize only if smudge is not zero
+    bl SMUDGE
+    bl FETCH
+    zerosense_
+    bne TAILOPT_OPT
+    pop {pc}
+
+TAILOPT_OPT:
+    @ don't optimize tail call, just compile a ret.
+    bl POPPC_C          @ ( )
+    pop {pc}
+
+@ ( -- )
 @ update wid from smudge if valid
 Forthword_ UWID, 0, "uwid"
     push {lr}
@@ -166,6 +182,7 @@ Forthword_ HEADER, 0, "header"
       r_from_             @ ( wid ) (R: DP )
       fetch_              @ ( VE_HEAD )
       bl COMMA            @ ( )
+      bl PUSHLR_C
       r_from_             @ ( DP ) (R: )
       pop {pc}
 

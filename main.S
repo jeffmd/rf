@@ -68,6 +68,7 @@ DPSTART:
 .include "defer.S"
 .include "compiler.S"
 .include "interpret.S"
+.include "asm.S"
 .include "minimum.S"
 
 @ ( nx* -- ) (R: ny* -- )
