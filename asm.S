@@ -3,7 +3,7 @@
 .balign 4
 .balign 2
 @ ( -- )
-@ compile assembler ret
+@ compile assembler push {lr}
 Forthword_ PUSHLR_C, 0, "pushlr,"
     push {lr}
     pushtos_
@@ -15,7 +15,7 @@ Forthword_ PUSHLR_C, 0, "pushlr,"
 .balign 2
 
 @ ( -- )
-@ compile assembler ret
+@ compile assembler pop {pc}
 Forthword_ POPPC_C, 0, "poppc,"
     push {lr}
     pushtos_

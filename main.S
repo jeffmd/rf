@@ -80,8 +80,8 @@ Forthword_ WARM, 0, "warm"
     bl RP0
     bl STORE
     bl ONLY
-    bl DECIMAL
-    bl DOSLIT
+    bl DECIMAL           @ default to decimal base
+    bl DOSLIT            @ print version
     ascii_ "rf 0.1"
     bl TYPE
     bl CR
