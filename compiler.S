@@ -69,6 +69,24 @@ Forthword_ DPPLUSONE, 0, "dp+1"
     two_
     b DPPLUS
 
+@ ( -- )
+@ update wid from smudge if valid
+Forthword_ UWID, 0, "uwid"
+    push {lr}
+    bl SMUDGE
+    fetch_
+    bl QDUP
+    zerosense_
+    beq UWID_end
+       bl CURRENT
+       fetch_
+       bl STORE
+       bl SMUDGE
+       bl ZEROSTORE
+       @bl DPSTOREE
+UWID_end:
+    pop {pc}
+
 @ ( --  )
 @ enter compiler mode
 Forthword_ RBRACKET, 0, "]"
@@ -85,6 +103,77 @@ Forthword_ LBRACKET, IMMEDIATE_EN, "["
     bl STATE
     bl ZEROHSTORE
     pop {pc}
+
+@ ( n -- )
+@ compile 16 bit into ram at (dictionary pointer) DP
+Forthword_ COMMA, 0, ","
+    push {lr}
+    bl DP
+    bl HSTORE
+    bl DPPLUSONE
+    pop {pc}
+
+@ ( addr len len' -- )
+@ compiles a string from RAM to Flash
+Forthword_ DOSCOMMA, 0, "(s,)"
+    push {lr}
+    bl COMMA           @ ( addr len )
+    bl BTOW            @ ( addr len/2 rem )
+    to_r_              @ ( addr len/2 ) (R: rem )
+    niptoa_            @ ( len/2 ) A: addr
+
+    @ begin
+PFA_SCOMMA1:
+    @ ?while
+    dupzerosense_      @ ( len )
+    beq PFA_SCOMMA2
+    ahfetch_           @ ( len c1c2 )
+    ahplus_
+    bl COMMA           @ ( len )
+    oneminus_          @ ( len-1 )
+    @ repeat
+    b PFA_SCOMMA1
+
+PFA_SCOMMA2:
+    drop_              @ (  )
+    r_from_            @ ( rem ) (R: )
+    @ if
+    zerosense_         @ ( )
+    beq PFA_SCOMMA3
+      acfetch_         @ ( c1 )
+      bl COMMA         @ ( )
+
+    @ then
+PFA_SCOMMA3:
+    pop {pc}
+
+@ ( addr len wid -- voc-link )
+@ creates the vocabulary header without XT and data field (PF) in the wordlist wid
+Forthword_ HEADER, 0, "header"
+    push {lr}
+    bl DP                 @ ( addr len wid DP )
+    to_r_                 @ ( addr len wid ) (R: DP )
+    to_r_                 @ ( addr len ) (R: DP wid )
+    @ <if>
+    dupzerosense_
+    beq HEADER_error
+      dup_                @ ( addr len len )
+      mov r0, #0xFF
+      lsl r0, #8
+      orr tos, r0         @ ( addr len len' )
+      bl DOSCOMMA         @ ( )
+      @ make voc link
+      r_from_             @ ( wid ) (R: DP )
+      fetch_              @ ( VE_HEAD )
+      bl COMMA            @ ( )
+      r_from_             @ ( DP ) (R: )
+      pop {pc}
+
+    @ <then>
+HEADER_error:
+    @ -16: attempted to use zero length string as a name
+    true_
+    bl THROW
 
 @ ( nfa -- lfa )
 @ get the link field address from the name field address
@@ -140,4 +229,6 @@ Forthword_ ONLY, IMMEDIATE_EN, "only"
     bl ZEROSTORE
     pop {pc}
 
+.balign 4
 EE_FORTHWORDLIST_P: .word EE_FORTHWORDLIST
+.balign 2

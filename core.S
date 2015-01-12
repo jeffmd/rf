@@ -598,3 +598,14 @@ Forthword_ AHPLUS, INLINE_OPT, "ah+"
 Forthword_ ACPLUS, INLINE_OPT, "ac+"
     acplus_
     bx lr
+
+@ ( len -- len/2 rem)
+@ convert byte length to word length plus remainder
+Forthword_ BTOW, 0, "btow"
+    push {lr}
+    dup_        @ ( len len )
+    twoslash_   @ ( len len/2 )
+    bl TUCK     @ ( len/2 len len/2 )
+    twostar_    @ ( len/2 len len' )
+    minus_      @ ( len/2 rem )
+    pop {pc}
