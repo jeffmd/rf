@@ -10,7 +10,7 @@ rf.o : main.S $(INCS)
 	as -o $@ $<
 
 lst:
-	objdump -S rf > test.s
+	objdump -h -x -D -S rf > test.s
 
 clean:
 	rm -vf rf *.o
