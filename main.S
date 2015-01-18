@@ -37,9 +37,11 @@ ram_tib: .space TIBSIZE
 HERESTART:
    .space 16000
 
+@ start of user program area
+DPSTART:
+   .space 16000
 
-.text
-.balign 2
+.balign 4
 
 eeprom_base:
 EE_FORTHWORDLIST:
@@ -58,9 +60,10 @@ EE_TURNKEY:
 EDPSTART:
   .space 2000
 
-@ start of user program area
-DPSTART:
-   .space 16000
+
+.text
+
+.balign 2
 
 .set VE_HEAD, 0
 
@@ -101,6 +104,13 @@ main:
     ldr dsp, addr_dstack
     @ initialize sysvar pointer
     ldr sysvar, addr_sysvar
+
+    ldr r0, addr_dpstart
+    mov tos, #(ram_dp-sysvar_base)
+    add tos, sysvar
+    str r0, [tos]
+
+    bl WIPE
     bl WARM
 
     mov r0, tos
@@ -110,6 +120,7 @@ main:
 @ ram pointers that need relocation on startup
 addr_dstack: .word topdstack
 addr_sysvar: .word sysvar_base
+addr_dpstart: .word DPSTART
 
 
 /* External calls*/

@@ -23,3 +23,64 @@ Forthword_ POPPC_C, 0, "poppc,"
     bl COMMA
 RET_C_POP:
     pop {pc}
+
+@ calc relative distance in half word alignment
+@ ( dest start  -- distance )
+Forthword_ RELDST, 0, "reldst"
+    @ calculate relative distance in half words from start to dest
+    @ rel dist = dest - start
+    @ account for 3 stage pipeline
+    fourplus_            @ ( dest start+4 )
+    minus_               @ ( dist )
+    twoslash_            @ ( dist/2 )
+    bx lr
+
+@ compile rcall to xt at the current dictionary position (DP) if relative distance is in range
+@ otherwise do long call to xt.  If word flag indicates inlining then the word is inlined.
+@ ( xt flags -- )
+Forthword_ COMPILEXT, 0, "cxt"
+    push {lr}
+    @ if bit 0 of high byte flag is 0 then word is to be inlinned
+    @sbrc tosh, INLINE_OPT_FB
+    b DO_COMPILEXT
+    @drop_           @ ( xt )
+    @b INLINE
+
+DO_COMPILEXT:
+    drop_                @ ( xt )
+    @ calculate relative distance in words from start to dest
+    bl DP                @ ( xt dp )
+
+    bl RELDST            @ ( distance )
+    bl BLC
+    pop {pc}
+
+@ compile call at start address
+@ ( dist -- )
+@ dist: 2's compliment half word offset
+Forthword_ BLC, 0, "bl,"
+    push {lr}
+    @ bl is a 32 bit instruction done as two 16 bit instructions in thumb
+    @ bit pattern:
+    @ 11110xxxxxx - upper half
+    @ 11111xxxxxx - lower half
+    @ split the 23-bit two’s complement half-word offset specifed by the
+    @ label into two 11-bit halves, ignoring bit 0 (which must be 0),
+    @ and creates two THUMB instructions
+    dup_                    @ ( dist dist )
+    @ get top 11 bits
+    asr tos, #11           @ ( dist xxxdist )
+    @ make high address bl instruction mask
+    mov r0, #0xF0
+    lsl r0, #8
+    orr tos, r0             @ ( dist 0xFxdist )
+    mov r0, #0x8
+    lsl r0,#8
+    bic tos, r0             @ ( dist 0xF0dist )
+    bl COMMA                @ ( dist )
+    @ make low address bl instruction mask
+    mov r0, #0xF8
+    lsl r0, #8
+    orr tos, r0             @ ( 0xF8dist )
+    bl COMMA
+    pop {pc}

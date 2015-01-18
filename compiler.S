@@ -35,21 +35,26 @@ Forthword_ SMUDGE, 0, "smudge"
     douser_ COLON_SMUDGE
 
 @ ( -- f-addr )
-@ address of the next free dictionary cell
-Forthword_ DP, 0, "dp"
+@ get address of the dictionary cell
+Forthword_ DPSHARP, 0, "dp#"
     pushtos_
     mov tos, #(ram_dp-sysvar_base)
     add tos, sysvar
-    fetch_
     bx lr
+
+@ ( -- f-addr )
+@ address of the next free dictionary cell
+Forthword_ DP, 0, "dp"
+    push {lr}
+    bl DPSHARP
+    fetch_
+    pop {pc}
 
 @ ( addr -- )
 @ store address of the next free dictionary cell
 Forthword_ DPSTORE, 0, "dp!"
     push {lr}
-    pushtos_
-    mov tos, #(ram_dp-sysvar_base)
-    add tos, sysvar
+    bl DPSHARP
     bl STORE
     pop {pc}
 
@@ -57,9 +62,7 @@ Forthword_ DPSTORE, 0, "dp!"
 @ add offset to 16 bit (dictionary pointer) DP
 Forthword_ DPPLUS, 0, "dp+"
     push {lr}
-    pushtos_
-    mov tos, #(ram_dp-sysvar_base)
-    add tos, sysvar
+    bl DPSHARP
     bl PLUSSTORE
     pop {pc}
 
@@ -129,6 +132,16 @@ Forthword_ COMMA, 0, ","
     bl DPPLUSONE
     pop {pc}
 
+@ ( n -- )
+@ compile 32 bit into ram at (dictionary pointer) DP
+Forthword_ DCOMMA, 0, ",,"
+    push {lr}
+    bl DP
+    bl STORE
+    bl DPPLUSONE
+    bl DPPLUSONE
+    pop {pc}
+
 @ ( addr len len' -- )
 @ compiles a string from RAM to Flash
 Forthword_ DOSCOMMA, 0, "(s,)"
@@ -181,7 +194,8 @@ Forthword_ HEADER, 0, "header"
       @ make voc link
       r_from_             @ ( wid ) (R: DP )
       fetch_              @ ( VE_HEAD )
-      bl COMMA            @ ( )
+      @ write full word (32 bit value) into dictionary
+      bl DCOMMA           @ ( )
       bl PUSHLR_C
       r_from_             @ ( DP ) (R: )
       pop {pc}
@@ -242,7 +256,7 @@ Forthword_ ONLY, IMMEDIATE_EN, "only"
     bl HSTORE
     @ make second slot have no vocab
     bl CONTEXT
-    twoplus_
+    fourplus_
     bl ZEROSTORE
     pop {pc}
 

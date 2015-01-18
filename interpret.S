@@ -345,7 +345,7 @@ Forthword_ FINDROOT, 0, "froot"
     b FINDNFA_BEGIN
 .balign 4
 FINDROOTdata:
-    .word VE_WIPE
+    .word VE_COLD
 .balign 2
 
 @ ( addr len idx -- 0 | nfa )
@@ -456,7 +456,7 @@ Forthword_ REC_WORD, 0, "recw"
     bl FINDW
     dupzerosense_
     bne REC_WORD_FOUND
-    pop {pc}
+      pop {pc}
 
 REC_WORD_FOUND:
     bl NFATOXTF
@@ -475,20 +475,24 @@ REC_WORD_FOUND:
 
 @CHECK_IMMEDIATE:
   @ either compile or EXEC the XT
-    @ check if word is immediate: bit 7 is clear if immediate
+    @ check if word is immediate: bit 15 is clear if immediate
   @sbrs tosh, IMMEDIATE_EN_FB @ skip next instruction if bit 7 is set: not immediate word
-      @ flag is 0: always EXEC
-      @rjmp REC_WORD_EXECUTE
+  mov r0, #IMMEDIATE_EN
+  lsl r0, #8
+  tst tos, r0
+  @ flag is 0: always EXEC
+  beq REC_WORD_EXECUTE
 
-@REC_WORD_CHECKSTATE:
+REC_WORD_CHECKSTATE:
         @ check state
-      @bl STATEFETCH
-      @zerosense_
-      @beq REC_WORD_EXECUTE
+      bl STATEFETCH
+      zerosense_
+      beq REC_WORD_EXECUTE
         @ in compile mode so compile xt
-      @bl COMPILEXT
-      @true_
-      @pop {pc}
+      bl COMPILEXT
+      true_
+      pop {pc}
+
 REC_WORD_EXECUTE:
     drop_
     @ state is zero, EXEC xt
