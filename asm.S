@@ -84,3 +84,26 @@ Forthword_ BLC, 0, "bl,"
     orr tos, r0             @ ( 0xF8dist )
     bl COMMA
     pop {pc}
+
+@ ( -- n )
+@ load a 32 bit constant onto the top of stack
+Forthword_ LDC32, INLINE_OPT, "ldc32"
+    pushtos_
+    ldr tos, LDCONST_VAL
+    b LDCONST_EXIT
+.balign 4
+LDCONST_VAL: .space 4
+.balign 2
+LDCONST_EXIT:
+    bx lr
+
+@ compile top of stack as immediate value
+@ ( n -- )
+Forthword_ LIT, 0, "lit"
+    push {lr}
+    @ if constant less than 256 then use ldc8 inlinned
+    @ for large constants use ldc32 inlinned
+    @ inline ldc at current dp
+    @ adjust for word boundary
+    @ branch instruction and pc offset must be adjusted
+    pop {pc}

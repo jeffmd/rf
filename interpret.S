@@ -435,14 +435,14 @@ Forthword_ REC_NUM, 0, "rec#"
     zerosense_
     beq REC_NONUMBER
 
-    bl STATEFETCH          @ ( n state )
-    zerosense_
-    beq REC_NUMBER_OK
-    @bl LIT
+      bl STATEFETCH        @ ( n state )
+      zerosense_
+      beq REC_NUMBER_OK
+        bl LIT
 
 REC_NUMBER_OK:
-    true_                  @ ( n true )
-    pop {pc}
+      true_                @ ( n true )
+      pop {pc}
 
 REC_NONUMBER:
     zero_                  @ ( 0 )
