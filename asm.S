@@ -89,7 +89,7 @@ Forthword_ BLC, 0, "bl,"
     bl COMMA
     pop {pc}
 
-@ ( -- n )
+@ ( -- 32b )
 @ load a 32 bit constant onto the top of stack
 Forthword_ LDC32, INLINE_OPT, "ldc32"
     pushtos_
@@ -101,6 +101,53 @@ LDCONST_VAL: .space 4
 LDCONST_EXIT:
     bx lr
 
+@ ( 16b -- )
+@ compile inline a 16 bit constant
+Forthword_ LDC16, INLINE_OPT, "ldc16"
+    push {lr}
+    @ 0x3F04 - sub r7, #4
+    pushtos_
+    mov tos, #0x3F
+    lsl tos, #8
+    add tos, #0x04
+    bl COMMA
+
+    @ 0x603E - str  r6, [r7, #0]
+    pushtos_
+    mov tos, #0x60
+    lsl tos, #8
+    add tos, #0x3E
+    bl COMMA
+
+    @ 0x26XX - mov  r6, #XX
+    mov r0, #0xFF        @ low byte mask
+    pushtos_
+    mov r1, tos
+    asr r1, #8         @ get high byte
+    and r1, r0         @ only keep low 8 bits
+    mov tos, #0x26
+    lsl tos, #8
+    add tos, r1
+    bl COMMA
+
+    @ 0x0236 - lsl r6, #8
+    pushtos_
+    mov tos, #0x02
+    lsl tos, #8
+    add tos, #0x36
+    bl COMMA
+
+    @ 0x36XX - add r6, #XX
+    mov r1, tos
+    mov r0, #0xFF        @ low byte mask
+    and r1, r0
+    mov tos, #0x36
+    lsl tos, #8
+    add tos, r1
+    bl COMMA
+
+    pop {pc}
+
 @ compile top of stack as inlinned immediate value
 @ ( n -- )
 Forthword_ LIT, 0, "lit"
@@ -110,4 +157,5 @@ Forthword_ LIT, 0, "lit"
     @ inline ldc at current dp
     @ adjust for word boundary
     @ branch instruction and pc offset must be adjusted
+    bl LDC16
     pop {pc}
