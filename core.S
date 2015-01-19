@@ -341,19 +341,19 @@ Forthword_ TRUE, INLINE_OPT, "true"
 
 @ ( -- 1 )
 @ place a value 1 on TOS
-Forthword_ ONE, 0, "1"
+Forthword_ ONE, INLINE_OPT, "1"
   one_
   bx lr
 
 @ ( -- 2 )
 @ place a value 2 on TOS
-Forthword_ TWO, 0, "2"
+Forthword_ TWO, INLINE_OPT, "2"
   two_
   bx lr
 
 @ ( -- 10 )
 @ place a value 10 on TOS
-Forthword_ TEN, 0, "10"
+Forthword_ TEN, INLINE_OPT, "10"
   ten_
   bx lr
 
@@ -608,4 +608,28 @@ Forthword_ BTOW, 0, "btow"
     bl TUCK     @ ( len/2 len len/2 )
     twostar_    @ ( len/2 len len' )
     minus_      @ ( len/2 rem )
+    pop {pc}
+
+@ (start dest count -- )
+@ count is the number of bytes to copy and must be a multiple of two
+@ copy ram using half words.  Assumes no overlap.
+Forthword_ MCPY, 0, "mcpy"
+    push {lr}
+    niptoa_         @ ( start count ) A: dest
+MCPY_B:
+    dupzerosense_   @ ( start count )
+    beq MCPY_END
+    tob_            @ ( start ) B: count
+    dup_            @ ( start start )
+    hfetch_         @ ( start val )
+    geta_           @ ( start val dest )
+    bl HSTORE       @ ( start )
+    ahplus_
+    twoplus_        @ ( start+2 )
+    getb_           @ ( start+2 count )
+    twominus_       @ ( start+2 count-2 )
+    b MCPY_B
+
+MCPY_END:
+    bl DDROP
     pop {pc}

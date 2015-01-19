@@ -40,17 +40,21 @@ Forthword_ RELDST, 0, "reldst"
 @ ( xt flags -- )
 Forthword_ COMPILEXT, 0, "cxt"
     push {lr}
+    mov r0, #INLINE_OPT
+    lsl r0, #8
+    tst tos, r0
     @ if bit 0 of high byte flag is 0 then word is to be inlinned
-    @sbrc tosh, INLINE_OPT_FB
+    drop_           @ ( xt )
+    beq COMPILEXT_INLINE
     b DO_COMPILEXT
-    @drop_           @ ( xt )
-    @b INLINE
+
+COMPILEXT_INLINE:
+      bl INLINE
+      pop {pc}
 
 DO_COMPILEXT:
-    drop_                @ ( xt )
     @ calculate relative distance in words from start to dest
     bl DP                @ ( xt dp )
-
     bl RELDST            @ ( distance )
     bl BLC
     pop {pc}
@@ -97,7 +101,7 @@ LDCONST_VAL: .space 4
 LDCONST_EXIT:
     bx lr
 
-@ compile top of stack as immediate value
+@ compile top of stack as inlinned immediate value
 @ ( n -- )
 Forthword_ LIT, 0, "lit"
     push {lr}

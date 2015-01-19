@@ -206,6 +206,50 @@ HEADER_error:
     true_
     bl THROW
 
+@ ( start match -- start count )
+@ match is the 16 bit half word value to search for in ram
+@ start is the start address of the search in ram
+@ the search goes up in ram address space
+@ count is number of bytes to get to match value in ram
+@ or get word index of match
+Forthword_ FINDH, 0, "findh"
+    @ fetch from ram and check if equal to match half word
+    tob_             @ ( start ) B: match
+    copytoa_         @ ( start ) A: start
+    @ begin
+FINDI_BEGIN:
+      ldrh r0, [areg] @ ( start )
+      ahplus_
+      cmp r0, breg    @ ( start )
+    @ until
+    bne FINDI_BEGIN
+
+    geta_            @ ( start end )
+    twominus_        @ ( start end-2 )
+    over_            @ ( start end-2 start )
+    minus_           @ ( start count )
+    bx lr
+
+@ ( start -- )
+@ copy code to current dictionary entry
+Forthword_ INLINE, 0, "inline"
+    push {lr}
+    @ find the bx lr instruction, want count to bx lr
+    @ count will be number of half words to inline
+    pushtos_
+    mov tos, #0x47
+    lsl tos, #8
+    add tos, #0x70
+    bl FINDH                 @ ( start count )
+
+    @ dp swap dup dp+ itoi
+    bl DP                    @ ( start count dp )
+    swap_                    @ ( start dp count )
+    dup_                     @ ( start dp count count )
+    bl DPPLUS                @ ( start dp count )
+    bl MCPY                  @ ( )
+    pop {pc}
+
 @ ( nfa -- lfa )
 @ get the link field address from the name field address
 Forthword_ NFA2LFA, 0, "nfa>lfa"
