@@ -26,11 +26,6 @@
     $77FF widf
 ; immediate
 
-\ make most current word call only
-: call
-  $FBFF widf
-; immediate
-
 
 \ search dictionary for name, returns XT or 0
 : 'f  ( "<spaces>name" -- XT XTflags )
@@ -89,7 +84,7 @@
     @i       ( nfa )
     nfa>xtf  ( xt xtflags )
     cxt
-; call
+;
 
 \ compile into pending new word
 : compile ( C: x "<spaces>name" -- )
@@ -103,7 +98,7 @@
 : rword
     (create)      ( voc-link )
     cur@          ( voc-link wid )
-    !e            ( )
+    !             ( )
 ;
 
 ( -- a-addr ) ( C: "<spaces>name" -- )
