@@ -14,9 +14,6 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 @ bit 0 : enable inlinning
 .set INLINE_OPT_FB, 0
 .set INLINE_OPT, 0x01
-@ bit 2 : dissable tail call optimization
-@ disable tail call optimization : & with word count flag ie: HFLAGS & DIS_CALL_OPT | 04
-.set DIS_CALL_OPT, 0x04
 
 @ bit 3 : disable interpret execution ie compile only
 .set COMPILE_ONLY_FB, 3
