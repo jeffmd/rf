@@ -81,7 +81,7 @@
 
 : (compile)  ( -- )
     r>r+     ( raddr ) ( R: raddr+1 )
-    @i       ( nfa )
+    @        ( nfa )
     nfa>xtf  ( xt xtflags )
     cxt
 ;
@@ -89,7 +89,7 @@
 \ compile into pending new word
 : compile ( C: x "<spaces>name" -- )
   ['f] (compile) cxt
-  find ,
+  find ,,
 ; :ic
 
 
@@ -138,7 +138,7 @@
     \ code at XT is 'call POPRET'
     \ want to change POPRET address to return address
     r>
-    cur@ @e
+    cur@ @
     nfa>lfa
     2+         \ lfa>xt+1
     !i
