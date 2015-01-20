@@ -91,17 +91,17 @@ Forthword_ BLC, 0, "bl,"
 
 @ ( -- 32b )
 @ fetch a 32 bit inlinned constant pointed to by lr onto the top of stack
+@ assumes caller was in thumb mode
 Forthword_ ICFETCH, 0, "ic@"
     pushtos_
     mov r0, lr
-    mov r1, #1
-    bic r0,r1      @ clear bit 0 which is thumb indicator
+    sub r0, #1     @ clear bit 0 which is thumb indicator
     ldr tos, [r0]
-    add r0, #5     @ return after constant
+    add r0, #5     @ return after constant and default to thumb mode
     bx r0
 
 
-@ compile top of stack as inlinned immediate value
+@ compile top of stack as inlinned immediate 32 bit constant
 @ ( n -- )
 Forthword_ LIT, 0, "lit"
     push {lr}
