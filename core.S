@@ -167,6 +167,27 @@ Forthword_ RP_STORE, INLINE_OPT, "rp!"
     rpstore_
     bx lr
 
+@ ( -- retaddr )
+@ pop return onto data stack and exit caller
+@ used if data in program mem and need an address to it
+Forthword_ POPRET, 0, "popret"
+    pushtos_
+    mov tos, lr
+    pop {pc}
+
+@ ( -- n) (R: n -- n+1 )
+@ get TOR and then increment TOR by 1 cell (32 bit)
+@ assumes TOR content will be used for 32 bit memory access so
+@ removes thumb bit flag
+Forthword_ RTORPLUS, 0, "r>r+"
+    pushtos_
+    pop {tos}
+    add tos, #0x04
+    push {tos}
+    sub tos, #0x05
+    bx lr
+
+
 @@@@@@@@@@@@@ Arithmatic @@@@@@@@@@@@@
 
 @ ( n1 n2 -- n3)
