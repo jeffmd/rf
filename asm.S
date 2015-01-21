@@ -24,6 +24,29 @@ Forthword_ POPPC_C, 0, "poppc,"
 RET_C_POP:
     pop {pc}
 
+@ compile assembler instruction b - unconditional branch
+@ ( reldist -- )
+@ reldist: relative distance as 2's compliment
+Forthword_ BC, 0, "b,"
+    push {lr}
+    @ 1110 0XXX XXXX XXXX
+    mov r0, #7
+    lsl r0, #8
+    add r0, #0xFF
+    and tos, r0
+    mov r0, #0x07
+    lsl r0, #13
+    orr tos, r0
+    bl      COMMA
+
+@ ( -- lr )
+@ move link register onto top of data stack
+Forthword_ LR_G, INLINE_OPT, "lr>"
+    pushtos_
+    mov tos, lr
+    bx lr
+
+
 @ calc relative distance in half word alignment
 @ ( dest start  -- distance )
 Forthword_ RELDST, 0, "reldst"
