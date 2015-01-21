@@ -173,6 +173,7 @@ Forthword_ RP_STORE, INLINE_OPT, "rp!"
 Forthword_ POPRET, 0, "popret"
     pushtos_
     mov tos, lr
+    sub tos, #1
     pop {pc}
 
 @ ( -- n) (R: n -- n+1 )
