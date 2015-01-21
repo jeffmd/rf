@@ -127,27 +127,35 @@
 ; immediate
 
 ( -- )
-\ Compiler
 \ replace the instruction written by CREATE to call the code that follows does>
 \ does not return to caller
+\ this is the runtime portion of does>
 : (does>)
     \ change call at XT to code after (does>)
-    \ get current word and then get its XT being compiled
-    \ code at XT is 'call POPRET'
+    \ code at XT is 'bl POPRET'
     \ want to change POPRET address to return address
-    r>
-    cur@ @
-    nfa>lfa
-    \ skip over lfa
-    4+         \ lfa>xt
+    r>                        ( retaddr )
+    \ remove thumb flag - will be using for memory access
+    1-
+    \ get address of bl POPRET
+    \ get current word and then get its XT being compiled
+    cur@ @                    ( retaddr nfa )
+    nfa>lfa                   ( retaddr lfa )
+    \ skip over lfa to get to xt
+    4+                        ( retaddr xt )
     \  skip over push {lr}
-    2+
+    2+                        ( retaddr xt+2 )
+    \ temp save dp on return stack
+    dp# @ >r
+    \ set dp to xt+2
+    dup dp# !                 ( retaddr xt+2 )
     \ modify the bl
     \ calc displacement
-    \ temp save dp on return stack
-    \ change dp to bl POPRET location
-    \ do bl,
+    reldst                    ( dst )
+    \ compile a bl instruction
+    bl,                       ( )
     \ restore dp
+    r> dp# !                  ( )
 ;
 
 ( -- )
@@ -159,6 +167,7 @@
     \ compile pop return to tos which is used as 'THIS' pointer
     compile (does>)
     compile lr>
+    compile 1-
 ; :ic
 
 ( -- xt )
@@ -369,7 +378,7 @@
 : con
     rword
     lit
-    ret,
+    poppc,
 ;
 
 
