@@ -77,8 +77,6 @@
 
 \ read the following cell from the executing word and append it
 \ to the current dictionary position.
-\ must use call/rcall
-
 : (compile)  ( -- )
     r>r+     ( raddr ) ( R: raddr+1 )
     @        ( nfa )
@@ -140,8 +138,16 @@
     r>
     cur@ @
     nfa>lfa
-    2+         \ lfa>xt+1
-    !i
+    \ skip over lfa
+    4+         \ lfa>xt
+    \  skip over push {lr}
+    2+
+    \ modify the bl
+    \ calc displacement
+    \ temp save dp on return stack
+    \ change dp to bl POPRET location
+    \ do bl,
+    \ restore dp
 ;
 
 ( -- )
@@ -152,7 +158,7 @@
 : does>
     \ compile pop return to tos which is used as 'THIS' pointer
     compile (does>)
-    compile r>
+    compile lr>
 ; :ic
 
 ( -- xt )
