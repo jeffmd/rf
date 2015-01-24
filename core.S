@@ -355,6 +355,18 @@ Forthword_ ZEROSET, INLINE_OPT, "0:"
     zerotos_
     bx lr
 
+@ ( n -- )
+@ test TOS if zero
+Forthword_ ZEROSENSE, INLINE_OPT, "0?"
+    zerosense_
+    bx lr
+
+@ ( n -- n)
+@ test TOS if zero, does not consume TOS
+Forthword_ QZEROSENSE, INLINE_OPT, "?0?"
+    dupzerosense_
+    bx lr
+
 @ ( -- -1 )
 @ leaves the value -1 (true) on TOS
 Forthword_ TRUE, INLINE_OPT, "true"

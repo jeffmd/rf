@@ -24,20 +24,6 @@ Forthword_ POPPC_C, 0, "poppc,"
 RET_C_POP:
     pop {pc}
 
-@ compile assembler instruction b - unconditional branch
-@ ( reldist -- )
-@ reldist: relative distance as 2's compliment
-Forthword_ BC, 0, "b,"
-    push {lr}
-    @ 1110 0XXX XXXX XXXX
-    mov r0, #7
-    lsl r0, #8
-    add r0, #0xFF
-    and tos, r0
-    mov r0, #0x07
-    lsl r0, #13
-    orr tos, r0
-    bl      COMMA
 
 @ ( -- lr )
 @ move link register onto top of data stack
@@ -57,6 +43,40 @@ Forthword_ RELDST, 0, "reldst"
     minus_               @ ( dist )
     twoslash_            @ ( dist/2 )
     bx lr
+
+@ compile assembler instruction b - unconditional branch
+@ ( reldist -- )
+@ reldist: relative distance as 2's compliment
+Forthword_ BRANCH, 0, "b."
+    push {lr}
+    @ 1110 0XXX XXXX XXXX
+    mov r0, #7
+    lsl r0, #8
+    add r0, #0xFF
+    and tos, r0
+    mov r0, #0x07
+    lsl r0, #13
+    orr tos, r0
+    pop {pc}
+
+@ compile assembler instruction b - unconditional branch
+@ ( reldist -- )
+@ reldist: relative distance as 2's compliment
+Forthword_ BC, 0, "b,"
+    push {lr}
+    bl BRANCH
+    bl COMMA
+    pop {pc}
+
+@ compile branch at start address
+@ ( start dest -- )
+Forthword_ RJMPC, 0, "rjmpc"
+    push {lr}
+    over_                @ ( start dest start )
+    bl BRANCH            @ ( start branchinst )
+    swap_                @ ( branchinst start )
+    bl HSTORE            @ ( )
+    pop {pc}
 
 @ compile rcall to xt at the current dictionary position (DP) if relative distance is in range
 @ otherwise do long call to xt.  If word flag indicates inlining then the word is inlined.
@@ -112,6 +132,18 @@ Forthword_ BLC, 0, "bl,"
     bl COMMA
     pop {pc}
 
+@ branch 1 word if not zero
+@ ( -- )
+Forthword_ BRNZ1_COMPILE, 0, "bne1,"
+    push {lr}
+    pushtos_
+    @compile bne #2 : 0xD101
+    mov tos, #0xD1
+    lsl tos, #8
+    add tos, #0x01
+    bl COMMA
+    pop {pc}
+
 @ ( -- 32b )
 @ fetch a 32 bit inlinned constant pointed to by lr onto the top of stack
 @ assumes caller was in thumb mode
@@ -122,7 +154,6 @@ Forthword_ ICFETCH, 0, "ic@"
     ldr tos, [r0]
     add r0, #5     @ return after constant and default to thumb mode
     bx r0
-
 
 @ compile top of stack as inlinned immediate 32 bit constant
 @ ( n -- )
