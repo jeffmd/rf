@@ -310,9 +310,9 @@ NUMBERSIGN:        @ ( addr len -- )
       bx lr
 
 NUMBERSIGN_HASSIGN:
+      push {lr}
       to_r_
       one_
-      push {lr}
       bl SLASHSTRING
       r_from_
       pop {pc}
