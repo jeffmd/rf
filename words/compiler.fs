@@ -186,7 +186,7 @@
 \ branch resolve on TOS and advances DP
 : >mark
     dp
-    dp+1           \ advance DP
+    dp+1           \ advance DP to allow branch/jmp
 ;
 
 ( start -- )
