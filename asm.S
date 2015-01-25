@@ -45,10 +45,9 @@ Forthword_ RELDST, 0, "reldst"
     bx lr
 
 @ compile assembler instruction b - unconditional branch
-@ ( reldist -- )
+@ ( reldist -- branchrel )
 @ reldist: relative distance as 2's compliment
 Forthword_ BRANCH, 0, "b."
-    push {lr}
     @ 1110 0XXX XXXX XXXX
     mov r0, #7
     lsl r0, #8
@@ -57,7 +56,7 @@ Forthword_ BRANCH, 0, "b."
     mov r0, #0x07
     lsl r0, #13
     orr tos, r0
-    pop {pc}
+    bx lr
 
 @ compile assembler instruction b - unconditional branch
 @ ( reldist -- )
@@ -73,6 +72,7 @@ Forthword_ BC, 0, "b,"
 Forthword_ RJMPC, 0, "rjmpc"
     push {lr}
     over_                @ ( start dest start )
+    bl RELDST            @ ( start reldst )
     bl BRANCH            @ ( start branchinst )
     swap_                @ ( branchinst start )
     bl HSTORE            @ ( )
@@ -137,10 +137,10 @@ Forthword_ BLC, 0, "bl,"
 Forthword_ BRNZ1_COMPILE, 0, "bne1,"
     push {lr}
     pushtos_
-    @compile bne #2 : 0xD101
+    @compile bne #00 : 0xD100
     mov tos, #0xD1
     lsl tos, #8
-    add tos, #0x01
+    add tos, #0x00
     bl COMMA
     pop {pc}
 
