@@ -285,8 +285,7 @@ NFATOXTF_EXIT:
 Forthword_ ONLY, IMMEDIATE_EN, "only"
     push {lr}
     @ forth vocab always takes slot 0
-    pushtos_
-    ldr tos, EE_FORTHWORDLIST_P
+    dolit32_ EE_FORTHWORDLIST
     dup_
     bl CONTEXT
     bl STORE
@@ -303,7 +302,3 @@ Forthword_ ONLY, IMMEDIATE_EN, "only"
     fourplus_
     bl ZEROSTORE
     pop {pc}
-
-.balign 4
-EE_FORTHWORDLIST_P: .word EE_FORTHWORDLIST
-.balign 2

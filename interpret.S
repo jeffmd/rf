@@ -339,14 +339,8 @@ FINDNFA_NEXT:
 Forthword_ FINDROOT, 0, "froot"
     push {lr}
     @ put root wid on stack
-    pushtos_
-    @ search root
-    ldr tos, FINDROOTdata
+    dolit32_ VE_COLD
     b FINDNFA_BEGIN
-.balign 4
-FINDROOTdata:
-    .word VE_COLD
-.balign 2
 
 @ ( addr len idx -- 0 | nfa )
 FINDWI:
@@ -729,8 +723,7 @@ Forthword_ DOINTERPRET, 0, "(interp)"
   push {lr}
   @ input buffer has something so try to interpret it
   @ setup exception handling in case of error
-  pushtos_
-  ldr tos, INTERPRET_P
+  dolit32_ INTERPRET
   bl CATCH
   @ check to make sure no throws
   bl QDUP
@@ -748,9 +741,6 @@ DOINTERPRET_ok:
   bl PROMPTOK
   pop {pc}
 
-.balign 4
-INTERPRET_P: .word INTERPRET
-.balign 2
 
 @ ( -- flag )
 @ receive a string of at most tibsize characters or cr/lf detected.

@@ -93,6 +93,11 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   mov tos, #\val
 .endm
 
+@ push a 32 bit inline val on datastack
+.macro dolit32_ val
+  bl ICFETCH
+  .word \val
+.endm
 
 .macro poptos_ @ load tos, (drop)
   ldm dsp!, {tos}

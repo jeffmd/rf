@@ -160,14 +160,9 @@ Forthword_ ICFETCH, 0, "ic@"
 Forthword_ LIT, 0, "lit"
     push {lr}
     @ compile xt -> ICFETCH
-    pushtos_
-    ldr tos, VE_ICFETCH_P
+    dolit32_ VE_ICFETCH
     bl NFATOXTF
     bl COMPILEXT
     @ store 32 bit val from tos
     bl DCOMMA
     pop {pc}
-
-.balign 4
-VE_ICFETCH_P: .word VE_ICFETCH
-.balign 2

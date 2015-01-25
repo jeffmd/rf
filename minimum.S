@@ -394,6 +394,20 @@ PFA_NUMBER5:
   bl BASESTORE            @ ( n true )
   pop {pc}
 
+@ dodefer - execute a deferred word
+@ defer setup as:
+@ push {lr}
+@ bl DODEFER
+@ .word deferptr
+@ does not return to defer callee
+Forthword_ DODEFER, 0, "(def)"
+  pushtos_
+  mov tos, lr
+  sub tos, #1 @ doing memory access, do not want thumb bit
+  ldr tos, [tos]
+  bl EXEC
+  pop {pc}
+
 @ must be last word in core
 Forthword_ WIPE, 0, "WIPE"
     push {lr}
@@ -417,14 +431,12 @@ Forthword_ WIPE, 0, "WIPE"
     @ set EE_FORTHWORDLIST to 0
     @rcall ZERO
     @doliteral_ EE_FORTHWORDLIST
-    pushtos_
-    ldr tos, EE_FORTHWORDLIST_P1
+    @pushtos_
+    @ldr tos, EE_FORTHWORDLIST_P1
+    bl ICFETCH
+    .word EE_FORTHWORDLIST
     dup_
     bl ZEROSTORE
     fourplus_
     bl ZEROSTORE
     pop {pc}
-
-.balign 4
-EE_FORTHWORDLIST_P1: .word EE_FORTHWORDLIST
-.balign 2
