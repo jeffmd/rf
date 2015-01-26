@@ -9,6 +9,12 @@ Forthword_ EXEC, 0, "exec"
     poptos_
     bx r0
 
+@ ( xt -- )
+@ Don't do anything, just chew up a few cycles
+Forthword_ NOOP, INLINE_OPT, "noop"
+    and tos, tos
+    bx lr
+
 @@@@@@@@@@@@@ Parameter Stack  Manipulation @@@@@@@@@@@@@@
 
 @ ( n -- n n )
