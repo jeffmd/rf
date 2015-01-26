@@ -35,6 +35,10 @@ Forthword_ STIB, 0, "stib"
 Forthword_ G_IN, 0, ">in"
     douser_ user_g_in
 
+@ ( -- pauseaddr )
+@ get ram address of pause defer
+Forthword_ PAUSEADDR, 0, "pause#"
+    douser_ USER_PAUSE
 
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
@@ -671,10 +675,11 @@ Forthword_ BYE, 0, "bye"
 
 @ ( -- )
 @ Fetch pause vector and EXEC it. may make a context/task switch
-Forthword_ PAUSE, 0, "pause"
+Forthword_ DOPAUSE, 0, "(pause)"
     push {lr}
-    @bl DODEFER
-    @.word USER_PAUSE
+    bl PAUSEADDR
+    fetch_
+    bl EXEC
     pop {pc}
 
 @ ( -- )
@@ -684,7 +689,7 @@ Forthword_ DOTASKS, 0, "(tasks)"
     push {lr}
 DOTASKS1:
     bl DOREFILL
-    bl PAUSE
+    bl DOPAUSE
 
     @ check to see if tasks should be terminated
     bl FFLAGS
