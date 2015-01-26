@@ -341,10 +341,10 @@
 \ Compiler
 \ compile the XT of the word currently
 \ being defined into the dictionary
-: recurse
-    latest  \ ;****FIXME******
-    @ $0400 cxt
-; :ic
+\ : recurse
+\    latest  \ ;****FIXME******
+\    @ $0400 cxt
+\ ; :ic
 
 ( n cchar -- )
 \ Compiler
@@ -355,22 +355,10 @@
 \    ,
 \ ;
 
-\ store the TOS to the named defer
-: to ( n <name> -- )
-    '  \ get address of next word from input stream
-    state@
-    if
-      compile (to)
-      ,
-    else
-      def! \ not in compile state, so do runtime operation
-    then
-
-; immediate
 
 \ allocate or release n bytes of memory in RAM
 : allot ( n -- )
-    here + to here
+    here +!
 ;
 
 ( x -- ) ( C: x "<spaces>name" -- )
@@ -386,7 +374,7 @@
 : var ( cchar -- )
     here
     con
-    2
+    4
     allot
 ;
 
@@ -399,23 +387,6 @@
     con
     1
     allot
-;
-
-( n -- )  ( C: x "<spaces>name" -- )
-\ Compiler
-\ create a dictionary entry for a value and allocate 1 cell in EEPROM.
-: val
-    rword
-    compile (val)
-    edp                ( n edp )
-    dup                ( n edp edp )
-    ,                  ( n edp )
-    dup                ( n edp edp )
-    2+                 ( n edp edp+2)
-    to edp             ( n edp )
-    !e                 ( )
-    ['] @e ,
-    ['] !e ,
 ;
 
 
