@@ -22,6 +22,8 @@ COLON_SMUDGE: .space 4
 user_g_in: .space 2
 state: .space 2
 USER_BASE: .space 2
+USER_PAUSE: .space 4
+USER_HERE: .space 4
 ram_CURRENT: .space 4
 ram_CONTEXTidx: .space 2
 ram_CONTEXT: .space 4 * 10 @ 10 wordlists max
@@ -81,6 +83,13 @@ Forthword_ WARM, 0, "warm"
     pushtos_
     mov tos, sp
     bl RP0
+    bl STORE
+    @ init pause to noop
+    dolit32_ NOOP
+    bl PAUSEADDR
+    bl STORE
+    dolit32_ HERESTART
+    bl HERE
     bl STORE
     bl ONLY
     bl DECIMAL           @ default to decimal base
