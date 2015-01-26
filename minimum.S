@@ -1,8 +1,12 @@
 @ minimum.S
 
 @ ( -- a-addr )
-@ location of the cell containing the number conversion radix
+@ location of the cell containing the address of the next free ram location
+Forthword_ HERE, 0, "here"
+    douser_ USER_HERE
 
+@ ( -- a-addr )
+@ location of the cell containing the number conversion radix
 Forthword_ BASE, 0, "base"
     douser_ USER_BASE
 
@@ -300,7 +304,7 @@ PFA_PRAEFIX0:
 
 @ (addr len -- addr len flag) Numeric IO
 @ check for - sign
-@ forthword_ NUMBERSIGN, 0, "numbersign"
+@ forthword_ NUMBERSIGN, 0, "#-"
 NUMBERSIGN:        @ ( addr len -- )
     over_          @ ( addr len addr )
     cfetch_        @ ( addr len char )
