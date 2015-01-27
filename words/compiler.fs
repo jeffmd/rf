@@ -390,7 +390,7 @@
 ;
 
 
-\ compiles a string from RAM to Flash
+\ compiles a string from RAM to program RAM
 : s, ( addr len -- )
     dup
     (s,)
@@ -398,7 +398,7 @@
 
 ( C: addr len -- )
 \ String
-\ compiles a string to flash
+\ compiles a string to program RAM
 : slit
     compile (slit)     ( -- addr n)
     s,
