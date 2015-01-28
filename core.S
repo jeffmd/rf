@@ -318,12 +318,25 @@ Forthword_ LESS, 0, "<"
 Forthword_ GREATER, 0, ">"
   ldm dsp!, {r0}     @ Get x1 into a register.
   cmp r0, tos        @ Is x2 greater?
+GREATER_CHK:
   ble 1f
   mov tos, #0
   mvn tos, tos
   bx lr
 1:
   mov tos, #0
+  bx lr
+
+@ ( n1 -- flag )
+@ flag is true if n1 is greater than 0
+Forthword_ ZEROGREATER, 0, "0>"
+  sub tos, #0
+  b GREATER_CHK
+
+@ ( n1 -- flag )
+@ flag is true if n1 is 0
+Forthword_ ZEROEQUAL, INLINE_OPT, "0="
+  zeroequal_
   bx lr
 
 @ ( u1 u2 -- flag )
@@ -608,17 +621,38 @@ Forthword_ AFETCH, INLINE_OPT, "a@"
     afetch_
     bx lr
 
+@ ( n -- )
+@ store a word to RAM address pointed to by areg
+Forthword_ ASTORE, 0, "a!"
+  str tos, [areg]
+  poptos_
+  bx lr
+
 @ ( -- n )
 @ Read a half word (32bit) from memory pointed to by register A (Extended VM)
 Forthword_ AHFETCH, INLINE_OPT, "ah@"
     ahfetch_
     bx lr
 
+@ ( h -- )
+@ store a half word to RAM address pointed to by areg
+Forthword_ AHSTORE, 0, "ah!"
+  strh tos, [areg]
+  poptos_
+  bx lr
+
 @ ( -- n )
 @ Read a byte from memory pointed to by register A (Extended VM)
 Forthword_ ACFETCH, INLINE_OPT, "ac@"
     acfetch_
     bx lr
+
+@ ( c -- )
+@ store a single byte to RAM address pointed to by areg
+Forthword_ ACSTORE, 0, "ac!"
+  strb tos, [areg]
+  poptos_
+  bx lr
 
 @ ( -- )
 @ update register A with post increment 4+ from last memory operation (Extended VM)
