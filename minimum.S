@@ -398,6 +398,81 @@ PFA_NUMBER5:
   bl BASESTORE            @ ( n true )
   pop {pc}
 
+@ ( n -- -n )
+@ negate a double word
+Forthword_ DNEGATE, 0, "dneg"
+  ldr r0, [dsp]
+  movs r1, #0
+  mvns r0, r0
+  mvns tos, tos
+  adds r0, #1
+  adcs tos, r1
+  str r0, [dsp]
+  bx lr
+
+@ Multiply unsigned 32*32 = 64
+@ ( u u -- ud )
+Forthword_ UMSTAR, 0, "um*"
+@------------------------------------------------------------------------------
+    ldr r0, [dsp]  @ To be calculated: Tos * r0
+
+    @ Calculate low part in hardware:
+    movs r3, r0    @ Save the low part for later
+    muls r3, tos   @ Gives complete low-part of result
+    str r3, [dsp]  @ Store low part
+
+    @ Calculate high part:
+    lsrs r1, r0,  #16 @ Shifted half
+    lsrs r2, tos, #16 @ Shifted half
+
+    movs r3, r1  @ High-High
+    muls r3, r2
+
+    @ Low-High and High-Low
+    uxth tos, tos
+    uxth r0, r0
+
+    muls tos, r1
+    muls r0, r2
+    adds tos, r0
+
+    lsrs tos, #16 @ Shift accordingly
+    adds tos, r3  @ Add together
+    bx lr
+
+@ ( n n -- d)
+@ multiply 2 signed cells to a double cell
+Forthword_ MSTAR, 0, "m*"
+@ Multiply signed 32*32 = 64
+@ ( n n -- d )
+
+    ldr r0, [dsp]
+    movs r1, r0, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+    beq 1f
+    @ - * ?
+      rsbs r0, r0, #0
+      str r0, [dsp]
+
+      movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+      beq 2f @ - * +
+
+      @ - * -
+      rsbs tos, tos, #0
+      b.n UMSTAR
+
+1:  @ + * ?
+    movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+    beq.n UMSTAR @ + * +
+    @ + * -
+    rsbs tos, tos, #0
+
+    @ - * + or + * -
+2:  push {lr}
+    bl UMSTAR
+    bl DNEGATE
+    pop {pc}
+
+
 @ dodefer - execute a deferred word
 @ defer setup as:
 @ push {lr}

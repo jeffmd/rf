@@ -1,4 +1,5 @@
 /*  main.S */
+.syntax unified
 .thumb
 
 .include "macros.S"
