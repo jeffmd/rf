@@ -378,8 +378,7 @@ FINDW_BEGIN:
       to_r_             @ ( addr len ) ( R: idx )
       bl TWOOVER        @ ( addr len addr len ) ( R: idx )
       @ get next wordlist in array
-      r_from_           @ ( addr len addr len idx ) ( R: )
-      dup_r_            @ ( addr len addr len idx ) ( R: idx)
+      r_fetch_          @ ( addr len addr len idx ) ( R: idx)
       bl FINDWI
       r_from_           @ ( addr len nfa idx ) ( R: )
       swap_             @ ( addr len idx nfa )

@@ -154,9 +154,8 @@ Forthword_ DUP_R, INLINE_OPT, "r>r"
 
 @ ( -- n) (R: n -- n )
 @ put a copy of TOR on TOS
-Forthword_ R_FETCH, 0, "r"
-    pushtos_
-    ldr tos, [sp]
+Forthword_ R_FETCH, INLINE_OPT, "r"
+    r_fetch_
     bx lr
 
 @ (  -- n)
