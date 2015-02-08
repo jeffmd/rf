@@ -53,7 +53,7 @@ Forthword_ EMIT, 0, "emit"
 @ cause subsequent output appear at the beginning of the next line
 Forthword_ CR, 0, "cr"
   push {lr}
-  doliteral_ 13
+  dolit8_ 13
   bl EMIT
   ten_
   bl EMIT
@@ -87,7 +87,7 @@ Forthword_ TYPE, 0, "type"
    push {lr}
    niptoa_           @ Address of string
    dupzerosense_
-   b TYPE2
+   b.n TYPE2
 
 TYPE1:
    acfetch_
@@ -96,7 +96,7 @@ TYPE1:
    oneminus_
 
 TYPE2:
-   bne TYPE1
+   bne.n TYPE1
 
    drop_
    pop {pc}
@@ -122,10 +122,10 @@ Forthword_ MCMP, 0, "mcmp"
     over_                    @ ( r-addr r-len f-addr r-len)
     @getb_                    @ ( r-addr r-len f-addr r-len f-len )
     @ check if strings are same length
-    eor tos, breg            @ ( r-addr r-len f-addr flag )
+    eors tos, breg            @ ( r-addr r-len f-addr flag )
     @ if
     zerosense_               @ ( r-addr r-len f-addr )
-    beq MCMP_SAMELEN
+    beq.n MCMP_SAMELEN
 
     @ strings are not the same length
     dnip_
@@ -144,7 +144,7 @@ MCMP_LOOP:
     copytob_                 @ ( r-addr len ) B: len
     @ while
     zerosense_               @ ( r-addr )
-    beq MCMP_DONE
+    beq.n MCMP_DONE
 
     dup_                     @ ( r-addr r-addr )
     hfetch_                  @ ( r-addr r-cc )
@@ -155,21 +155,21 @@ MCMP_LOOP:
     @ high byte in the ram cell
     dup_                     @ ( r-addr r-cc f-cc f-cc )
     pushtos_
-    mov tos, #80             @ ( r-addr r-cc f-cc f-cc 0x100 )
-    add tos, tos
+    movs tos, #80             @ ( r-addr r-cc f-cc f-cc 0x100 )
+    adds tos, tos
     bl ULESS                 @ ( r-addr r-cc f-cc flag)
     @ if
     zerosense_
-    beq MCMP_LASTCELL
+    beq.n MCMP_LASTCELL
     swap_                    @ ( r-addr f-cc r-cc)
-    mov r0, #255
-    and tos, r0              @ ( r-addr f-cc 0:r-cc)
+    movs r0, #255
+    ands tos, r0              @ ( r-addr f-cc 0:r-cc)
     @ then
 MCMP_LASTCELL:
     xor_                     @ ( r-addr flag)
     @ if
     zerosense_               @ ( r-addr )
-    beq MCMP_NEXTLOOP
+    beq.n MCMP_NEXTLOOP
 
     @ strings don't match
     zerotos_                 @ ( 0 )
@@ -182,7 +182,7 @@ MCMP_NEXTLOOP:
     oneminus_                @ ( r-addr+2 len-1 )
 
     @ repeat
-    b MCMP_LOOP
+    b.n MCMP_LOOP
 
 MCMP_DONE:
     @ strings are the same
@@ -208,14 +208,14 @@ Forthword_ CSKIP, 0, "cskip"
     dup_                 @ ( n1 n1 )
 PFA_CSKIP1:
     dupzerosense_        @ ( n1 n')
-    beq PFA_CSKIP2
+    beq.n PFA_CSKIP2
     acfetch_             @ ( n1 n' c' )
     acplus_
     cmp tos, breg        @ ( n1 n' c' )
     drop_                @ ( n1 n' )
-    bne PFA_CSKIP2
+    bne.n PFA_CSKIP2
     oneminus_
-    b PFA_CSKIP1
+    b.n PFA_CSKIP1
 
 PFA_CSKIP2:
     minus_               @ ( n1-n' )
@@ -231,14 +231,14 @@ Forthword_ CSCAN, 0, "cscan"
     dup_                 @ ( addr1 n1 n1 )
 PFA_CSCAN1:
     dupzerosense_        @ ( addr1 n1 n')
-    beq PFA_CSCAN2
+    beq.n PFA_CSCAN2
     acfetch_             @ ( addr1 n1 n' c' )
     acplus_
     cmp tos, breg        @ ( addr1 n1 n' c' )
     drop_                @ ( addr1 n1 n' )
-    beq PFA_CSCAN2
+    beq.n PFA_CSCAN2
     oneminus_
-    b PFA_CSCAN1
+    b.n PFA_CSCAN1
 
 PFA_CSCAN2:
     minus_               @ ( addr1 n1-n' )
@@ -298,17 +298,18 @@ Forthword_ PNAME, 0, "pname"
 Forthword_ FINDNFA, 0, "findnfa"
     push {lr}
     dupzerosense_
-    bne FINDNFA_
+    bne.n FINDNFA_
       @ terminating, wid is empty
       dnip_
       pop {pc}
 FINDNFA_:
     fetch_                      @ ( c-addr len nfa )
+
     @ <begin>
 FINDNFA_BEGIN:
     @ <while>
     dupzerosense_               @ ( c-addr len nfa )
-    bne FINDNFA_CHECK
+    bne.n FINDNFA_CHECK
       @ terminating, 0 found
       dnip_                     @ ( 0 )
       pop {pc}
@@ -318,12 +319,12 @@ FINDNFA_CHECK:
     bl TWOOVER                  @ ( c-addr len c-addr len )
     r_fetch_                    @ ( c-addr len c-addr len nfa )
     bl STRINGLEN                @ ( c-addr len c-addr len f-addr len )
-    mov r0, #31
-    and tos, r0                 @ ( c-addr len c-addr len f-addr 0:len )
+    movs r0, #31
+    ands tos, r0                 @ ( c-addr len c-addr len f-addr 0:len )
     bl MCMP                     @ ( c-addr len flag )
     @ <if>
     zerosense_
-    beq FINDNFA_NEXT
+    beq.n FINDNFA_NEXT
       @ we found the string
       ddrop_                    @ ( )
       r_from_                   @ ( nfa )
@@ -335,7 +336,7 @@ FINDNFA_NEXT:
       bl NFA2LFA
       fetch_
       @ <repeat>
-      b FINDNFA_BEGIN
+      b.n FINDNFA_BEGIN
 
 
 @ ( addr len --  0 | nfa )
@@ -344,7 +345,7 @@ Forthword_ FINDROOT, 0, "froot"
     push {lr}
     @ put root wid on stack
     dolit32_ VE_COLD
-    b FINDNFA_BEGIN
+    b.n FINDNFA_BEGIN
 
 @ ( addr len idx -- 0 | nfa )
 FINDWI:
@@ -373,7 +374,7 @@ Forthword_ FINDW, 0, "findw"
     hfetch_             @ ( addr len idx )
 FINDW_BEGIN:
     dupzerosense_
-    bmi FINDLAST        @ ( addr len idx )
+    bmi.n FINDLAST        @ ( addr len idx )
       to_r_             @ ( addr len ) ( R: idx )
       bl TWOOVER        @ ( addr len addr len ) ( R: idx )
       @ get next wordlist in array
@@ -384,7 +385,7 @@ FINDW_BEGIN:
       swap_             @ ( addr len idx nfa )
       dupzerosense_
       @ end loop if word found
-      beq FINDW_NEXT
+      beq.n FINDW_NEXT
         dnip_           @ ( addr nfa )
         nip_            @ ( nfa )
         pop {pc}
@@ -393,7 +394,7 @@ FINDW_NEXT:
       drop_             @ ( addr len idx )
       @ decrement index
       oneminus_         @ ( addr len idx-1 )
-      b FINDW_BEGIN
+      b.n FINDW_BEGIN
 
 
 @ ( -- addr len )
@@ -431,11 +432,11 @@ Forthword_ REC_NUM, 0, "rec#"
     @ try converting to a number
     bl NUMBER              @ ( [n] f )
     zerosense_
-    beq REC_NONUMBER
+    beq.n REC_NONUMBER
 
       bl STATEFETCH        @ ( n state )
       zerosense_
-      beq REC_NUMBER_OK
+      beq.n REC_NUMBER_OK
         bl LIT
 
 REC_NUMBER_OK:
@@ -453,7 +454,7 @@ Forthword_ REC_WORD, 0, "recw"
     push {lr}
     bl FINDW
     dupzerosense_
-    bne REC_WORD_FOUND
+    bne.n REC_WORD_FOUND
       pop {pc}
 
 REC_WORD_FOUND:
@@ -465,7 +466,7 @@ REC_WORD_FOUND:
 @CHECK_COMPILE_ONLY:
 @    bl STATEFETCH
 @    zerosense_
-@    bne CHECK_IMMEDIATE
+@    bne.n CHECK_IMMEDIATE
         @ word can only be used in compile state
         @doliteral_ 0xBC
         @jmp THROW
@@ -475,17 +476,17 @@ REC_WORD_FOUND:
   @ either compile or EXEC the XT
     @ check if word is immediate: bit 15 is clear if immediate
   @sbrs tosh, IMMEDIATE_EN_FB @ skip next instruction if bit 7 is set: not immediate word
-  mov r0, #IMMEDIATE_EN
-  lsl r0, #8
+  movs r0, #IMMEDIATE_EN
+  lsls r0, #8
   tst tos, r0
   @ flag is 0: always EXEC
-  beq REC_WORD_EXECUTE
+  beq.n REC_WORD_EXECUTE
 
 REC_WORD_CHECKSTATE:
         @ check state
       bl STATEFETCH
       zerosense_
-      beq REC_WORD_EXECUTE
+      beq.n REC_WORD_EXECUTE
         @ in compile mode so compile xt
       bl COMPILEXT
       true_
@@ -518,7 +519,7 @@ Forthword_ RECX, 0, "recx"
     geta_                 @ ( addr len flag ) A:
     @ <if>
     zerosense_            @ ( addr len )
-    bne RECX_DONE
+    bne.n RECX_DONE
     bl TWOOVER            @ ( addr len addr len  )
     to_r_                 @ ( addr len addr ) (R: len )
     to_r_                 @ ( addr len ) (R: len addr )
@@ -529,7 +530,7 @@ Forthword_ RECX, 0, "recx"
     r_from_               @ ( addr len ) (R: n )
     geta_                 @ ( addr len flag ) A:
     zerosense_            @ ( addr len )
-    bne RECX_DONE
+    bne.n RECX_DONE
     @ not recognized so throw
     bl CR
     @ print unrecognized word
@@ -555,13 +556,13 @@ INTERPRET_DO:
 
     @ ?while
     dupzerosense_       @ ( -- addr len )
-    beq INTERPRET_END
+    beq.n INTERPRET_END
 
     bl RECX             @ ( )
     bl QSTACK           @ ( )
 
     @ repeat
-    b INTERPRET_DO
+    b.n INTERPRET_DO
 
 INTERPRET_END:
     ddrop_
@@ -615,7 +616,7 @@ Forthword_ QP_RD, 0, "?prd"
     @ output ready prompt if in interpret mode
     @ <-if>
     zerosense_
-    bne QP_RD_exit
+    bne.n QP_RD_exit
       bl PROMPTRDY
       pop {pc}
 QP_RD_exit:
@@ -643,7 +644,7 @@ Forthword_ DOREFILL, 0, "(refill)"
   bl G_IN                  @ ( >inaddr )
   hfetch_                  @ ( >in )
   zerosense_               @ ( )
-  beq DOREFILL_do
+  beq.n DOREFILL_do
     bl INRESET
     pop {pc}
 
@@ -652,7 +653,7 @@ DOREFILL_do:
   bl REFILL                @ ( f )
   @ <if>
   zerosense_
-  beq DOREFILL_end
+  beq.n DOREFILL_end
 
     @ there is something in the input buffer, try interpreting it
     bl DOINTERPRET
@@ -696,7 +697,7 @@ DOTASKS1:
     hfetch_
     bittest_ TERMINATE_F
     @ <again>
-    beq DOTASKS1
+    beq.n DOTASKS1
     pop {pc}
 
 @ ( -- )
@@ -734,7 +735,7 @@ Forthword_ DOINTERPRET, 0, "(interp)"
   bl QDUP
   @ <if>
   zerosense_
-  beq DOINTERPRET_ok
+  beq.n DOINTERPRET_ok
     bl PROMPTERROR
     bl QUIT
 
@@ -756,28 +757,28 @@ Forthword_ ACCEPT, 0, "accept"
     @ <begin>
     bl KEY        @ ( k )
     cmp tos, #0
-    bgt ACCEPT_haskey
-    add tos, #1
+    bgt.n ACCEPT_haskey
+    adds tos, #1
     pop {pc}
 
 ACCEPT_haskey:
     @ check for EOL
     cmp tos, #10
     @ <if>
-    bne ACCEPT_checkreturn
+    bne.n ACCEPT_checkreturn
     pop {pc}
 
 ACCEPT_checkreturn:
     cmp tos, #13     @ ( k k 13 )
     @ <if>
-    bne ACCEPT_checkdelete
+    bne.n ACCEPT_checkdelete
     pop {pc}
 
 ACCEPT_checkdelete:
     @ check delete
     cmp tos, #127      @ ( k k 8 )
     @ <if>
-    bne ACCEPT_checkcontrol
+    bne.n ACCEPT_checkcontrol
     @ delete previous character
     @ check beginning of line
     @ if cursor is 0 then at begining of input
@@ -785,15 +786,15 @@ ACCEPT_checkdelete:
     hfetch_          @ ( k #tib )
     @ <if>
     zerosense_            @ ( k )
-    bne ACCEPT_dodelete
+    bne.n ACCEPT_dodelete
     @ at the beginning of the line, ignore this character
     drop_
     bl ZERO
     pop {pc}
 
 ACCEPT_dodelete:
-    mov r0, #8
-    and tos, r0
+    movs r0, #8
+    ands tos, r0
     dup_              @ ( k k )
     bl EMIT           @ ( k )
     bl_               @ ( k bl )
@@ -803,13 +804,13 @@ ACCEPT_dodelete:
     bl TRUE           @ ( -1 )
     bl SHARPTIB       @ ( -1 #tibaddr )
     bl PLUSHSTORE     @ ( )
-    b ACCEPT_checkmaxinput
+    b.n ACCEPT_checkmaxinput
 
 
 ACCEPT_checkcontrol:
     @ check for remaining control characters, replace them with blank
     cmp tos, #32         @ ( k k bl )
-    bge ACCEPT_echo
+    bge.n ACCEPT_echo
     drop_
     @ replace control key with a space
     bl_
@@ -828,13 +829,13 @@ ACCEPT_echo:
 
 ACCEPT_checkmaxinput:
     @ check if max number of char input
-    doliteral_ TIBSIZE   @ ( tibsize )
+    dolit8_ TIBSIZE   @ ( tibsize )
     bl SHARPTIB          @ ( tibsize #tibaddr )
     bl HFETCH            @ ( tibsize #tib)
     minus_               @ ( tibsize-#tib)
     @ <if>
     zerosense_           @ ( )
-    beq ACCEPT_atmaxinput
+    beq.n ACCEPT_atmaxinput
     bl ZERO
     pop {pc}
 
@@ -849,7 +850,7 @@ Forthword_ REFILLTIB, 0, "reftib"
     push {lr}
     bl ACCEPT                  @ ( f )
     dupzerosense_              @ ( f )
-    beq REFILLTIB_exit
+    beq.n REFILLTIB_exit
     bl CR
 
 REFILLTIB_exit:

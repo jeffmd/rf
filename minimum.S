@@ -30,20 +30,20 @@ Forthword_ BASEFETCH, 0, "base@"
 @ set base for number conversion to 2
 Forthword_ BIN, 0, "bin"
     two_
-    b BASESTORE
+    b.n BASESTORE
 
 
 @ ( -- )
 @ set base for numeric conversion to 10
 Forthword_ DECIMAL, 0, "decimal"
     ten_
-    b BASESTORE
+    b.n BASESTORE
 
 @ ( -- )
 @ set base for number conversion to 16
 Forthword_ HEX, 0, "hex"
-    doliteral_ 16
-    b BASESTORE
+    dolit8_ 16
+    b.n BASESTORE
 
 
 @ ( n1 n2 -- n1|n2 )
@@ -51,7 +51,7 @@ Forthword_ HEX, 0, "hex"
 Forthword_ MIN, 0, "min"
   ldm dsp!, {r0}
   cmp r0, tos
-  bge 1f
+  bge.n 1f
   movs tos, r0
 1:
   bx lr
@@ -61,7 +61,7 @@ Forthword_ MIN, 0, "min"
 Forthword_ MAX, 0, "max"
   ldm dsp!, {r0}
   cmp r0, tos
-  blt 1f
+  blt.n 1f
   mov tos, r0
 1:
   bx lr
@@ -70,15 +70,15 @@ Forthword_ MAX, 0, "max"
 @ ( val -- char )
 @ convert low byte of val to a printable hex character
 Forthword_ NHEX, 0, "#h"
-    mov r0, #0x0F
-    and tos, r0
+    movs r0, #0x0F
+    ands tos, r0
     cmp tos, #10
-    blo NHEX_NEXT
-    add tos, #7
+    blo.n NHEX_NEXT
+    adds tos, #7
 
     @ <then>
 NHEX_NEXT:
-    add tos, #48
+    adds tos, #48
     bx lr
 
 
@@ -94,18 +94,18 @@ Forthword_ PNIB, 0, ".h"
 @ simple 32 bit hex print
 Forthword_ PHEX, 0, ".$"
     push {lr}
-    doliteral_ 28
+    dolit8_ 28
 PHEX_BEGIN:
     bl TWOOVER
     rshift_
     bl PNIB
-    sub tos, #4
-    bne PHEX_BEGIN
+    subs tos, #4
+    bne.n PHEX_BEGIN
 
     drop_
     dup_
     bl PNIB
-    mov tos, #32
+    movs tos, #32
     bl EMIT
     pop {pc}
 
@@ -113,7 +113,7 @@ PHEX_BEGIN:
 @ get the absolute value
 Forthword_ ABS, 0, "abs"
   dupzerosense_
-  bpl 1f
+  bpl.n 1f
   neg_
 1:
   bx lr
@@ -121,12 +121,12 @@ Forthword_ ABS, 0, "abs"
 @ ( c -- (number|) flag )
 @ tries to convert a character to a number, set flag accordingly
 Forthword_ DIGITQ, 0, "digit?"
-    sub tos, #0x30
+    subs tos, #0x30
     cmp tos, #10
-    blo DIGITQ0
-    sub tos, #7
+    blo.n DIGITQ0
+    subs tos, #7
     cmp tos, #10
-    bge DIGITQ0
+    bge.n DIGITQ0
 
     zerotos_
     bx lr
@@ -137,7 +137,7 @@ DIGITQ0:
     bl BASEFETCH
     bl UGREATEREQUAL
     zerosense_
-    beq PFA_DIGITQ2
+    beq.n PFA_DIGITQ2
     zerotos_
     pop {pc}
 
@@ -162,12 +162,6 @@ Forthword_ UGREATEREQUAL, 0, "u>="
     pop {pc}
 
 
-@ ( -- addr)
-@ start address of the data stack
-Forthword_ SP0, 0, "sp0"
-  pushtos_
-  ldr tos, addr_dstack
-  bx lr
 
 @ ( -- addr)
 @ start address of return stack
@@ -193,7 +187,7 @@ Forthword_ QSTACK, 0, "?sp"
     bl DEPTH
     zeroless_
     zerosense_
-    beq QSTACKFIN
+    beq.n QSTACKFIN
       @doliteral_ 0xBEF
       one_
       bl THROW
@@ -236,7 +230,7 @@ Forthword_ CATCH, 0, "catch"
 @ throw an exception
 Forthword_ THROW, 0, "throw"
     dupzerosense_
-    bne THROW1
+    bne.n THROW1
     drop_
     bx lr
 
@@ -263,18 +257,18 @@ SETBASE:        @ ( c -- )
     mov r0, tos
     drop_
     cmp r0, #'$
-    bne PFA_SETBASE0
-    b HEX
+    bne.n PFA_SETBASE0
+    b.n HEX
 
 PFA_SETBASE0:
     cmp r0, #'%
-    bne PFA_SETBASE1
-    b BIN
+    bne.n PFA_SETBASE1
+    b.n BIN
 
 PFA_SETBASE1:
     cmp r0, #'&
-    bne PFA_SETBASE2
-    b DECIMAL
+    bne.n PFA_SETBASE2
+    b.n DECIMAL
 
 PFA_SETBASE2:        @ ( error)
     dup_
@@ -291,7 +285,7 @@ PRAEFIX:        @ ( adr1 len1 -- adr2 len2 )
     over_
     cfetch_
     cmp tos, #0x30
-    blo PFA_PRAEFIX0
+    blo.n PFA_PRAEFIX0
     @ no praefix
     drop_
     pop {pc}
@@ -309,7 +303,7 @@ NUMBERSIGN:        @ ( addr len -- )
     over_          @ ( addr len addr )
     cfetch_        @ ( addr len char )
     cmp tos, #'-
-    beq NUMBERSIGN_HASSIGN
+    beq.n NUMBERSIGN_HASSIGN
       zerotos_
       bx lr
 
@@ -327,12 +321,12 @@ Forthword_ TO_NUMBER, 0, ">num"
     push {lr}
 TO_NUMBER_AGAIN:
     dupzerosense_
-    beq TO_NUMBER_END
+    beq.n TO_NUMBER_END
         over_                @ ( u adr len adr)
         cfetch_              @ ( u adr len char)
         bl DIGITQ            @ ( u adr len digit flag)
         zerosense_
-        bne TO_NUMBER_CONV
+        bne.n TO_NUMBER_CONV
             @ character is not a recognized number
             pop {pc}
 
@@ -343,13 +337,13 @@ TO_NUMBER_CONV:
         @bl STAR             @ ( adr len u*base)
         mov r0, tos
         poptos_
-        mul tos, r0
+        muls tos, r0
         getb_                @ ( adr len u' digit)
         plus_                @ ( adr len u')
         bl RROT              @ ( u' adr len )
         one_
         bl SLASHSTRING
-        b TO_NUMBER_AGAIN
+        b.n TO_NUMBER_AGAIN
 
 TO_NUMBER_END:
     pop {pc}
@@ -373,21 +367,21 @@ Forthword_ NUMBER, 0, "num"
   @ check length of the remaining string.
   @ if zero: a single cell number is entered
   zerosense_
-  beq PFA_NUMBER1
+  beq.n PFA_NUMBER1
 
   @ error in string to number conversion
 PFA_NUMBER2:
   nip_                    @ ( addr' )  (R: base flagsign' )
   r_drop_                 @ ( addr' ) (R: base )
   zerotos_                @ ( 0 ) (R: base )
-  b PFA_NUMBER5
+  b.n PFA_NUMBER5
 
 PFA_NUMBER1:
   drop_                   @ ( n )  (R: base flagsign' )
   @ incorporate sign into number
   r_from_                 @ ( n flagsign' ) (R: base )
   zerosense_
-  beq PFA_NUMBER4
+  beq.n PFA_NUMBER4
   neg_
 
 PFA_NUMBER4:
@@ -398,9 +392,21 @@ PFA_NUMBER5:
   bl BASESTORE            @ ( n true )
   pop {pc}
 
+Forthword_ DSWAP, 0, "2swap"
+@ ( 4 3 2 1 -- 2 1 4 3 )
+@ -----------------------------------------------------------------------------
+  ldm dsp!, {r0, r1, r2}
+  subs dsp, #4
+  str r0, [dsp]
+  pushtos_
+  subs dsp, #4
+  str r2, [dsp]
+  movs tos, r1
+  bx lr
+
 @ ( n -- -n )
 @ negate a double word
-Forthword_ DNEGATE, 0, "dneg"
+Forthword_ DNEG, 0, "dneg"
   ldr r0, [dsp]
   movs r1, #0
   mvns r0, r0
@@ -448,13 +454,13 @@ Forthword_ MSTAR, 0, "m*"
 
     ldr r0, [dsp]
     movs r1, r0, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
-    beq 1f
+    beq.n 1f
     @ - * ?
       rsbs r0, r0, #0
       str r0, [dsp]
 
       movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
-      beq 2f @ - * +
+      beq.n 2f @ - * +
 
       @ - * -
       rsbs tos, tos, #0
@@ -469,7 +475,126 @@ Forthword_ MSTAR, 0, "m*"
     @ - * + or + * -
 2:  push {lr}
     bl UMSTAR
-    bl DNEGATE
+    bl DNEG
+    pop {pc}
+
+@------------------------------------------------------------------------------
+@ Tool for ud/mod
+@------------------------------------------------------------------------------
+
+  .macro division_step
+    @ Shift the long chain of four registers.
+    lsls r0, #1
+    adcs r1, r1
+    adcs r2, r2
+    adcs r3, r3
+
+    @ Compare Divisor with top two registers
+    cmp r3, r5 @ Check high part first
+    bhi.n 1f
+    blo.n 2f
+
+    cmp r2, r4 @ High part is identical. Low part decides.
+    blo.n 2f
+
+    @ Subtract Divisor from two top registers
+1:  subs r2, r4 @ Subtract low part
+    sbcs r3, r5 @ Subtract high part with carry
+
+    @ Insert a bit into Result which is inside LSB of the long register.
+    adds r0, #1
+2:
+  .endm
+
+Forthword_ UD_SLASHMOD, 0, "ud/mod"
+         @ Unsigned divide 64/64 = 64 remainder 64
+         @ ( ud1 ud2 -- ud ud)
+         @ ( 1L 1H 2L tos: 2H -- Rem-L Rem-H Quot-L tos: Quot-H )
+   push {r4, r5}
+
+   @ ( DividendL DividendH DivisorL DivisorH -- RemainderL RemainderH ResultL ResultH )
+   @   8         4         0        tos      -- 8          4          0       tos
+
+
+   @ Shift-High Shift-Low Dividend-High Dividend-Low
+   @         r3        r2            r1           r0
+
+   movs r3, #0
+   movs r2, #0
+   ldr  r1, [dsp, #4]
+   ldr  r0, [dsp, #8]
+
+   @ Divisor-High Divisor-Low
+   @          r5           r4
+
+ud_slash_mod_internal:
+   movs r5, tos
+   ldr  r4, [dsp, #0]
+
+   @ For this long division, we need 64 individual division steps.
+   movs tos, #64
+
+3: division_step
+   subs tos, #1
+   bne.n 3b
+
+   @ Now place all values to their destination.
+   movs tos, r1       @ Result-High
+   str  r0, [dsp, #0] @ Result-Low
+   str  r3, [dsp, #4] @ Remainder-High
+   str  r2, [dsp, #8] @ Remainder-Low
+
+   pop {r4, r5}
+   bx lr
+
+Forthword_ D_SLASHMOD, 0, "d/mod"
+@ Signed symmetric divide 64/64 = 64 remainder 64
+@ ( d1 d2 -- d d )
+@ ( 1L 1H 2L tos: 2H -- Rem-L Rem-H Quot-L tos: Quot-H )
+  @ Check Divisor
+  push {lr}
+  movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+  beq.n 2f
+    @ ? / -
+    bl DNEG
+    bl DSWAP
+    movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+    beq.n 1f
+    @ - / -
+    bl DNEG
+    bl DSWAP
+    bl UD_SLASHMOD
+
+    bl DSWAP
+    bl DNEG @ Negative remainder
+    bl DSWAP
+    pop {pc}
+
+1:  @ + / -
+    bl DSWAP
+    bl UD_SLASHMOD
+    bl DNEG  @ Negative result
+    pop {pc}
+
+2:  @ ? / +
+    bl DSWAP
+    movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+    beq.n 3f
+    @ - / +
+    bl DNEG
+    bl DSWAP
+
+    bl UD_SLASHMOD
+
+    bl DNEG @ Negative result
+    bl DSWAP
+    bl DNEG @ Negative remainder
+    bl DSWAP
+    pop {pc}
+
+3:  @ + / +
+    bl DSWAP
+    bl UD_SLASHMOD
     pop {pc}
 
 
@@ -482,7 +607,7 @@ Forthword_ MSTAR, 0, "m*"
 Forthword_ DODEFER, 0, "(def)"
   pushtos_
   mov tos, lr
-  sub tos, #1 @ doing memory access, do not want thumb bit
+  subs tos, #1 @ doing memory access, do not want thumb bit
   ldr tos, [tos]
   bl EXEC
   pop {pc}

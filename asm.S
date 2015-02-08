@@ -1,27 +1,21 @@
 @ asm.S - words that generate inline assembly ie arm thumb instructions
 
-.balign 4
-.balign 2
-@ ( -- )
-@ compile assembler push {lr}
-Forthword_ PUSHLR_C, 0, "pushlr,"
-    push {lr}
-    pushtos_
-    ldrh tos, POPPC_C
-    bl COMMA
-    pop {pc}
-
-.balign 4
-.balign 2
-
 @ ( -- )
 @ compile assembler pop {pc}
 Forthword_ POPPC_C, 0, "poppc,"
     push {lr}
-    pushtos_
-    ldrh tos, RET_C_POP
+    dolit16_ 0xbd00
     bl COMMA
 RET_C_POP:
+    pop {pc}
+
+
+@ ( -- )
+@ compile assembler push {lr}
+Forthword_ PUSHLR_C, 0, "pushlr,"
+    push {lr}
+    dolit16_ 0xb500
+    bl COMMA
     pop {pc}
 
 
@@ -49,13 +43,13 @@ Forthword_ RELDST, 0, "reldst"
 @ reldist: relative distance as 2's compliment
 Forthword_ BRANCH, 0, "b."
     @ 1110 0XXX XXXX XXXX
-    mov r0, #7
-    lsl r0, #8
-    add r0, #0xFF
-    and tos, r0
-    mov r0, #0x07
-    lsl r0, #13
-    orr tos, r0
+    movs r0, #7
+    lsls r0, #8
+    adds r0, #0xFF
+    ands tos, r0
+    movs r0, #0x07
+    lsls r0, #13
+    orrs tos, r0
     bx lr
 
 @ compile assembler instruction b - unconditional branch
@@ -83,13 +77,13 @@ Forthword_ RJMPC, 0, "rjmpc"
 @ ( xt flags -- )
 Forthword_ COMPILEXT, 0, "cxt"
     push {lr}
-    mov r0, #INLINE_OPT
-    lsl r0, #8
+    movs r0, #INLINE_OPT
+    lsls r0, #8
     tst tos, r0
     @ if bit 0 of high byte flag is 0 then word is to be inlinned
     drop_           @ ( xt )
-    beq COMPILEXT_INLINE
-    b DO_COMPILEXT
+    beq.n COMPILEXT_INLINE
+    b.n DO_COMPILEXT
 
 COMPILEXT_INLINE:
       bl INLINE
@@ -116,19 +110,19 @@ Forthword_ BLC, 0, "bl,"
     @ and creates two THUMB instructions
     dup_                    @ ( dist dist )
     @ get top 11 bits
-    asr tos, #11           @ ( dist xxxdist )
+    asrs tos, #11           @ ( dist xxxdist )
     @ make high address bl instruction mask
-    mov r0, #0xF0
-    lsl r0, #8
-    orr tos, r0             @ ( dist 0xFxdist )
-    mov r0, #0x8
-    lsl r0,#8
-    bic tos, r0             @ ( dist 0xF0dist )
+    movs r0, #0xF0
+    lsls r0, #8
+    orrs tos, r0             @ ( dist 0xFxdist )
+    movs r0, #0x8
+    lsls r0,#8
+    bics tos, r0             @ ( dist 0xF0dist )
     bl COMMA                @ ( dist )
     @ make low address bl instruction mask
-    mov r0, #0xF8
-    lsl r0, #8
-    orr tos, r0             @ ( 0xF8dist )
+    movs r0, #0xF8
+    lsls r0, #8
+    orrs tos, r0             @ ( 0xF8dist )
     bl COMMA
     pop {pc}
 
@@ -138,9 +132,9 @@ Forthword_ BRNZ1_COMPILE, 0, "bne1,"
     push {lr}
     pushtos_
     @compile bne #00 : 0xD100
-    mov tos, #0xD1
-    lsl tos, #8
-    add tos, #0x00
+    movs tos, #0xD1
+    lsls tos, #8
+    adds tos, #0x00
     bl COMMA
     pop {pc}
 
@@ -150,9 +144,9 @@ Forthword_ BRNZ1_COMPILE, 0, "bne1,"
 Forthword_ ICFETCH, 0, "ic@"
     pushtos_
     mov r0, lr
-    sub r0, #1     @ clear bit 0 which is thumb indicator
+    subs r0, #1     @ clear bit 0 which is thumb indicator
     ldr tos, [r0]
-    add r0, #5     @ return after constant and default to thumb mode
+    adds r0, #5     @ return after constant and default to thumb mode
     bx r0
 
 @ compile top of stack as inlinned immediate 32 bit constant

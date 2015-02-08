@@ -98,9 +98,15 @@ Forthword_ WARM, 0, "warm"
     ascii_ "rf 0.1"
     bl TYPE
     bl CR
-
     bl QUIT
     pop {pc}
+
+@ ( -- addr)
+@ start address of the data stack
+Forthword_ SP0, 0, "sp0"
+  pushtos_
+  ldr tos, addr_dstack
+  bx lr
 
 .global main
 @ ( -- )
@@ -116,8 +122,8 @@ main:
     ldr sysvar, addr_sysvar
 
     ldr r0, addr_dpstart
-    mov tos, #(ram_dp-sysvar_base)
-    add tos, sysvar
+    movs tos, #(ram_dp-sysvar_base)
+    adds tos, sysvar
     str r0, [tos]
 
     bl WIPE

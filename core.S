@@ -3,16 +3,16 @@
 @ ( xt -- )
 @ execute XT
 Forthword_ EXEC, 0, "exec"
-    mov r0, #1
+    movs r0, #1
     @ make sure its a thumb address mode
-    orr r0, tos
+    orrs r0, tos
     poptos_
     bx r0
 
 @ ( xt -- )
 @ Don't do anything, just chew up a few cycles
 Forthword_ NOOP, INLINE_OPT, "noop"
-    and tos, tos
+    ands tos, tos
     bx lr
 
 @@@@@@@@@@@@@ Parameter Stack  Manipulation @@@@@@@@@@@@@@
@@ -27,7 +27,7 @@ Forthword_ DUP, INLINE_OPT, "dup"
 @ duplicate TOS if non-zero
 Forthword_ QDUP, 0, "?dup"
     cmp tos, #0
-    beq PFA_QDUP1
+    beq.n PFA_QDUP1
     pushtos_
 PFA_QDUP1:
     bx lr
@@ -48,7 +48,7 @@ Forthword_ OVER, INLINE_OPT, "over"
 @ Place a copy of x1 and x2 on top of the stack
 Forthword_ TWOOVER, 0, "2over"
     over_
-    b OVER
+    b.n OVER
 
 @ ( n -- )
 @ drop TOS
@@ -79,7 +79,7 @@ Forthword_ DNIP, INLINE_OPT, "2nip"
 @ tuck TOS before NOS, same as SWAP OVER
 Forthword_ TUCK, 0, "tuck"
     ldm dsp!, {r0}
-    sub dsp, #8
+    subs dsp, #8
     str tos, [dsp, #4]
     str r0, [dsp]
     bx lr
@@ -96,7 +96,7 @@ Forthword_ FLIP, 0, "flip"
 @ rotate the three top level cells
 Forthword_ ROT, 0, "rot"
     ldm dsp!, {r0, r1}
-    sub dsp, #8
+    subs dsp, #8
     str r0, [dsp, #4]
     str tos, [dsp]
     mov tos, r1
@@ -107,7 +107,7 @@ Forthword_ ROT, 0, "rot"
 @ equivalent to rotate twice but faster
 Forthword_ RROT, 0, "-rot"
     ldm dsp!, {r0, r1}
-    sub dsp, #8
+    subs dsp, #8
     str tos, [dsp, #4]
     str r1, [dsp]
     mov tos, r0
@@ -179,7 +179,7 @@ Forthword_ RP_STORE, INLINE_OPT, "rp!"
 Forthword_ POPRET, 0, "popret"
     pushtos_
     mov tos, lr
-    sub tos, #1
+    subs tos, #1
     pop {pc}
 
 @ ( -- n) (R: n -- n+1 )
@@ -189,9 +189,9 @@ Forthword_ POPRET, 0, "popret"
 Forthword_ RTORPLUS, 0, "r>r+"
     pushtos_
     pop {tos}
-    add tos, #0x04
+    adds tos, #0x04
     push {tos}
-    sub tos, #0x05
+    subs tos, #0x05
     bx lr
 
 
@@ -295,9 +295,9 @@ Forthword_ NOTEQUAL, INLINE_OPT, "<>"
 @ flag is true if TOS and NOS are equal
 Forthword_ EQUAL, 0, "="
   ldm dsp!, {r0}
-  sub tos, r0
-  sub tos, #1
-  sbc tos, tos
+  subs tos, r0
+  subs tos, #1
+  sbcs tos, tos
   bx lr
 
 @ ( n1 n2 -- flag)
@@ -305,12 +305,12 @@ Forthword_ EQUAL, 0, "="
 Forthword_ LESS, 0, "<"
   ldm dsp!, {r0}
   cmp r0, tos
-  bge 1f
-  mov tos, #0
-  mvn tos, tos
+  bge.n 1f
+  movs tos, #0
+  mvns tos, tos
   bx lr
 1:
-  mov tos, #0
+  movs tos, #0
   bx lr
 
 @ ( n1 n2 -- flag )
@@ -319,19 +319,19 @@ Forthword_ GREATER, 0, ">"
   ldm dsp!, {r0}     @ Get x1 into a register.
   cmp r0, tos        @ Is x2 greater?
 GREATER_CHK:
-  ble 1f
-  mov tos, #0
-  mvn tos, tos
+  ble.n 1f
+  movs tos, #0
+  mvns tos, tos
   bx lr
 1:
-  mov tos, #0
+  movs tos, #0
   bx lr
 
 @ ( n1 -- flag )
 @ flag is true if n1 is greater than 0
 Forthword_ ZEROGREATER, 0, "0>"
-  sub tos, #0
-  b GREATER_CHK
+  subs tos, #0
+  b.n GREATER_CHK
 
 @ ( n1 -- flag )
 @ flag is true if n1 is 0
@@ -343,17 +343,17 @@ Forthword_ ZEROEQUAL, INLINE_OPT, "0="
 @ flag is true if u1 > u2 (unsigned)
 Forthword_ UGREATER, 0, "u>"
   ldm dsp!, {r0}
-  sub tos, r0
-  sbc tos, tos
+  subs tos, r0
+  sbcs tos, tos
   bx lr
 
 @ ( u1 u2 -- flag)
 @ flag is true if u1 < u2 (unsigned)
 Forthword_ ULESS, 0, "u<"
   ldm dsp!, {r0}
-  sub tos, r0, tos
+  subs tos, r0, tos
 @ TOS = a-b  -- carry set if a is less than b
-  sbc tos, tos
+  sbcs tos, tos
   bx lr
 
 @ ( n1 -- flag)
@@ -416,9 +416,9 @@ Forthword_ TEN, INLINE_OPT, "10"
 
 forthword_ WALIGN, 0, "w_"
     oneplus_
-    mov r0, #2
-    neg r0, r0
-    and tos, r0
+    movs r0, #2
+    rsbs r0, r0, #0
+    ands tos, r0
     bx lr
 
 
@@ -439,9 +439,9 @@ forthword_ RSHIFT, INLINE_OPT, ">>"
 @ round number up to even value
 Forthword_ HALIGN, 0, "h_"
   oneplus_
-  mov r0, #1
-  mvn r0, r0
-  and tos, r0
+  movs r0, #1
+  mvns r0, r0
+  ands tos, r0
   bx lr
 
 
@@ -463,7 +463,7 @@ STORE_it:
 @ ( a-addr -- )
 @ store 0 (32 bits) to RAM address
 Forthword_ ZEROSTORE, 0, "0!"
-  mov r0, #0
+  movs r0, #0
   str r0, [tos]
   poptos_
   bx lr
@@ -475,7 +475,7 @@ Forthword_ PLUSSTORE, 0, "+!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
 PLUSSTORE_do:
   ldr  r2, [tos]     @ Load the current cell value
-  add r2, r0         @ Do the add
+  adds r2, r0         @ Do the add
   str  r2, [tos]     @ Store it back
   movs tos, r1
   bx lr
@@ -484,8 +484,8 @@ PLUSSTORE_do:
 @ add 1 to content of cell RAM address a-addr
 Forthword_ ONEPLUSSTORE, 0, "1+!"
   ldm dsp!, {r1}
-  mov r0, #1
-  b PLUSSTORE_do
+  movs r0, #1
+  b.n PLUSSTORE_do
 
 @ ( a-addr -- n16 )
 @ read half cell (16 bits) from RAM address
@@ -504,7 +504,7 @@ Forthword_ HSTORE, 0, "h!"
 @ ( a-addr -- )
 @ store 0 (16 bits) to RAM address
 Forthword_ ZEROHSTORE, 0, "0h!"
-  mov r0, #0
+  movs r0, #0
   strh r0, [tos]
   poptos_
   bx lr
@@ -515,7 +515,7 @@ Forthword_ PLUSHSTORE, 0, "+h!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
 PLUSHSTORE_do:
   ldrh r2, [tos]     @ Load the current cell value
-  add r2, r0         @ Do the add
+  adds r2, r0         @ Do the add
   strh r2, [tos]     @ Store it back
   movs tos, r1
   bx lr
@@ -524,8 +524,8 @@ PLUSHSTORE_do:
 @ add 1 to content of half cell RAM address a-addr
 Forthword_ ONEPLUSHSTORE, 0, "1+h!"
   ldm dsp!, {r1}
-  mov r0, #1
-  b PLUSHSTORE_do
+  movs r0, #1
+  b.n PLUSHSTORE_do
 
 @ ( a-addr -- n8 )
 @ read byte (8 bits) from RAM address
@@ -544,7 +544,7 @@ Forthword_ CSTORE, 0, "c!"
 @ ( a-addr -- )
 @ store 0 (16 bits) to RAM address
 Forthword_ ZEROCSTORE, 0, "0c!"
-  mov r0, #0
+  movs r0, #0
   strb r0, [tos]
   poptos_
   bx lr
@@ -555,7 +555,7 @@ Forthword_ PLUSCSTORE, 0, "+c!"
   ldm dsp!, {r0, r1} @ X is the new TOS after the store completes.
 PLUSCSTORE_do:
   ldrb r2, [tos]     @ Load the current cell value
-  add r2, r0         @ Do the add
+  adds r2, r0         @ Do the add
   strb r2, [tos]     @ Store it back
   movs tos, r1
   bx lr
@@ -564,8 +564,8 @@ PLUSCSTORE_do:
 @ add 1 to content of byte cell RAM address a-addr
 Forthword_ ONEPLUSCSTORE, 0, "1+c!"
   ldm dsp!, {r1}
-  mov r0, #1
-  b PLUSHSTORE_do
+  movs r0, #1
+  b.n PLUSHSTORE_do
 
 @ ( n1 n2 -- n2 ) A: n1
 @ Remove next on stack and write to A register (Extended VM)
@@ -692,7 +692,7 @@ Forthword_ MCPY, 0, "mcpy"
     niptoa_         @ ( start count ) A: dest
 MCPY_B:
     dupzerosense_   @ ( start count )
-    beq MCPY_END
+    beq.n MCPY_END
     tob_            @ ( start ) B: count
     dup_            @ ( start start )
     hfetch_         @ ( start val )
@@ -702,7 +702,7 @@ MCPY_B:
     twoplus_        @ ( start+2 )
     getb_           @ ( start+2 count )
     twominus_       @ ( start+2 count-2 )
-    b MCPY_B
+    b.n MCPY_B
 
 MCPY_END:
     bl DDROP

@@ -38,8 +38,8 @@ Forthword_ SMUDGE, 0, "smudge"
 @ get address of the dictionary cell
 Forthword_ DPSHARP, 0, "dp#"
     pushtos_
-    mov tos, #(ram_dp-sysvar_base)
-    add tos, sysvar
+    movs tos, #(ram_dp-sysvar_base)
+    adds tos, sysvar
     bx lr
 
 @ ( -- f-addr )
@@ -70,7 +70,7 @@ Forthword_ DPPLUS, 0, "dp+"
 @ increment 32 bit (dictionary pointer) DP by one thumb cell
 Forthword_ DPPLUSONE, 0, "dp+1"
     two_
-    b DPPLUS
+    b.n DPPLUS
 
 @ ( -- )
 @ tail call optimize: change last rcall/call into rjmp/jmp
@@ -80,7 +80,7 @@ Forthword_ TAILOPT, 0, ";opt"
     bl SMUDGE
     bl FETCH
     zerosense_
-    bne TAILOPT_OPT
+    bne.n TAILOPT_OPT
     pop {pc}
 
 TAILOPT_OPT:
@@ -96,7 +96,7 @@ Forthword_ UWID, 0, "uwid"
     fetch_
     bl QDUP
     zerosense_
-    beq UWID_end
+    beq.n UWID_end
        bl CURRENT
        fetch_
        bl STORE
@@ -155,20 +155,20 @@ Forthword_ DOSCOMMA, 0, "(s,)"
 PFA_SCOMMA1:
     @ ?while
     dupzerosense_      @ ( len )
-    beq PFA_SCOMMA2
+    beq.n PFA_SCOMMA2
     ahfetch_           @ ( len c1c2 )
     ahplus_
     bl COMMA           @ ( len )
     oneminus_          @ ( len-1 )
     @ repeat
-    b PFA_SCOMMA1
+    b.n PFA_SCOMMA1
 
 PFA_SCOMMA2:
     drop_              @ (  )
     r_from_            @ ( rem ) (R: )
     @ if
     zerosense_         @ ( )
-    beq PFA_SCOMMA3
+    beq.n PFA_SCOMMA3
       acfetch_         @ ( c1 )
       bl COMMA         @ ( )
 
@@ -185,11 +185,11 @@ Forthword_ HEADER, 0, "header"
     to_r_                 @ ( addr len ) (R: DP wid )
     @ <if>
     dupzerosense_
-    beq HEADER_error
+    beq.n HEADER_error
       dup_                @ ( addr len len )
-      mov r0, #0xFF
-      lsl r0, #8
-      orr tos, r0         @ ( addr len len' )
+      movs r0, #0xFF
+      lsls r0, #8
+      orrs tos, r0         @ ( addr len len' )
       bl DOSCOMMA         @ ( )
       @ make voc link
       r_from_             @ ( wid ) (R: DP )
@@ -222,7 +222,7 @@ FINDI_BEGIN:
       ahplus_
       cmp r0, breg    @ ( start )
     @ until
-    bne FINDI_BEGIN
+    bne.n FINDI_BEGIN
 
     geta_            @ ( start end )
     twominus_        @ ( start end-2 )
@@ -237,9 +237,9 @@ Forthword_ INLINE, 0, "inline"
     @ find the bx lr instruction, want count to bx lr
     @ count will be number of half words to inline
     pushtos_
-    mov tos, #0x47
-    lsl tos, #8
-    add tos, #0x70
+    movs tos, #0x47
+    lsls tos, #8
+    adds tos, #0x70
     bl FINDH                 @ ( start count )
 
     @ dp swap dup dp+ itoi
@@ -256,8 +256,8 @@ Forthword_ NFA2LFA, 0, "nfa>lfa"
     push {lr}                   @ ( nfa )
     bl STRINGLEN                @ ( nfa+2 len+flags )
     @ mask out flags in len, allow up to 31 characters
-    mov r0, #31
-    and tos, r0                 @ ( nfa+2 len )
+    movs r0, #31
+    ands tos, r0                 @ ( nfa+2 len )
     bl WALIGN
     plus_
     pop {pc}
@@ -267,7 +267,7 @@ Forthword_ NFA2LFA, 0, "nfa>lfa"
 Forthword_ NFATOXTF, 0, "nfa>xtf"
     push {lr}
     dupzerosense_               @ ( n )
-    beq NFATOXTF_EXIT
+    beq.n NFATOXTF_EXIT
 
     dup_                        @ ( nfa nfa )
     hfetch_                     @ ( nfa xtflags )
