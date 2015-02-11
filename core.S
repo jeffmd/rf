@@ -204,8 +204,15 @@ Forthword_ PLUS, INLINE_OPT, "+"
 
 @ ( n1|u1 n2|u2 -- n3|u3 )
 @ subtract n2 from n1
-Forthword_ MINUS_, INLINE_OPT, "-"
+Forthword_ MINUS, INLINE_OPT, "-"
   minus_
+  bx lr
+
+@ ( u1|n1 u2|n2 -- u3|n3 )
+@ signed multiply 32b x 32b = 32b
+Forthword_ MULU, INLINE_OPT,  "*"
+  ldm dsp!, {r0}
+  muls tos, r0
   bx lr
 
 @ ( n1|u1 -- n2|u2 )
