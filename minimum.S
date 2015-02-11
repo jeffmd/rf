@@ -597,6 +597,107 @@ Forthword_ D_SLASHMOD, 0, "d/mod"
     bl UD_SLASHMOD
     pop {pc}
 
+@ ( u1 u2 -- rem quot )
+@ unsigned 32b division with modulus result
+Forthword_ U_DIVMOD, 0, "u/mod"
+@ ARM provides no remainder operation, so we fake it by un-dividing and subtracting.
+
+  movs r1, tos
+  ldm dsp!, {tos}
+
+  @ Catch divide by zero..
+  cmp r1, #0
+  bne.n 1f
+    zero_           @ Null
+    bx lr
+1:
+
+  @ Shift left the denominator until it is greater than the numerator
+  movs r2, #1
+  movs r3, #0
+  cmp tos, r1
+  bls.n 3f
+  adds r1, #0    @ Don't shift if denominator would overflow
+  bmi.n 3f
+
+2:lsls r2, #1
+  lsls r1, #1
+  bmi.n 3f
+  cmp tos, r1
+  bhi.n 2b
+
+3:cmp tos, r1
+  bcc.n 4f         @ if (num>denom)
+  subs tos, r1     @ numerator -= denom
+  orrs r3, r2      @ result(r3) |= bitmask(r2)
+
+4:lsrs r1, #1      @ denom(r1) >>= 1
+  lsrs r2, #1      @ bitmask(r2) >>= 1
+  bne.n 3b
+
+  pushtos_
+  movs tos, r3
+  bx lr
+
+@ ( n1 n2 -- rem quot )
+@ signed division with remainder
+Forthword_ DIVMOD, 0, "/mod"
+@ ARM provides no remainder operation, so we fake it by un-dividing and subtracting.
+
+  push {lr}
+  movs r0, tos
+  ldm dsp!, {tos}
+  @     TOS: Dividend
+
+  cmp tos, #0
+  bge.n divmod_plus
+  rsbs tos, tos, #0
+
+divmod_minus:
+    cmp r0, #0
+    bge.n divmod_minus_plus
+
+divmod_minus_minus:
+      rsbs r0, r0, #0
+      pushtos_
+      movs tos, r0
+      bl U_DIVMOD
+      movs r0, tos
+      ldm dsp!, {tos}
+      rsbs tos, tos, #0
+      pushtos_
+      movs tos, r0
+      pop {pc}
+
+divmod_minus_plus:
+      pushtos_
+      mov tos, r0
+      bl U_DIVMOD
+      movs r0, tos
+      ldm dsp!, {tos}
+      rsbs r0, r0, #0
+      rsbs tos, tos, #0
+      pushtos_
+      movs tos, r0
+      pop {pc}
+
+divmod_plus:
+    cmp r0, #0
+    bge.n divmod_plus_plus
+
+divmod_plus_minus:
+      rsbs r0, r0, #0
+      pushtos_
+      movs tos, r0
+      bl U_DIVMOD
+      rsbs tos, tos, #0
+      pop {pc}
+
+divmod_plus_plus:
+      pushtos_
+      mov tos, r0
+      bl U_DIVMOD
+      pop {pc}
 
 @ dodefer - execute a deferred word
 @ defer setup as:
