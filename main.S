@@ -142,3 +142,5 @@ addr_dpstart: .word DPSTART
 /* External calls*/
 .global putchar
 .global getchar
+// Declare the built-in __clear_cache function.
+.global __clear_cache

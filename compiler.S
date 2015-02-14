@@ -88,6 +88,21 @@ TAILOPT_OPT:
     bl POPPC_C          @ ( )
     pop {pc}
 
+
+@ ( -- )
+@ clear data cache to force reload when executed as instructions
+Forthword_ CLRCACHE, 0, "clrcache"
+    push {lr}
+    bl SMUDGE
+    fetch_
+    mov r0, tos
+    poptos_
+    bl DP
+    mov r1, tos
+    poptos_
+    bl __clear_cache
+    pop {pc}
+    
 @ ( -- )
 @ update wid from smudge if valid
 Forthword_ UWID, 0, "uwid"
@@ -97,6 +112,7 @@ Forthword_ UWID, 0, "uwid"
     bl QDUP
     zerosense_
     beq.n UWID_end
+       bl CLRCACHE
        bl CURRENT
        fetch_
        bl STORE
