@@ -2,6 +2,8 @@
 .syntax unified
 .thumb
 
+.set rpi2, 1
+
 .include "macros.S"
 
 @ size of the Terminal Input Buffer
@@ -49,7 +51,7 @@ DPSTART:
 eeprom_base:
 EE_FORTHWORDLIST:
   .word 0 @ head pointer
-  .word 0 @ tail pointer
+  .word 0 @ name pointer
 
 EE_DP:
     .word DPSTART      @ Dictionary Pointer in flash
@@ -144,3 +146,4 @@ addr_dpstart: .word DPSTART
 .global getchar
 // Declare the built-in __clear_cache function.
 .global __clear_cache
+
