@@ -35,19 +35,13 @@
     >r
     m*
     r>
-    um/mod
+    m/mod
 ;
 
 
 \ signed multiply and division with double precision intermediate
 : */ ( n1 n2 n3 -- n4 )
     */mod
-    nip
-;
-
-\ divide n1 by n2. giving the quotient
-: /  ( n1 n2 -- n3)
-    /mod
     nip
 ;
 
@@ -178,16 +172,16 @@ var hld
 \ stack dump
 : .s  ( -- )
     sp@     ( limit ) \ setup limit
-    2-
+    4-
     sp0     ( limit counter )
     begin
-    2-      ( limit counter-2 )
-    2over   ( limit counter-2 limit counter-2 )
-    <>      ( limit counter-2 flag )
+    4-      ( limit counter-4 )
+    2over   ( limit counter-4 limit counter-4 )
+    <>      ( limit counter-4 flag )
     while
-      dup     ( limit counter-2 counter-2 )
-      @       ( limit counter-2 val )
-      u.      ( limit counter-2 )
+      dup     ( limit counter-4 counter-4 )
+      @       ( limit counter-4 val )
+      u.      ( limit counter-4 )
     repeat
     2drop
 ;
@@ -209,6 +203,6 @@ var hld
 
 ( xt1 c<char> -- )
 \ stores xt into defer or compiles code to do so at runtime
-: is
-    [compile] to
-; immediate
+\ : is
+\    [compile] to
+\ ; immediate
