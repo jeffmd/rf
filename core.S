@@ -251,16 +251,28 @@ Forthword_ FOURMINUS, INLINE_OPT, "4-"
   fourminus_
   bx lr
 
-@ ( n1 -- n2 )
-@ arithmetic shift left, filling with zero
+@ ( n1 -- n1*2 )
+@ shift left to give * 2
 Forthword_ TWOSTAR, INLINE_OPT, "2*"
   twostar_
   bx lr
 
-@ ( n1 -- n2 )
-@ arithmetic shift right
+@ ( n1 -- n1/2 )
+@ arithmetic shift right to give / 2
 Forthword_ TWOSLASH, INLINE_OPT, "2/"
   twoslash_
+  bx lr
+
+@ ( n1 -- n1*4 )
+@ shift left to give * 4
+Forthword_ FOURSTAR, INLINE_OPT, "4*"
+  fourstar_
+  bx lr
+
+@ ( n1 -- n1/4 )
+@ shift right to give / 4
+Forthword_ FOURSLASH, INLINE_OPT, "4/"
+  fourslash_
   bx lr
 
 Forthword_ NEGATE, INLINE_OPT, "neg"

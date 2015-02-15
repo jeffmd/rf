@@ -690,6 +690,7 @@ Forthword_ DOTASKS, 0, "(tasks)"
 DOTASKS1:
     bl DOREFILL
     bl DOPAUSE
+    
 
     @ check to see if tasks should be terminated
     bl FFLAGS
