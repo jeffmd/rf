@@ -420,6 +420,15 @@ Forthword_ DNEG, 0, "dneg"
 @ ( u u -- ud )
 Forthword_ UMSTAR, 0, "um*"
 @------------------------------------------------------------------------------
+.if rpi2
+
+    ldr r0, [dsp]
+    umull r0, tos, r0, tos @ Unsigned long multiply 32*32=64
+    str r0, [dsp]
+    bx lr
+    
+.else
+
     ldr r0, [dsp]  @ To be calculated: Tos * r0
 
     @ Calculate low part in hardware:
@@ -446,11 +455,22 @@ Forthword_ UMSTAR, 0, "um*"
     adds tos, r3  @ Add together
     bx lr
 
+.endif
+
 @ ( n n -- d)
 @ multiply 2 signed cells to a double cell
 Forthword_ MSTAR, 0, "m*"
 @ Multiply signed 32*32 = 64
 @ ( n n -- d )
+
+.if rpi2
+
+    ldr r0, [dsp]
+    smull r0, tos, r0, tos @ Signed long multiply 32*32=64
+    str r0, [dsp]
+    bx lr
+
+.else
 
     ldr r0, [dsp]
     movs r1, r0, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
@@ -476,6 +496,132 @@ Forthword_ MSTAR, 0, "m*"
 2:  push {lr}
     bl UMSTAR
     bl DNEG
+    pop {pc}
+
+.endif
+
+Forthword_ UM_DIVMOD, 0, "um/mod"
+@ ( ud u -- u u ) Dividend Divisor -- Rest Ergebnis
+@ 64/32 = 32 Rest 32
+
+@  push {lr}
+@  pushdaconst 0
+@  bl ud_slash_mod
+@  drop
+@  nip
+@  pop {pc}
+
+  push {r4}
+                     @ tos : Divisor
+  ldr  r0, [dsp, #4] @ (LL) Dividend L
+  ldr  r1, [dsp, #0] @ (L)  Dividend H
+  movs r2, #0        @ (H)  Shift L
+
+  movs r4, #0        @ Result
+
+  @ Loop in r3:
+  movs r3, #32
+
+1:lsls r4, #1 @ Shift result
+  
+  adds r0, r0 @ Shift through first three registers
+  adcs r1, r1
+  adcs r2, r2 
+
+  @ Compare the top two registers to divisor
+  cmp tos, r2  @ Compare low part
+  bhi.n 2f      @ If lower or same:
+    subs r2, tos  @  Low-part first
+    adds r4, #1  @ Set bit in result
+2:
+  subs r3, #1
+  bne.n 1b
+  @ r3 is Zero now. No need to clear.
+
+  @ Shifted 32 places - r0 (LL) is shifted out completely now. 
+  @ Result is kept as it is and may overflow
+
+  @ Loop in r3:
+  movs r3, #32
+
+1:lsls r4, #1 @ Shift result
+  
+  adds r1, r1 @ Shift through two registers only
+  adcs r2, r2
+
+  @ Compare the top two registers to divisor
+  cmp tos, r2  @ Compare low part
+  bhi.n 2f      @ If lower or same:
+    subs r2, tos  @  Low-part first
+    adds r4, #1  @ Set bit in result
+2:
+  subs r3, #1
+  bne.n 1b
+  @ r3 is Zero now. No need to clear.
+
+  adds dsp, #4
+  str r2, [dsp] @ Remainder
+  movs tos, r4
+
+  pop {r4}
+  bx lr
+
+
+Forthword_ M_DIVMOD, 0, "m/mod"
+@ Signed symmetric divide 64/32 = 32 remainder 32
+@ ( d n -- n n )
+@  push {lr}
+@  pushdatos                 @ s>d
+@  movs tos, tos, asr #31    @ Turn MSB into 0xffffffff or 0x00000000
+@  bl d_slash_mod
+@  drop
+@  nip
+@  pop {pc}
+
+  @ Check Divisor
+  push {lr}
+  movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+  beq.n 2f
+    @ ? / -
+    rsbs tos, tos, #0 @ Negate
+    bl RROT
+    movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+    beq.n 1f
+    @ - / -
+    bl DNEG
+    bl ROT
+    bl UM_DIVMOD
+
+    swap_
+    rsbs tos, tos, #0 @ Negate for Negative remainder
+    swap_
+    pop {pc}
+
+1:  @ + / -
+    bl ROT
+    bl UM_DIVMOD
+    rsbs tos, tos, #0 @ Negate for Negative result
+    pop {pc}
+
+2:  @ ? / +
+    bl RROT
+    movs r0, tos, asr #31 @ Turn MSB into 0xffffffff or 0x00000000
+    beq.n 3f
+    @ - / +
+    bl DNEG
+    bl ROT
+
+    bl UM_DIVMOD
+
+    rsbs tos, tos, #0 @ Negate for Negative result
+    swap_
+    rsbs tos, tos, #0 @ Negate for Negative remainder
+    swap_
+    pop {pc}
+
+3:  @ + / +
+    bl ROT
+    bl UM_DIVMOD
     pop {pc}
 
 @------------------------------------------------------------------------------
@@ -601,6 +747,18 @@ Forthword_ D_SLASHMOD, 0, "d/mod"
 @ unsigned 32b division with modulus result
 Forthword_ U_DIVMOD, 0, "u/mod"
 @ ARM provides no remainder operation, so we fake it by un-dividing and subtracting.
+  .if rpi2
+
+  ldm dsp!, {r0}       @ Get u1 into a register
+  movs r1, tos         @ Back up the divisor in X.
+  udiv tos, r0, tos    @ Divide: quotient in TOS.
+  muls r1, tos, r1     @ Un-divide to compute remainder.
+  subs r0, r1          @ Compute remainder.
+  subs dsp, #4
+  str r0, [dsp]
+  bx lr
+    
+  .else
 
   movs r1, tos
   ldm dsp!, {tos}
@@ -638,11 +796,24 @@ Forthword_ U_DIVMOD, 0, "u/mod"
   pushtos_
   movs tos, r3
   bx lr
-
+  .endif
+  
 @ ( n1 n2 -- rem quot )
 @ signed division with remainder
 Forthword_ DIVMOD, 0, "/mod"
 @ ARM provides no remainder operation, so we fake it by un-dividing and subtracting.
+.if rpi2
+
+  ldm dsp!, {r0}       @ Get u1 into a register
+  movs r1, tos         @ Back up the divisor in X.
+  sdiv tos, r0, tos    @ Divide: quotient in TOS.
+  muls r1, tos, r1     @ Un-divide to compute remainder.
+  subs r0, r1          @ Compute remainder.
+  subs dsp, #4
+  str r0, [dsp]
+  bx lr
+
+.else
 
   push {lr}
   movs r0, tos
@@ -698,6 +869,26 @@ divmod_plus_plus:
       mov tos, r0
       bl U_DIVMOD
       pop {pc}
+.endif
+
+@ ( n1 n2 -- n1/n2 )
+@ 32bit/32bit = 32bit
+.if rpi2
+
+Forthword_ DIV, INLINE_OPT, "/"
+  ldm dsp!, {r0}       @ Get n1 into a register
+  sdiv tos, r0, tos    @ Divide !
+  bx lr
+
+.else
+
+Forthword_, DIV, 0, "/" 
+  push {lr}
+  bl DIVMOD
+  nip_
+  pop {pc}
+
+.endif
 
 @ dodefer - execute a deferred word
 @ defer setup as:
