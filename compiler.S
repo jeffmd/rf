@@ -159,7 +159,7 @@ Forthword_ DCOMMA, 0, ",,"
     pop {pc}
 
 @ ( addr len len' -- )
-@ compiles a string from RAM to Flash
+@ compiles a string from RAM to program ram
 Forthword_ DOSCOMMA, 0, "(s,)"
     push {lr}
     bl COMMA           @ ( addr len )
