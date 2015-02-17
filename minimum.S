@@ -2,8 +2,16 @@
 
 @ ( -- a-addr )
 @ location of the cell containing the address of the next free ram location
-Forthword_ HERE, 0, "here"
+Forthword_ HEREADDR, 0, "here#"
     douser_ USER_HERE
+
+@ ( -- a-addr )
+@ the address of the next free ram location
+Forthword_ HERE, 0, "here"
+    push {lr}
+    bl HEREADDR
+    fetch_
+    pop {pc}
 
 @ ( -- a-addr )
 @ location of the cell containing the number conversion radix

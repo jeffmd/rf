@@ -107,7 +107,6 @@ var hld
     pad hld !
 ;
 
-
 \ pictured numeric output: convert one digit
 : # ( u1 -- u2 )
     base@      ( u1 base )

@@ -358,7 +358,7 @@
 
 \ allocate or release n bytes of memory in RAM
 : allot ( n -- )
-    here +!
+    here + here# !
 ;
 
 ( x -- ) ( C: x "<spaces>name" -- )
@@ -425,7 +425,7 @@
      [compile] s"             \ "
      state@
      if
-       compile itype
+       compile type
      else
        type
      then

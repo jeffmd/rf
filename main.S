@@ -92,7 +92,7 @@ Forthword_ WARM, 0, "warm"
     bl PAUSEADDR
     bl STORE
     dolit32_ HERESTART
-    bl HERE
+    bl HEREADDR
     bl STORE
     bl ONLY
     bl DECIMAL           @ default to decimal base
