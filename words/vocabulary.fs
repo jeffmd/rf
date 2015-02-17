@@ -2,7 +2,7 @@
 
 \ get context array address using context index
 : context# ( -- addr )
-  context dup 2- c@ 4* +
+  context dup 2- h@ 4* +
 ;
 
 \ get a wordlist id from context array
