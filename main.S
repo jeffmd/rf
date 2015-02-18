@@ -40,11 +40,11 @@ ram_tib: .space TIBSIZE
 
 @ start of user ram area
 HERESTART:
-   .space 16000
+   .space 64000
 
 @ start of user program area
 DPSTART:
-   .space 16000
+   .space 64000
 
 .balign 4
 

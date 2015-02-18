@@ -22,8 +22,7 @@ set_input_mode (void)
   /* Make sure stdin is a terminal. */
   if (!isatty (STDIN_FILENO))
     {
-      fprintf (stderr, "Not a terminal.\n");
-      exit (EXIT_FAILURE);
+      fprintf (stderr, "Note: input not a terminal.\n");
     }
 
   /* Save the terminal attributes so we can restore them later. */
