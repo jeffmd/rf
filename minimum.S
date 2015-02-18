@@ -102,6 +102,8 @@ Forthword_ PNIB, 0, ".h"
 @ simple 32 bit hex print
 Forthword_ PHEX, 0, ".$"
     push {lr}
+    dolit8_ '$
+    bl EMIT
     dolit8_ 28
 PHEX_BEGIN:
     bl TWOOVER
