@@ -7,15 +7,13 @@
 
 struct termios saved_attributes;
 
-void
-reset_input_mode (void)
+void reset_input_mode (void)
 {
   tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
   fprintf (stdout, "\nstdin terminal attributes restored\n");
 }
 
-void
-set_input_mode (void)
+void set_input_mode (void)
 {
   struct termios tattr;
 

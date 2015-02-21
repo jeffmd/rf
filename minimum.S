@@ -900,6 +900,16 @@ Forthword_, DIV, 0, "/"
 
 .endif
 
+@ ( n -- )
+@ sleep for n micro seconds
+Forthword_ USLEEP, 0, "usleep"
+  push {lr}
+  mov r0, tos
+  poptos_
+  bl usleep
+  pop {pc}
+
+
 @ dodefer - execute a deferred word
 @ defer setup as:
 @ push {lr}
