@@ -31,17 +31,6 @@ Forthword_ GPIODIR, 0, "gpio.dir"
   bl GPIODirection
   pop {pc}
 
-@ ( direction pin -- )
-@ setup a GPIO pin for input or output
-@ automatically exports the pin 
-@ if direction is 0 then pin will be input
-@ if direction is 1 then pin will be output
-Forthword_ GPIO, 0 "gpio"
-  push {lr}
-  dup_
-  bl GPIOX
-  bl GPIODIR
-  pop {pc}
 
 @ ( val pin --  )
 @ set GPIO pin output either 0 or 1
