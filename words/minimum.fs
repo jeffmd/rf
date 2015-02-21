@@ -205,3 +205,5 @@ var hld
 \ : is
 \    [compile] to
 \ ; immediate
+
+: 1ms 1000 usleep ;
