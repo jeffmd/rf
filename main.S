@@ -77,6 +77,7 @@ EDPSTART:
 .include "compiler.S"
 .include "interpret.S"
 .include "asm.S"
+.include "gpio.S"
 .include "minimum.S"
 
 @ ( nx* -- ) (R: ny* -- )
@@ -139,11 +140,4 @@ main:
 addr_dstack: .word topdstack
 addr_sysvar: .word sysvar_base
 addr_dpstart: .word DPSTART
-
-
-/* External calls*/
-.global putchar
-.global getchar
-// Declare the built-in __clear_cache function.
-.global __clear_cache
 
