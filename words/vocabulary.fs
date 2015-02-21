@@ -1,8 +1,12 @@
 \ vocabulary.fs - words for managing the words
+\ get context index address
+: contidx ( -- addr )
+  context 2-
+;
 
 \ get context array address using context index
 : context# ( -- addr )
-  context dup 2- h@ 4* +
+  context contidx h@ 4* +
 ;
 
 \ get a wordlist id from context array
@@ -24,7 +28,7 @@
 : also ( -- )
   context@
   \ increment index
-  context 2- 1+h!
+  contidx 1+h!
   context!
   
 ; immediate
@@ -32,7 +36,7 @@
 
 : previous ( -- )
   \ get current index and decrement by 1
-  context 2- dup h@ 1- dup
+  contidx dup h@ 1- dup
   \ index must be >= 1
   0> if
        0 context! swap h!
@@ -50,7 +54,7 @@
 
 : definitions
     context@
-    current !
+    ?if current ! then
 ; immediate
 
 \ A defining word used in the form:
@@ -67,10 +71,10 @@
   [compile] immediate
   \ allocate space in ram for head and tail of vocab word list
   wordlist dup ,,
-  \ get nfa and store in second field of wordlist record in eeprom
+  \ get nfa and store in second field of wordlist record 
   cur@ @ swap 4+ !
   does>
-   @ \ get eeprom header address
+   @ \ get header address
    context!
 ;
 
@@ -130,7 +134,7 @@ context @ 4+
 \ list active vocabularies
 : vocabs ( -- )
   \ get context index and use as counter
-  context 2- h@
+  contidx h@
   begin
   \ iterate through vocab array and print out vocab names
   ?while
@@ -149,3 +153,6 @@ context @ 4+
   drop
   ." Forth Root"
 ;
+
+\ save some cpu time by giving OS a chance to do something else
+' 1ms pause# !
