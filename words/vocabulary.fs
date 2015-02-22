@@ -1,4 +1,5 @@
 \ vocabulary.fs - words for managing the words
+
 \ get context index address
 : contidx ( -- addr )
   context 2-
@@ -155,4 +156,4 @@ context @ 4+
 ;
 
 \ save some cpu time by giving OS a chance to do something else
-' 1ms pause# !
+dopause 1ms
