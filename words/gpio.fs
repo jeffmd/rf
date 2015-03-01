@@ -11,6 +11,16 @@ GPIO definitions
   dup gpio.x gpio.dir
 ;
 
+\ set pin as output
+: out ( pin -- )
+  1 swap pin
+;
+
+\ set pin as input
+: in ( pin -- )
+  0 swap pin
+;
+
 \ turn gpio pin to on state
 : on ( pin -- )
   1 swap gpio.write

@@ -44,7 +44,7 @@ Forthword_ GPIOW, 0, "gpio.write"
   pop {pc}
 
 @ ( pin -- val )
-@ set direction of a GPIO pin that has been exported
+@ get GPIO pin value that has been exported
 Forthword_ GPIOR, 0, "gpio.read"
   push {lr}
   mov r0, tos @ pin
