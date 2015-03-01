@@ -4,12 +4,13 @@ only
 vocabulary Tasker
 also Tasker definitions
 
+\ maximum number of tasks
 62 con maxtask
 \ the active index into the task list
 cvar tidx
 
-\ count register for each task: max 31 tasks
-\ is an array of 63 bytes
+\ count register for each task
+\ is an array 
 var tcnt
 maxtask 4* allot
 
@@ -32,6 +33,12 @@ maxtask 4* allot
 \ idx: index of slot
 : cnt@
   4* tcnt + @
+;
+
+\ get the count for current task executing
+( -- n )
+: count
+ tidx@ cnt@
 ;
 
 \ increment tcnt array element using idx as index
