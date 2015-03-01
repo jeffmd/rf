@@ -112,13 +112,13 @@ int GPIOWrite(const int pin, const int value)
     snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
     fd = open(path, O_WRONLY);
     if (-1 == fd) {
-	fprintf(stderr, "Failed to open gpio value for writing!\n");
-	return(-1);
+	  fprintf(stderr, "Failed to open gpio value for writing!\n");
+	  return(-1);
     }
 
     if (1 != write(fd, &s_values_str[0 == value ? 0 : 1], 1)) {
-	fprintf(stderr, "Failed to write value!\n");
-	return(-1);
+	  fprintf(stderr, "Failed to write value!\n");
+	  return(-1);
     }
 
     close(fd);
