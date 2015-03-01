@@ -76,9 +76,7 @@ var tasks
 \ store a task in a slot
 \ idx is the slot index range: 0 to 30
 : task!
-  4*
-  tasks +
-  !
+  4* tasks + !
 ;
 
 \ store a task in a slot
@@ -114,7 +112,8 @@ cvar exms
 ( -- )
 \ execute tasks.ex if tick time expired
 : tick
-  1ms ms 1+! ms @ lastms @ - exms c@ u> if ms @ lastms ! taskex then
+  1ms ms dup 1+! @ lastms @ - exms c@ 
+  u> if ms @ lastms ! taskex then
 ;
 
 ( -- )
