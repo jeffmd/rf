@@ -18,27 +18,27 @@ Forthword_ GPIOUX, 0, "gpio.ux"
   bl GPIOUnexport
   pop {pc}
 
-@ ( direction pin --  )
+@ ( pin direction --  )
 @ set direction of a GPIO pin that has been exported
 @ if direction is 0 then pin will be input
 @ if direction is 1 then pin will be output
 Forthword_ GPIODIR, 0, "gpio.dir"
   push {lr}
-  mov r0, tos @ pin
+  mov r1, tos @ direction
   poptos_
-  mov r1, tos @ direction 
+  mov r0, tos @ pin
   poptos_
   bl GPIODirection
   pop {pc}
 
 
-@ ( val pin --  )
+@ ( pin val --  )
 @ set GPIO pin output either 0 or 1
 Forthword_ GPIOW, 0, "gpio.write"
   push {lr}
-  mov r0, tos @ pin
-  poptos_
   mov r1, tos @ val
+  poptos_
+  mov r0, tos @ pin
   poptos_
   bl GPIOWrite
   pop {pc}
