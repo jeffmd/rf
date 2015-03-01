@@ -583,7 +583,7 @@ PLUSCSTORE_do:
 Forthword_ ONEPLUSCSTORE, 0, "1+c!"
   ldm dsp!, {r1}
   movs r0, #1
-  b.n PLUSHSTORE_do
+  b.n PLUSCSTORE_do
 
 @ ( n1 n2 -- n2 ) A: n1
 @ Remove next on stack and write to A register (Extended VM)
