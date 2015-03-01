@@ -19,7 +19,7 @@ void reset_input_mode (void)
 void set_input_mode (void)
 {
   struct termios tattr;
-/*
+#if 0
   fdm = posix_openpt(O_RDWR); 
   if (fdm < 0) 
   { 
@@ -42,18 +42,18 @@ void set_input_mode (void)
   } 
 
   fprintf(stdout, "remote connect to %s\n", ptsname(fdm));
-*/  
+  
+  // The slave side of the PTY becomes the standard input and outputs of the child process 
+  close(0); // Close standard input (current terminal) 
+  close(1); // Close standard output (current terminal) 
+  dup(fdm); // PTY becomes standard input (0) 
+  dup(fdm); // PTY becomes standard output (1) 
+#endif
   /* Make sure stdin is a terminal. */
   if (!isatty (STDIN_FILENO))
     {
       fprintf (stderr, "Note: input not a terminal.\n");
     }
-  // The slave side of the PTY becomes the standard input and outputs of the child process 
-//  close(0); // Close standard input (current terminal) 
-//  close(1); // Close standard output (current terminal) 
-//  dup(fdm); // PTY becomes standard input (0) 
-//  dup(fdm); // PTY becomes standard output (1) 
-
   /* Save the terminal attributes so we can restore them later. */
   tcgetattr (STDIN_FILENO, &saved_attributes);
   atexit (reset_input_mode);
