@@ -4,23 +4,24 @@ only
 vocabulary Tasker
 also Tasker definitions
 
+62 con maxtask
 \ the active index into the task list
 cvar tidx
 
 \ count register for each task: max 31 tasks
-\ is an array of 31 bytes
-cvar tcnt
-30 allot
+\ is an array of 63 bytes
+var tcnt
+maxtask 4* allot
 
 ( -- n )
 \ fetch task index: verifies index is valid
 \ adjusts index if count is odd ?
 : tidx@
   tidx c@ 
-  \ verify index is below 31
-  dup 30 >
+  \ verify index is below 63
+  dup maxtask >
   if
-    \ greater than 30 so 0
+    \ greater than 62 so 0
     0:
     tidx 0c!
   then
@@ -30,30 +31,31 @@ cvar tcnt
 \ get count for a slot
 \ idx: index of slot
 : cnt@
-  tcnt + c@
+  4* tcnt + @
 ;
 
 \ increment tcnt array element using idx as index
 ( idx -- )
 : cnt+
-  tcnt + 1+c!
+  4* tcnt + 1+!
 ;
 
 ( n idx -- )
 \ set tcnt array element using idx as index
 : cnt!
-  tcnt + c!
+  4* tcnt + !
 ;
 
 \ array of task slots in ram : max 31 tasks 62 bytes
 \ array is a binary process tree
-\                        0                          125 ms
-\             1                      2              250 ms
-\      3           4           5           6        500 ms
-\   7     8     9    10     11   12     13   14     1 s
-\ 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30   2 s
+\                        0                          62.5 ms
+\             1                      2              125 ms
+\      3           4           5           6        250 ms
+\   7     8     9    10     11   12     13   14     500 ms
+\ 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30   1 s
+\ 31 -                                          62  2 s
 var tasks
-30 4* allot
+maxtask 4* allot
 
 ( -- )
 \ increment task index to next task idx
@@ -74,7 +76,7 @@ var tasks
 
 ( addr idx -- ) 
 \ store a task in a slot
-\ idx is the slot index range: 0 to 30
+\ idx is the slot index range: 0 to 62
 : task!
   4* tasks + !
 ;
@@ -105,7 +107,7 @@ var tasks
 var ms
 var lastms
 \ how often in milliseconds to execute a task
-\ default to 25 ms 
+\ default to 12.5 ms 
 cvar exms
 
 
@@ -126,7 +128,7 @@ cvar exms
     0 over cnt!
     dup taskclr 
     1+ 
-    dup 30 >  
+    dup maxtask >  
   until
   drop
 ;
@@ -134,7 +136,7 @@ cvar exms
 ( -- )
 \ start tasking
 : run
-  24 exms c!
+  8 exms c!
   ms 0! lastms 0!
   ['] tick pause# !
 ;
