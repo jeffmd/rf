@@ -154,6 +154,3 @@ context @ 4+
   drop
   ." Forth Root"
 ;
-
-\ save some cpu time by giving OS a chance to do something else
-dopause 1ms
