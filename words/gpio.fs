@@ -38,15 +38,19 @@ GPIO definitions
     close
 ;
 
+: dirOpen ( pin -- fs flag )
+    1    ( pin 1 )
+    swap  ( 1 pin )
+    <# 0 hold dir$ #$ #s gpio$ #>Open ( fs flag)
+;
 
 \ set direction of a GPIO pin that has been exported
 \ if direction is 0 then pin will be input
 \ if direction is 1 then pin will be output
 : dir ( pin direction --  )
     \ open direction file for writing
-    1    ( pin direction 1 )
-    rot  ( direction 1 pin )
-    <# 0 hold dir$ #$ #s gpio$ #>Open ( direction fs flag)
+    swap ( direction pin )
+    dirOpen    ( direction fs flag )
     if
       dup ( direction fs fs )
       rot ( fs fs direction )
@@ -59,12 +63,18 @@ GPIO definitions
     close
 ;
 
-\ write to gpio port
-: gpiow ( pin val --  )
+\ Open gpio value file
+\ mode: 0 file opened for reading
+\ mode: 1 file opened for writing
+: valOpen ( pin mode -- fs flag )
     \ open value file for writing
-    1    ( pin val 1 )
-    rot  ( val 1 pin )
-    <# 0 hold value$ #$ #s gpio$ #>Open ( val fs flag)
+    swap ( mode pin )
+    <# 0 hold value$ #$ #s gpio$ #>Open ( fs flag)
+;
+
+\ write to gpio pin
+: pinW ( pin val --  )
+    swap 1 valOpen ( val fs flag )
     if
       dup ( val fs fs )
       rot ( fs fs val )
@@ -77,12 +87,9 @@ GPIO definitions
     close
 ;
 
-\ read from gpio port
-: gpior ( pin -- val )
-    \ open value file for reading
-    0    ( pin 0 )
-    swap ( 0 pin )
-    <# 0 hold value$ #$ #s gpio$ #>Open ( fs flag)
+\ read from gpio pin
+: pinR ( pin -- val )
+    0 valOpen ( fs flag )
     if
       dup ( fs fs )
       inbuf$ read ( fs flag )
@@ -107,22 +114,22 @@ GPIO definitions
 ;
 
 \ set pin as output
-: out ( pin -- )
+: output ( pin -- )
   1 pin
 ;
 
 \ set pin as input
-: in ( pin -- )
+: input ( pin -- )
   0 pin
 ;
 
 \ turn gpio pin to high state
 : high ( pin -- )
-  1 gpiow
+  1 pinW
 ;
 
 \ turn gpio pin to low state
 : low ( pin -- )
-  0 gpiow
+  0 pinW
 ;
 
