@@ -26,6 +26,7 @@ user_g_in: .space 2
 state: .space 2
 USER_BASE: .space 2
 USER_PAUSE: .space 4
+USER_KEY: .space 4
 USER_HERE: .space 4
 ram_CURRENT: .space 4
 ram_CONTEXTidx: .space 2
@@ -78,6 +79,7 @@ EDPSTART:
 .include "interpret.S"
 .include "asm.S"
 .include "gpio.S"
+.include "file.S"
 .include "minimum.S"
 
 @ ( nx* -- ) (R: ny* -- )

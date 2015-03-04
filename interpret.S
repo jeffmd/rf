@@ -40,6 +40,11 @@ Forthword_ G_IN, 0, ">in"
 Forthword_ PAUSEADDR, 0, "pause#"
     douser_ USER_PAUSE
 
+@ ( -- keyaddr )
+@ get ram address of key defer
+Forthword_ KEYADDR, 0, "key#"
+    douser_ USER_KEY
+
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ EMIT, 0, "emit"
@@ -64,14 +69,47 @@ Forthword_ CR, 0, "cr"
 Forthword_ BL, 0, "bl"
     bl_
     bx lr
+    
 
 @ ( -- key )
-@ fetch key vector and EXEC it, should leave a single character on TOS
-Forthword_ KEY, 0, "key"
+@ fetch key from standard input, should leave a single character on TOS
+@ if a key was pressed. If no key pressed then -1 is on TOS.
+Forthword_ STDIN, 0, "stdin"
   push {lr}
   bl getchar
   pushtos_
   mov tos, r0
+  pop {pc}
+
+@ (  filedes -- key )
+@ fetch key from an open file using filedes, should leave
+@ a single character on TOS or -1 if no more to read in file.
+Forthword_ KEYFILE, 0, "keyfile"
+  push {lr}
+  movs r0, tos
+  movs tos, #0
+  pushtos_
+  @neg_
+  pushtos_
+  mov r1, dsp
+  movs r2, #1
+  bl read 
+  poptos_
+  @ was one key read from the file?
+  cmp r0, #1
+  beq.n KEYEND
+  subs tos, #1  
+ KEYEND:
+  pop {pc}
+
+@ ( -- key )
+@ fetch key from deffered routine, should leave a single character
+@ on TOS if a key was pressed. If no key pressed then -1 is on TOS.
+Forthword_ KEY, 0, "key"
+  push {lr}
+  bl KEYADDR
+  fetch_
+  bl EXEC
   pop {pc}
 
 @ ( -- f )
@@ -717,6 +755,11 @@ Forthword_ QUIT, 0, "quit"
     @ reset input buffer
     bl INRESET
 
+    @ reset input source
+    dolit32_ STDIN
+    bl KEYADDR
+    bl STORE
+
     @ switch to interpret mode
     bl LBRACKET
 
@@ -756,7 +799,7 @@ Forthword_ ACCEPT, 0, "accept"
     push {lr}
     @ <begin>
     bl KEY        @ ( k )
-    cmp tos, #0
+    dupzerosense_
     bgt.n ACCEPT_haskey
     adds tos, #1
     pop {pc}

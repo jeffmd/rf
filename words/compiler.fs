@@ -407,8 +407,8 @@
 
 ( -- addr len) ( C: <cchar> -- )
 \ Compiler
-\ compiles a string to flash,
-\ at runtime leaves ( -- flash-addr count) on stack
+\ compiles a string to ram,
+\ at runtime leaves ( -- ram-addr count) on stack
 : s"
     $22
     parse        ( -- addr n)

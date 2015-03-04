@@ -99,7 +99,7 @@ var hld
 
 \ Address of the temporary scratch buffer.
 : pad ( -- a-addr )
-    here 20 +
+    here 100 +
 ;
 
 \ initialize the pictured numeric output conversion process
@@ -124,6 +124,15 @@ var hld
     repeat
 ;
 
+\ copy string to numeric output buffer
+: #$ ( addr len -- )
+\ start at end of string
+    begin
+    ?while
+      1- over over + c@ hold
+    repeat
+    2drop    
+;
 
 \ Pictured Numeric Output: convert PNO buffer into an string
 : #> ( u1 -- addr count )
@@ -214,3 +223,10 @@ var hld
 \ executes each time pause executes
 ( char:name -- )
 : dopause ' pause# ! ;
+
+\ put a null at end of string
+: $_ ( addr len -- )
+
+ \ addr + len = 0
+ 1- + 0c!
+;
