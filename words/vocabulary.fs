@@ -154,3 +154,5 @@ context @ 4+
   drop
   ." Forth Root"
 ;
+
+dopause 1ms
