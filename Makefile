@@ -3,7 +3,7 @@ INCS = *.S
 
 all: rf
 
-rf : rf.o input.o gpio.o
+rf : rf.o input.o
 	gcc -Os -o $@ $+
 
 rf.o : main.S $(INCS)
