@@ -78,7 +78,6 @@ EDPSTART:
 .include "compiler.S"
 .include "interpret.S"
 .include "asm.S"
-.include "gpio.S"
 .include "file.S"
 .include "minimum.S"
 

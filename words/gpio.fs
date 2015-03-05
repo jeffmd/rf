@@ -15,24 +15,29 @@ GPIO definitions
 : .fail ." Failed to open GPIO: " ;
 : .wrting ."  for writing!" ;
 
-: #>Open ( -- flag)
-    #$ root$ #$ #> drop open ( pin fs )
-    dup 0> ( pin fs flag)
+\ start null terminated buffer
+: <#_ ( -- )
+    <# 0 hold
+;
+
+\ file open using null terminated buffer
+: #>Open ( mode -- fs flag)
+    #$ root$ #$ #> drop open ( fs )
+    dup 0> ( fs flag )
 ;
 
 \ unexport a GPIO pin when no longer needed by user
 : unexp ( pin --  )
     \ open unexport file for writing
-    1    ( pin 1 )
-    dup  ( pin 1 1 )
-    <# 0 hold unexp$ #>Open ( pin fs flag)
+    1 dup  ( pin 1 1 )
+    <#_ unexp$ #>Open ( pin fs flag)
     if
       dup ( pin fs fs )
       rot ( fs fs pin )
       <# #s #> write ( fs flag )
       swap
     else
-      .fail ." unexport" .wrting
+      .fail unexp$ type .wrting
     then
     nip
     close
@@ -41,7 +46,30 @@ GPIO definitions
 : dirOpen ( pin -- fs flag )
     1    ( pin 1 )
     swap  ( 1 pin )
-    <# 0 hold dir$ #$ #s gpio$ #>Open ( fs flag)
+    <#_ dir$ #$ #s gpio$ #>Open ( fs flag)
+;
+
+: exp ( pin -- )
+    1 dup            ( pin 1 1 )
+    <#_ exp$ #>Open  ( pin fs flag )
+    if
+      swap           ( fs pin )
+      over           ( fs pin fs )
+      over           ( fs pin fs pin )
+      <# #s #> write ( fs pin 1 )
+      rot close      ( pin 1 )
+      \ wait for direction file to become available
+      begin
+        drop         ( pin )
+        dup          ( pin pin ) 
+        dirOpen      ( pin fs flag )
+      until
+    else
+      .fail exp$ type .wrting
+    then
+    nip
+    close
+    
 ;
 
 \ set direction of a GPIO pin that has been exported
@@ -69,7 +97,7 @@ GPIO definitions
 : valOpen ( pin mode -- fs flag )
     \ open value file for writing
     swap ( mode pin )
-    <# 0 hold value$ #$ #s gpio$ #>Open ( fs flag)
+    <#_ value$ #$ #s gpio$ #>Open ( fs flag)
 ;
 
 \ write to gpio pin
@@ -110,7 +138,7 @@ GPIO definitions
 \ if direction is 0 then pin will be input
 \ if direction is 1 then pin will be output
 : pin ( pin direction -- )
-  over gpio.x dir
+  over exp dir
 ;
 
 \ set pin as output
