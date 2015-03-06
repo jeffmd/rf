@@ -14,7 +14,7 @@
 
 
 pstack:
-  .space 400
+  .space 800
 topdstack:
   .word 0
 
@@ -27,6 +27,7 @@ state: .space 2
 USER_BASE: .space 2
 USER_PAUSE: .space 4
 USER_KEY: .space 4
+USER_KEYFILE: .space 4
 USER_HERE: .space 4
 ram_CURRENT: .space 4
 ram_CONTEXTidx: .space 2

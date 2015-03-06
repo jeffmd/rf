@@ -45,6 +45,11 @@ Forthword_ PAUSEADDR, 0, "pause#"
 Forthword_ KEYADDR, 0, "key#"
     douser_ USER_KEY
 
+@ ( -- keyfileaddr )
+@ get ram address of key file descriptor
+Forthword_ KEYFILEADDR, 0, "keyf#"
+    douser_ USER_KEYFILE
+
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ EMIT, 0, "emit"
@@ -81,16 +86,18 @@ Forthword_ STDIN, 0, "stdin"
   mov tos, r0
   pop {pc}
 
-@ (  filedes -- key )
+@ ( -- key )
 @ fetch key from an open file using filedes, should leave
 @ a single character on TOS or -1 if no more to read in file.
 Forthword_ KEYFILE, 0, "keyfile"
   push {lr}
+  bl KEYFILEADDR
+  fetch_
   movs r0, tos
   movs tos, #0
   pushtos_
   @neg_
-  pushtos_
+  @pushtos_
   mov r1, dsp
   movs r2, #1
   bl read 
@@ -98,7 +105,8 @@ Forthword_ KEYFILE, 0, "keyfile"
   @ was one key read from the file?
   cmp r0, #1
   beq.n KEYEND
-  subs tos, #1  
+  subs tos, #1
+  bl BYE  
  KEYEND:
   pop {pc}
 
@@ -573,6 +581,11 @@ Forthword_ RECX, 0, "recx"
     @ print unrecognized word
     bl TYPE
     @doliteral_ 0xBAD
+    
+    bl DOSLIT
+    ascii_ " Unrecognized word!"
+    bl TYPE
+    
     one_
 
     bl THROW

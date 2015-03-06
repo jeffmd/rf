@@ -199,6 +199,10 @@ Forthword_ QSTACK, 0, "?sp"
     zerosense_
     beq.n QSTACKFIN
       @doliteral_ 0xBEF
+      bl DOSLIT
+      ascii_ " Stack Underflow!"
+      bl TYPE
+
       one_
       bl THROW
 
@@ -284,6 +288,10 @@ PFA_SETBASE2:        @ ( error)
     dup_
     mov tos, r0
     bl EMIT
+    bl DOSLIT
+    ascii_ " Bad Base type!"
+    bl TYPE
+
     two_
     bl THROW
 
@@ -923,6 +931,70 @@ Forthword_ DODEFER, 0, "(def)"
   ldr tos, [tos]
   bl EXEC
   pop {pc}
+
+@ ( C:filepath -- ** )
+@ open a file that will be used for key input
+Forthword_ INCLUDEF, 0, "include"
+    push {lr}
+    @ set file open mode to reading
+    zero_
+    @ parse input for filename to include
+    bl PNAME     @ ( 0 addr len )
+    @ add null to end of string
+    over_         
+    plus_
+    bl ZEROCSTORE
+    bl OPENF     @ ( filedes )
+    @ if file descriptor > 0 then open is success
+    dup_
+    bl ZEROGREATER
+    zerosense_
+    
+    beq.n INCLUDEF_EXIT
+      @ push FFLAGS on tor
+      bl FFLAGS
+      hfetch_
+      to_r_
+      @ push on return stack the old defer key
+      bl KEYADDR
+      fetch_
+      to_r_
+      @ push old keyfile on return stack
+      bl KEYFILEADDR
+      fetch_
+      to_r_
+      bl KEYFILEADDR
+      bl STORE
+      @ defer key to keyfile for input
+      dolit32_ KEYFILE
+      bl KEYADDR
+      bl STORE
+      @ run interpreter
+      bl DOTASKS
+      @ close keyfile
+      bl KEYFILEADDR
+      fetch_
+      bl CLOSEF
+      @ pop tor into keyfile
+      r_from_
+      bl KEYFILEADDR
+      bl STORE
+      @ pop top of return into defer key
+      r_from_
+      bl KEYADDR
+      bl STORE
+      @ restore FFLAGS
+      r_from_
+      bl FFLAGS
+      bl HSTORE
+      pop {pc}
+       
+INCLUDEF_EXIT:
+    drop_
+    bl DOSLIT
+    ascii_ "File not found!"
+    bl TYPE
+    pop {pc}
 
 @ must be last word in core
 Forthword_ WIPE, 0, "WIPE"
