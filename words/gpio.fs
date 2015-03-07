@@ -43,12 +43,14 @@ GPIO definitions
     close
 ;
 
+\ open the direction file
 : dirOpen ( pin -- fs flag )
     1    ( pin 1 )
     swap  ( 1 pin )
     <#_ dir$ #$ #s gpio$ #>Open ( fs flag)
 ;
 
+\ export a pin - prepare for gpio use
 : exp ( pin -- )
     1 dup            ( pin 1 1 )
     <#_ exp$ #>Open  ( pin fs flag )
