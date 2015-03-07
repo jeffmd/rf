@@ -927,26 +927,24 @@ Forthword_ DODEFER, 0, "(def)"
   ldr tos, [tos]
   bl EXEC
   pop {pc}
+  
 
-@ ( C:filepath -- ** )
+
+@ ( caddr -- ** )
 @ open a file that will be used for key input
-Forthword_ INCLUDEF, 0, "include"
+@ caddr points to null terminated file name
+Forthword_ DOINCLUDE, 0, "doinclude"
     push {lr}
     @ set file open mode to reading
     zero_
-    @ parse input for filename to include
-    bl PNAME     @ ( 0 addr len )
-    @ add null to end of string
-    over_         
-    plus_
-    bl ZEROCSTORE
+    swap_
     bl OPENF     @ ( filedes )
     @ if file descriptor > 0 then open is success
     dup_
     bl ZEROGREATER
     zerosense_
     
-    beq.n INCLUDEF_EXIT
+    beq.n DOINCLUDE_EXIT
       @ push FFLAGS on tor
       bl FFLAGS
       hfetch_
@@ -985,11 +983,24 @@ Forthword_ INCLUDEF, 0, "include"
       bl HSTORE
       pop {pc}
        
-INCLUDEF_EXIT:
+DOINCLUDE_EXIT:
     drop_
     type_ "File not found!"
     pop {pc}
 
+@ ( C:filepath -- ** )
+@ open a file that will be used for key input
+Forthword_ INCLUDEF, 0, "include"
+    push {lr}
+    @ parse input for filename to include
+    bl PNAME     @ ( 0 addr len )
+    @ add null to end of string
+    over_         
+    plus_
+    bl ZEROCSTORE
+    bl DOINCLUDE
+    pop {pc}
+    
 @ must be last word in core
 Forthword_ WIPE, 0, "WIPE"
     push {lr}
