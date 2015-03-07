@@ -28,6 +28,8 @@ USER_BASE: .space 2
 USER_PAUSE: .space 4
 USER_KEY: .space 4
 USER_KEYFILE: .space 4
+USER_ARGC: .space 4
+USER_ARGV: .space 4
 USER_HERE: .space 4
 ram_CURRENT: .space 4
 ram_CONTEXTidx: .space 2
@@ -99,9 +101,7 @@ Forthword_ WARM, 0, "warm"
     bl STORE
     bl ONLY
     bl DECIMAL           @ default to decimal base
-    bl DOSLIT            @ print version
-    ascii_ "rf 0.1"
-    bl TYPE
+    type_ "rf 0.1"
     bl CR
     bl QUIT
     pop {pc}
@@ -120,6 +120,8 @@ Forthword_ COLD, 0, "cold"
 .thumb_func
 main:
     push {lr} @ save return
+    @ save r0 and r1 which contain command line arguments
+    push {r0, r1}
     bl set_input_mode
     @ initialize data stack
     ldr dsp, addr_dstack
@@ -132,6 +134,16 @@ main:
     str r0, [tos]
 
     bl WIPE
+    pop {r0, r1}
+    @ save r0 and r1
+    pushtos_
+    movs tos, r0
+    pushtos_
+    movs tos, r1
+    bl ARGVADDR
+    bl STORE
+    bl ARGCADDR
+    bl STORE
     bl WARM
 
     mov r0, tos

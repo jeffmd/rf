@@ -50,6 +50,16 @@ Forthword_ KEYADDR, 0, "key#"
 Forthword_ KEYFILEADDR, 0, "keyf#"
     douser_ USER_KEYFILE
 
+@ ( -- argcaddr )
+@ get ram address of command line argument count
+Forthword_ ARGCADDR, 0, "argc#"
+    douser_ USER_ARGC
+
+@ ( -- cmd[]addr )
+@ get ram address of command line argument vector
+Forthword_ ARGVADDR, 0, "argv#"
+    douser_ USER_ARGV
+
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ EMIT, 0, "emit"
@@ -582,12 +592,9 @@ Forthword_ RECX, 0, "recx"
     bl TYPE
     @doliteral_ 0xBAD
     
-    bl DOSLIT
-    ascii_ " Unrecognized word!"
-    bl TYPE
+    type_ " Unrecognized word!"
     
     one_
-
     bl THROW
     pop {pc}
 
@@ -624,9 +631,7 @@ INTERPRET_END:
 Forthword_ PROMPTRDY, 0, ".>"
     push {lr}
     bl CR
-    bl DOSLIT
-    ascii_ "> "
-    bl TYPE
+    type_ "> "
     pop {pc}
 
 @ ( -- )
@@ -634,27 +639,21 @@ Forthword_ PROMPTRDY, 0, ".>"
 Forthword_ PROMPTCOMPILE, 0, ".:"
     push {lr}
     bl CR
-    bl DOSLIT
-    ascii_ ": "
-    bl TYPE
+    type_ ": "
     pop {pc}
 
 @ ( -- )
 @ send the OK prompt to the command line
 Forthword_ PROMPTOK, 0, ".ok"
     push {lr}
-    bl DOSLIT
-    ascii_ " ok"
-    bl TYPE
+    type_ " ok"
     pop {pc}
 
 @ ( n -- )
 @ process the error prompt
 Forthword_ PROMPTERROR, 0, ".??"
     push {lr}
-    bl DOSLIT
-    ascii_ " ?? "
-    bl TYPE
+    type_ " ?? "
     bl PHEX
     pop {pc}
 

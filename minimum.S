@@ -199,9 +199,7 @@ Forthword_ QSTACK, 0, "?sp"
     zerosense_
     beq.n QSTACKFIN
       @doliteral_ 0xBEF
-      bl DOSLIT
-      ascii_ " Stack Underflow!"
-      bl TYPE
+      type_ " Stack Underflow!"
 
       one_
       bl THROW
@@ -288,9 +286,7 @@ PFA_SETBASE2:        @ ( error)
     dup_
     mov tos, r0
     bl EMIT
-    bl DOSLIT
-    ascii_ " Bad Base type!"
-    bl TYPE
+    type_ " Bad Base type!"
 
     two_
     bl THROW
@@ -991,9 +987,7 @@ Forthword_ INCLUDEF, 0, "include"
        
 INCLUDEF_EXIT:
     drop_
-    bl DOSLIT
-    ascii_ "File not found!"
-    bl TYPE
+    type_ "File not found!"
     pop {pc}
 
 @ must be last word in core

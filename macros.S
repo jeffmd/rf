@@ -419,6 +419,12 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
   .p2align 1
 .endm
 
+.macro type_ str
+    bl DOSLIT
+    ascii_ "\str"
+    bl TYPE
+.endm
+
 .macro Forthword_ lbl, flags, name
 
 VE_\lbl:
