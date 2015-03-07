@@ -257,7 +257,9 @@ Forthword_ STRINGLEN, 0, "$l"
     bx lr
 
 @ ( addr1 n1 c -- n2 )
-@ skips leading occurances in string at addr1/n1 leaving n2 as an index pointing to the 1st non-c character
+@ skips leading occurances in string at addr1 leaving n2 as an index
+@ pointing to the 1st non-c character
+@ n1 is max number of characters to search
 Forthword_ CSKIP, 0, "cskip"
     tob_                 @ ( addr1 n1 ) B: c
     niptoa_              @ ( n1 ) A: addr1
@@ -278,7 +280,8 @@ PFA_CSKIP2:
     bx lr
 
 @ ( addr1 n1 c -- addr1 n2 )
-@ Scan string at addr1/n1 for the first occurance of c, leaving addr1 n2,
+@ Scan string at addr1 for the first occurance of c, leaving addr1 n2,
+@ n1 is max number of characters to search
 @ char at n2 is first c character
 Forthword_ CSCAN, 0, "cscan"
     tob_                 @ ( addr1 n1 ) B: c
