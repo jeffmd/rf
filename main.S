@@ -7,16 +7,16 @@
 .include "macros.S"
 
 @ size of the Terminal Input Buffer
-.set TIBSIZE, 80
+.set TIBSIZE, 100
 
 .bss
 .balign 4
 
 
-pstack:
+datastack:
   .space 800
-topdstack:
-  .word 0
+topdatastack:
+  .space 8
 
 .balign 2
 sysvar_base:
@@ -57,14 +57,6 @@ EE_FORTHWORDLIST:
   .word 0 @ head pointer
   .word 0 @ name pointer
 
-EE_DP:
-    .word DPSTART      @ Dictionary Pointer in flash
-EE_HERE:
-    .word HERESTART    @ RAM Memory Allocation pointer
-EE_EDP:
-    .word EDPSTART     @ EEProm Memory Allocation pointer
-EE_TURNKEY:
-    .word 0            @ TURNKEY
 
 EDPSTART:
   .space 2000
@@ -84,6 +76,7 @@ EDPSTART:
 .include "file.S"
 .include "minimum.S"
 
+
 @ ( nx* -- ) (R: ny* -- )
 @ initialize asforth further. EXECs turnkey operation and go to quit
 Forthword_ WARM, 0, "warm"
@@ -92,17 +85,14 @@ Forthword_ WARM, 0, "warm"
     mov tos, sp
     bl RP0
     bl STORE
-    @ init pause to noop
-    dolit32_ NOOP
-    bl PAUSEADDR
-    bl STORE
-    dolit32_ HERESTART
-    bl HEREADDR
-    bl STORE
+
+    bl RESET
     bl ONLY
     bl DECIMAL           @ default to decimal base
     type_ "rf 0.1"
     bl CR
+    @ check if command line args need to be loaded
+    bl DOCMDARG    
     bl QUIT
     pop {pc}
 
@@ -128,11 +118,6 @@ main:
     @ initialize sysvar pointer
     ldr sysvar, addr_sysvar
 
-    ldr r0, addr_dpstart
-    movs tos, #(ram_dp-sysvar_base)
-    adds tos, sysvar
-    str r0, [tos]
-
     bl WIPE
     pop {r0, r1}
     @ save r0 and r1
@@ -151,7 +136,7 @@ main:
 
 .balign 4
 @ ram pointers that need relocation on startup
-addr_dstack: .word topdstack
+addr_dstack: .word topdatastack
 addr_sysvar: .word sysvar_base
 addr_dpstart: .word DPSTART
 

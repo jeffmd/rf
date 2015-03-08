@@ -106,8 +106,6 @@ Forthword_ KEYFILE, 0, "keyfile"
   movs r0, tos
   movs tos, #0
   pushtos_
-  @neg_
-  @pushtos_
   mov r1, dsp
   movs r2, #1
   bl read 
@@ -753,17 +751,11 @@ DOTASKS1:
     beq.n DOTASKS1
     pop {pc}
 
+
 @ ( -- )
-@ reset stacks and start over again
-Forthword_ QUIT, 0, "quit"
+@ reset input source
+Forthword_ RESET, 0, "reset"
     push {lr}
-    @ reset data stack
-    bl SP0
-    bl SP_STORE
-    @ reset return stack pointers
-    bl RP0
-    fetch_
-    bl RP_STORE
     bl SMUDGE
     bl ZEROSTORE
 
@@ -777,7 +769,20 @@ Forthword_ QUIT, 0, "quit"
 
     @ switch to interpret mode
     bl LBRACKET
-
+    pop {pc}
+    
+@ ( -- )
+@ reset stacks and start over again
+Forthword_ QUIT, 0, "quit"
+    push {lr}
+    @ reset data stack
+    bl SP0
+    bl SP_STORE
+    @ reset return stack pointers
+    bl RP0
+    fetch_
+    bl RP_STORE
+    bl RESET
     bl DOTASKS
     pop {pc}
 

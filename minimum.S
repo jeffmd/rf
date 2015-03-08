@@ -993,43 +993,56 @@ DOINCLUDE_EXIT:
 Forthword_ INCLUDEF, 0, "include"
     push {lr}
     @ parse input for filename to include
-    bl PNAME     @ ( 0 addr len )
+    bl PNAME     @ ( addr len )
     @ add null to end of string
     over_         
     plus_
     bl ZEROCSTORE
     bl DOINCLUDE
     pop {pc}
+
+@ ( nx* -- ) (R: ny* -- )
+@ initialize rf further. EXECs turnkey operation and go to quit
+Forthword_ DOCMDARG, 0, "docmdarg"
+    push {lr}
+    bl ARGCADDR
+    fetch_
+    one_
+    bl GREATER
+    zerosense_
+    bne.n DOCMDARG_LOAD
+    pop {pc}
+
+DOCMDARG_LOAD:
+    bl ARGVADDR
+    fetch_
+    fourplus_
+    fetch_
+    bl DOINCLUDE    
+    pop {pc}
     
 @ must be last word in core
 Forthword_ WIPE, 0, "WIPE"
     push {lr}
-    @ reset forth dictionary, here, edp, dp to original burn state
-    @ set EE_DP to DPSTART
-    @doliteral_ pm(DPSTART)
-    @doliteral_ EE_DP
-    @rcall STOREE
-    @ set EE_HERE to HERESTART
-    @doliteral_ HERESTART
-    @doliteral_ EE_HERE
-    @rcall STOREE
-    @ set EE_EDP to EDPSTART
-    @doliteral_ EDPSTART
-    @doliteral_ EE_EDP
-    @rcall STOREE
-    @ set EE_TURNKEY to NOOP
-    @doliteral_ pm(NOOP)
-    @doliteral_ EE_TURNKEY
-    @rcall STOREE
-    @ set EE_FORTHWORDLIST to 0
-    @rcall ZERO
-    @doliteral_ EE_FORTHWORDLIST
-    @pushtos_
-    @ldr tos, EE_FORTHWORDLIST_P1
-    bl ICFETCH
-    .word EE_FORTHWORDLIST
+   
+    ldr r0, addr_dpstart
+    movs tos, #(ram_dp-sysvar_base)
+    adds tos, sysvar
+    str r0, [tos]
+    
+    dolit32_ EE_FORTHWORDLIST
     dup_
     bl ZEROSTORE
     fourplus_
     bl ZEROSTORE
+    
+    @ init pause to noop
+    dolit32_ NOOP
+    bl PAUSEADDR
+    bl STORE
+    
+    dolit32_ HERESTART
+    bl HEREADDR
+    bl STORE
+    bl ONLY    
     pop {pc}
