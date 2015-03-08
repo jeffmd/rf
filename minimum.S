@@ -1010,15 +1010,31 @@ Forthword_ DOCMDARG, 0, "docmdarg"
     one_
     bl GREATER
     zerosense_
-    bne.n DOCMDARG_LOAD
-    pop {pc}
+    beq.n DOCMDARG_EXIT
 
-DOCMDARG_LOAD:
     bl ARGVADDR
     fetch_
     fourplus_
     fetch_
-    bl DOINCLUDE    
+    bl DOINCLUDE 
+       
+DOCMDARG_EXIT:
+    pop {pc}
+
+@ ( -- seconds usecs ) 
+@ get time of day
+@ gives the number of seconds and microseconds since the Epoch
+Forthword_ TIME, 0, "time"
+    push {lr}
+    pushtos_
+    movs tos, #0
+    pushtos_
+    movs tos, #0
+    pushtos_
+    mov r0, dsp
+    movs r1, #0
+    bl gettimeofday
+    poptos_
     pop {pc}
     
 @ must be last word in core
