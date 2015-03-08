@@ -2,7 +2,7 @@
 
 only 
 vocabulary Tasker
-also Tasker definitions
+Tasker definitions
 
 \ maximum number of tasks
 62 con maxtask
