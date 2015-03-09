@@ -631,16 +631,14 @@ INTERPRET_END:
 @ send the READY prompt to the command line
 Forthword_ PROMPTRDY, 0, ".>"
     push {lr}
-    bl CR
-    type_ "> "
+    type_ "\n> "
     pop {pc}
 
 @ ( -- )
 @ send the READY prompt to the command line
 Forthword_ PROMPTCOMPILE, 0, ".:"
     push {lr}
-    bl CR
-    type_ ": "
+    type_ "\n: "
     pop {pc}
 
 @ ( -- )

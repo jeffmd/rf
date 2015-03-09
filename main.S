@@ -42,24 +42,19 @@ ram_handler: .space 4
 ram_sharptib: .space 2
 ram_tib: .space TIBSIZE
 
+EE_FORTHWORDLIST:
+  .space 4 @ head pointer
+  .space 4 @ name pointer
+
 @ start of user ram area
 HERESTART:
-   .space 64000
+   .space 32000
+
 
 @ start of user program area
 DPSTART:
    .space 64000
 
-.balign 4
-
-eeprom_base:
-EE_FORTHWORDLIST:
-  .word 0 @ head pointer
-  .word 0 @ name pointer
-
-
-EDPSTART:
-  .space 2000
 
 
 .text
@@ -89,8 +84,7 @@ Forthword_ WARM, 0, "warm"
     bl RESET
     bl ONLY
     bl DECIMAL           @ default to decimal base
-    type_ "rf 0.1"
-    bl CR
+    type_ "rf 0.1\n"
     @ check if command line args need to be loaded
     bl DOCMDARG    
     bl QUIT
