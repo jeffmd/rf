@@ -1029,7 +1029,6 @@ Forthword_ TIME, 0, "time"
     pushtos_
     movs tos, #0
     pushtos_
-    movs tos, #0
     pushtos_
     mov r0, dsp
     movs r1, #0
