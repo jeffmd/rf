@@ -593,7 +593,7 @@ Forthword_ RECX, 0, "recx"
     bl TYPE
     @doliteral_ 0xBAD
     
-    type_ " Unrecognized word!"
+    type_ " <- Unrecognized word!"
     
     one_
     bl THROW
