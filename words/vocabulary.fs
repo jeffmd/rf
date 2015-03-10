@@ -134,6 +134,7 @@ context @ 4+
 
 \ list active vocabularies
 : vocabs ( -- )
+  ." Search: "
   \ get context index and use as counter
   contidx h@
   begin
@@ -144,7 +145,7 @@ context @ 4+
     @
     \ if not zero then print vocab name 
     ?dup if
-      \ next cell in eeprom has name field address 
+      \ next cell has name field address 
       4+ @
       ?nf
     then
@@ -152,7 +153,9 @@ context @ 4+
     1-
   repeat
   drop
-  ." Forth Root"
+  ." Forth Root" cr
+  ." definitions: "
+  cur@ 4+ @ ?nf cr
 ;
 
 \ dopause 1ms
