@@ -112,13 +112,12 @@ Forthword_ UWID, 0, "uwid"
     bl QDUP
     zerosense_
     beq.n UWID_end
-       bl CLRCACHE
        bl CURRENT
        fetch_
        bl STORE
+       bl CLRCACHE
        bl SMUDGE
        bl ZEROSTORE
-       @bl DPSTOREE
 UWID_end:
     pop {pc}
 
