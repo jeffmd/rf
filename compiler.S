@@ -18,7 +18,7 @@ Forthword_ CURRENT, 0, "current"
     douser_ ram_CURRENT
 
 @ ( -- addr )
-@ current vocabulary for searching
+@ context vocabulary for searching
 @ array of wordlists
 Forthword_ CONTEXT, 0, "context"
     douser_ ram_CONTEXT
