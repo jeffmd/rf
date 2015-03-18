@@ -21,7 +21,7 @@ GPIO definitions
 ;
 
 \ file open using null terminated buffer
-: #>Open ( mode -- fs flag)
+: #>Open ( mode straddr len -- fs flag)
     #$ root$ #$ #> drop open ( fs )
     dup 0> ( fs flag )
 ;
@@ -71,7 +71,6 @@ GPIO definitions
     then
     nip
     close
-    
 ;
 
 \ set direction of a GPIO pin that has been exported
