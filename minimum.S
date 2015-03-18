@@ -199,9 +199,7 @@ Forthword_ QSTACK, 0, "?sp"
     zerosense_
     beq.n QSTACKFIN
       @doliteral_ 0xBEF
-      type_ " Stack Underflow!"
-
-      one_
+      $lit_ " Stack Underflow!"
       bl THROW
 
 QSTACKFIN:
@@ -238,27 +236,21 @@ Forthword_ CATCH, 0, "catch"
     zero_
     pop {pc}
 
-@ ( n -- )
+@ ( straddr len -- )
 @ throw an exception
+@ will type the string passed in
 Forthword_ THROW, 0, "throw"
-    dupzerosense_
-    bne.n THROW1
-    drop_
-    bx lr
-
-THROW1:
     push {lr}
-    bl HANDLER         @ ( n haddr )
-    fetch_             @ ( n RP_handler )
-    rpstore_           @ ( n ) (R: callerret SP hxt)
-    r_from_            @ ( n hxt ) (R: callerret SP )
-    bl HANDLER         @ ( n hxt haddr )
-    bl STORE           @ ( n )
-    r_from_            @ ( n SP ) (R: callerret )
-    swap_              @ ( SP n ) (R: callerret )
-    to_r_              @ ( SP ) (R: callerret n )
+    bl TYPE
+    bl HANDLER         @ ( haddr )
+    fetch_             @ ( RP_handler )
+    rpstore_           @ ( ) (R: callerret SP hxt)
+    r_from_            @ ( hxt ) (R: callerret SP )
+    bl HANDLER         @ ( hxt haddr )
+    bl STORE           @ ( )
+    r_from_            @ ( SP ) (R: callerret )
     spstore_           @ ( ... )
-    r_from_            @ ( ... n )
+    one_               @ ( ... 1 )
     pop {pc}
 
 @ (c -- ) Numeric IO
@@ -286,9 +278,7 @@ PFA_SETBASE2:        @ ( error)
     dup_
     mov tos, r0
     bl EMIT
-    type_ " Bad Base type!"
-
-    two_
+    $lit_ " Bad Base!"
     bl THROW
 
 @ ( addr len -- addr' len' )

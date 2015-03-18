@@ -218,9 +218,7 @@ Forthword_ HEADER, 0, "header"
     @ <then>
 HEADER_error:
     @ -16: attempted to use zero length string as a name
-    type_ "Zero Length Name!"
-    
-    true_
+    $lit_ "Zero Length Name!"
     bl THROW
 
 @ ( start match -- start count )

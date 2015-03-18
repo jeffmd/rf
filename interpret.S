@@ -524,7 +524,6 @@ REC_WORD_FOUND:
 @    zerosense_
 @    bne.n CHECK_IMMEDIATE
         @ word can only be used in compile state
-        @doliteral_ 0xBC
         @jmp THROW
 
 
@@ -593,9 +592,8 @@ Forthword_ RECX, 0, "recx"
     bl TYPE
     @doliteral_ 0xBAD
     
-    type_ " <- Unrecognized word!"
+    $lit_ " Unknown!"
     
-    one_
     bl THROW
     pop {pc}
 
@@ -652,8 +650,8 @@ Forthword_ PROMPTOK, 0, ".ok"
 @ process the error prompt
 Forthword_ PROMPTERROR, 0, ".??"
     push {lr}
+    drop_
     type_ " ?? "
-    bl PHEX
     pop {pc}
 
 @ ( -- )
