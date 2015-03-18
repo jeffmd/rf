@@ -367,6 +367,7 @@
     rword
     lit
     poppc,
+    clrcache
 ;
 
 

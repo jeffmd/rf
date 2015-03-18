@@ -93,7 +93,7 @@ TAILOPT_OPT:
 @ clear data cache to force reload when executed as instructions
 Forthword_ CLRCACHE, 0, "clrcache"
     push {lr}
-    bl SMUDGE
+    bl CURRENT
     fetch_
     mov r0, tos
     poptos_

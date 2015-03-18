@@ -12,10 +12,6 @@
 .bss
 .balign 4
 
-@ start of user ram area
-HERESTART:
-   .space 32000
-
 datastack:
   .space 800
 topdatastack:
@@ -49,13 +45,15 @@ EE_FORTHWORDLIST:
   .space 4 @ head pointer
   .space 4 @ name pointer
 
+@ start of user ram area
+HERESTART:
+   .space 64000
 
 @ start of user program area
 DPSTART:
    .space 64000
 
-
-
+@ start of hard coded program area that can not be modified at runtime
 .text
 
 .balign 2
