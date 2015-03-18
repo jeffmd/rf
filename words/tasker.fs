@@ -110,8 +110,6 @@ maxtask 4* allot
   tidx+
 ;
 
-\ time in ms since last tasks.ex
-var ms
 var lastms
 \ how often in microseconds to execute a task
 \ default to 62.5/6 ms 
@@ -121,8 +119,13 @@ var exms
 ( -- )
 \ execute tasks.ex if tick time expired
 : tick
-  time drop lastms @ - exms @ 
-  u> if time drop lastms ! taskex then
+  time drop lastms @ - dup
+  exms @ u>
+  if
+    lastms +! taskex
+  else
+    255 and usleep
+  then
 ;
 
 ( -- )
@@ -144,7 +147,7 @@ var exms
 \ start tasking
 : run
   10417 exms !
-  ms 0! lastms 0!
+  lastms 0!
   ['] tick pause# !
 ;
 
