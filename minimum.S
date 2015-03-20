@@ -127,6 +127,55 @@ Forthword_ ABS, 0, "abs"
   neg_
 1:
   bx lr
+  
+@ ( -- icell )
+@ push instruction cell size 
+Forthword_ ICELL, INLINE_OPT, "icell"
+  two_
+  bx lr
+
+@ ( n -- n-icell )
+@ add instruction cell size to n
+Forthword_ ICELLM, INLINE_OPT, "icell-"
+  twominus_
+  bx lr
+
+@ ( n -- n+icell )
+@ add instruction cell size to n
+Forthword_ ICELLP, INLINE_OPT, "icell+"
+  twoplus_
+  bx lr
+
+@ ( n -- n*icell )
+@ multiply n by instruction size 
+Forthword_ ICELLS, INLINE_OPT, "icell*"
+  twostar_
+  bx lr
+
+@ ( -- dcell )
+@ push data stack cell size 
+Forthword_ DCELL, INLINE_OPT, "dcell"
+  four_
+  bx lr
+
+@ ( n -- n-dcell )
+@ add data stack cell size to n
+Forthword_ DCELLM, INLINE_OPT, "dcell-"
+  fourminus_
+  bx lr
+
+@ ( n -- n+dcell )
+@ add data stack cell size to n
+Forthword_ DCELLP, INLINE_OPT, "dcell+"
+  fourplus_
+  bx lr
+
+@ ( n -- n*dcell )
+@ multiply n by data stack cell size 
+Forthword_ DCELLS, INLINE_OPT, "dcell*"
+  fourstar_
+  bx lr
+
 
 @ ( c -- (number|) flag )
 @ tries to convert a character to a number, set flag accordingly

@@ -7,7 +7,7 @@
 
 \ get context array address using context index
 : context# ( -- addr )
-  context contidx h@ 4* +
+  context contidx h@ dcell* +
 ;
 
 \ get a wordlist id from context array
@@ -23,7 +23,7 @@
 
 : wordlist ( -- wid )
   here dup 0! \ get head address in ram and set to zero
-  8 allot \ allocate  2 words in ram
+  2 dcell* allot \ allocate  2 words in ram
 ;
 
 : also ( -- )
@@ -39,11 +39,12 @@
   \ get current index and decrement by 1
   contidx dup h@ 1- dup
   \ index must be >= 1
-  0> if
-       0 context! swap h!
-     else
-       2drop
-     then
+  0>
+  if
+    0 context! swap h!
+  else
+    2drop
+  then
 ; immediate
 
 \ Used in the form:
@@ -73,7 +74,7 @@
   \ allocate space in ram for head and tail of vocab word list
   wordlist dup ,,
   \ get nfa and store in second field of wordlist record 
-  cur@ @ swap 4+ !
+  cur@ @ swap dcell+ !
   does>
    @ \ get header address
    context!
@@ -88,7 +89,7 @@
 \ get forth nfa - its the most recent word created
 cur@ @
 \ get the forth wid and adjust to name field 
-context @ 4+
+context @ dcell+
 \ write forth nfa to name field
 ! 
 
@@ -113,7 +114,7 @@ context @ 4+
       swap                   ( cnt+1 addr )
     repeat 
 
-    cr .
+    cr ." count: " .
 ;
 
 \ List the names of the definitions in the context vocabulary.
@@ -140,13 +141,13 @@ context @ 4+
   begin
   \ iterate through vocab array and print out vocab names
   ?while
-    dup 4* context +
+    dup dcell* context +
     \ get context wid
     @
     \ if not zero then print vocab name 
     ?dup if
       \ next cell has name field address 
-      4+ @
+      dcell+ @
       ?nf
     then
     \ decrement index
@@ -155,7 +156,6 @@ context @ 4+
   drop
   ." Forth Root" cr
   ." definitions: "
-  cur@ 4+ @ ?nf cr
+  cur@ dcell+ @ ?nf cr
 ;
 
-\ dopause 1ms

@@ -14,7 +14,7 @@ only
 : dmp
  over .$ [char] : emit space
  begin
-   ?while 2- swap dup h@ .$ 2+ swap
+   ?while icell- swap dup h@ .$ icell+ swap
  repeat
  drop
 ;
@@ -86,3 +86,24 @@ find r? var fence fence !
 ;
 
 find forget fence !
+
+\ create a marker word
+\ when executed it will restore dp, here and current
+\ back to when marker was created
+: marker  ( c: name -- )
+  \ copy current word list, current wid, dp, here
+  cur@ dup @ dp here
+  create
+  \ save here, dp, current wid, current word list
+  ,, ,, ,, ,,
+  does> ( addr )
+    \ restore here
+    dup @ here# !
+    \ restore dp
+    dcell+ dup @ dp!
+    \ restore current wid
+    dcell+ dup @ 
+    swap dcell+ @ !
+    \ only Forth and Root are safe vocabs
+    only
+;

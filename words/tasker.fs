@@ -12,7 +12,7 @@ cvar tidx
 \ count register for each task
 \ is an array 
 var tcnt
-maxtask 4* allot
+maxtask dcell* allot
 
 ( -- n )
 \ fetch task index: verifies index is valid
@@ -32,7 +32,7 @@ maxtask 4* allot
 \ get count for a slot
 \ idx: index of slot
 : cnt@
-  4* tcnt + @
+  dcell* tcnt + @
 ;
 
 \ get the count for current task executing
@@ -44,13 +44,13 @@ maxtask 4* allot
 \ increment tcnt array element using idx as index
 ( idx -- )
 : cnt+
-  4* tcnt + 1+!
+  dcell* tcnt + 1+!
 ;
 
 ( n idx -- )
 \ set tcnt array element using idx as index
 : cnt!
-  4* tcnt + !
+  dcell* tcnt + !
 ;
 
 \ array of task slots in ram : max 31 tasks 62 bytes
@@ -62,7 +62,7 @@ maxtask 4* allot
 \ 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30   1 s
 \ 31 -                                          62  2 s
 var tasks
-maxtask 4* allot
+maxtask dcell* allot
 
 ( -- )
 \ increment task index to next task idx
@@ -78,14 +78,14 @@ maxtask 4* allot
 ( idx -- task )
 \ get a task at idx slot
 : task@
-  4* tasks + @ 
+  dcell* tasks + @ 
 ;
 
 ( addr idx -- ) 
 \ store a task in a slot
 \ idx is the slot index range: 0 to 62
 : task!
-  4* tasks + !
+  dcell* tasks + !
 ;
 
 \ store a task in a slot

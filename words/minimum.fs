@@ -179,17 +179,17 @@ var hld
 
 \ stack dump
 : .s  ( -- )
-    sp@     ( limit ) \ setup limit
-    4-
-    sp0     ( limit counter )
+    sp@         ( limit ) \ setup limit
+    dcell-
+    sp0         ( limit counter )
     begin
-    4-      ( limit counter-4 )
-    2over   ( limit counter-4 limit counter-4 )
-    <>      ( limit counter-4 flag )
-    while
-      dup     ( limit counter-4 counter-4 )
-      @       ( limit counter-4 val )
-      u.      ( limit counter-4 )
+      dcell-    ( limit counter-4 )
+      2over     ( limit counter-4 limit counter-4 )
+      <>        ( limit counter-4 flag )
+      while
+        dup     ( limit counter-4 counter-4 )
+        @       ( limit counter-4 val )
+        u.      ( limit counter-4 )
     repeat
     2drop
 ;

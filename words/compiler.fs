@@ -26,7 +26,6 @@
     $77FF widf
 ; immediate
 
-
 \ search dictionary for name, returns XT or 0
 : 'f  ( "<spaces>name" -- XT XTflags )
     pname
@@ -99,7 +98,7 @@
     !             ( )
 ;
 
-( -- a-addr ) ( C: "<spaces>name" -- )
+( -- ) ( C: "<spaces>name" -- )
 \ Dictionary
 \ create a dictionary header that will push the address of the
 \ data field of name.
@@ -142,9 +141,9 @@
     cur@ @                    ( retaddr nfa )
     nfa>lfa                   ( retaddr lfa )
     \ skip over lfa to get to xt
-    4+                        ( retaddr xt )
+    dcell+                    ( retaddr xt )
     \  skip over push {lr}
-    2+                        ( retaddr xt+2 )
+    icell+                    ( retaddr xt+2 )
     \ temp save dp on return stack
     dp# @ >r
     \ set dp to xt+2
@@ -375,7 +374,7 @@
 : var ( cchar -- )
     here
     con
-    4
+    dcell
     allot
 ;
 
