@@ -72,7 +72,7 @@
   create
   [compile] immediate
   \ allocate space in ram for head and tail of vocab word list
-  wordlist dup ,,
+  wordlist dup d,
   \ get nfa and store in second field of wordlist record 
   cur@ @ swap dcell+ !
   does>

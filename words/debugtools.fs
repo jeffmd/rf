@@ -59,16 +59,17 @@ only
 find r? var fence fence !
 
 ( c: name -- )
+\ can only forget a name that is in the current definition
 : forget
   pname
   cur@
-  findnfa            ( nfa )
+  findnfa           ( nfa )
   ?dup
   if
     \ nfa must be greater than fence
-    dup           ( nfa nfa)
-    fence @       ( nfa nfa fence )
-    >             ( nfa nfa>fence )
+    dup             ( nfa nfa)
+    fence @         ( nfa nfa fence )
+    >               ( nfa nfa>fence )
     if
       \ nfa is valid
       \ set dp to nfa
@@ -95,7 +96,7 @@ find forget fence !
   cur@ dup @ dp here
   create
   \ save here, dp, current wid, current word list
-  ,, ,, ,, ,,
+  d, d, d, d,
   does> ( addr )
     \ restore here
     dup @ here# !
@@ -105,5 +106,5 @@ find forget fence !
     dcell+ dup @ 
     swap dcell+ @ !
     \ only Forth and Root are safe vocabs
-    only
+    [compile] only
 ;

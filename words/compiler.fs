@@ -86,7 +86,7 @@
 \ compile into pending new word
 : compile ( C: x "<spaces>name" -- )
   ['f] (compile) cxt
-  find ,,
+  find d,
 ; :ic
 
 
@@ -105,6 +105,7 @@
 \ is used in conjunction with does>
 : create
     rword
+    pushlr,
     \ leave address after call on tos
     compile popret
 ;
@@ -364,6 +365,7 @@
 \ create a constant in the dictionary
 : con
     rword
+    pushlr,
     lit
     poppc,
     clrcache

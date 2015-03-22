@@ -121,14 +121,6 @@ Forthword_ UWID, 0, "uwid"
 UWID_end:
     pop {pc}
 
-@ ( --  )
-@ enter compiler mode
-Forthword_ RBRACKET, 0, "]"
-    push {lr}
-    bl ONE
-    bl STATE
-    bl HSTORE
-    pop {pc}
 
 @ ( --  )
 @ enter interpreter mode
@@ -149,7 +141,7 @@ Forthword_ COMMA, 0, ","
 
 @ ( n -- )
 @ compile 32 bit into ram at (dictionary pointer) DP
-Forthword_ DCOMMA, 0, ",,"
+Forthword_ DCOMMA, 0, "d,"
     push {lr}
     bl DP
     bl STORE
@@ -191,35 +183,6 @@ PFA_SCOMMA2:
 PFA_SCOMMA3:
     pop {pc}
 
-@ ( addr len wid -- voc-link )
-@ creates the vocabulary header without XT and data field (PF) in the wordlist wid
-Forthword_ HEADER, 0, "header"
-    push {lr}
-    bl DP                 @ ( addr len wid DP )
-    to_r_                 @ ( addr len wid ) (R: DP )
-    to_r_                 @ ( addr len ) (R: DP wid )
-    @ <if>
-    dupzerosense_
-    beq.n HEADER_error
-      dup_                @ ( addr len len )
-      movs r0, #0xFF
-      lsls r0, #8
-      orrs tos, r0         @ ( addr len len' )
-      bl DOSCOMMA         @ ( )
-      @ make voc link
-      r_from_             @ ( wid ) (R: DP )
-      fetch_              @ ( VE_HEAD )
-      @ write full word (32 bit value) into dictionary
-      bl DCOMMA           @ ( )
-      bl PUSHLR_C
-      r_from_             @ ( DP ) (R: )
-      pop {pc}
-
-    @ <then>
-HEADER_error:
-    @ -16: attempted to use zero length string as a name
-    $lit_ "Zero Length Name!"
-    bl THROW
 
 @ ( start match -- start count )
 @ match is the 16 bit half word value to search for in ram
