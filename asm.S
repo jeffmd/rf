@@ -6,7 +6,6 @@ Forthword_ POPPC_C, 0, "poppc,"
     push {lr}
     dolit16_ 0xbd00
     bl COMMA
-RET_C_POP:
     pop {pc}
 
 
@@ -18,6 +17,13 @@ Forthword_ PUSHLR_C, 0, "pushlr,"
     bl COMMA
     pop {pc}
 
+@ ( -- )
+@ compile assembler bx lr
+Forthword_ BXLR_C, 0, "bxlr,"
+    push {lr}
+    dolit16_ 0x4770
+    bl COMMA
+    pop {pc}
 
 @ ( -- lr )
 @ move link register onto top of data stack
