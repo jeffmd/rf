@@ -98,6 +98,56 @@
     !             ( )
 ;
 
+\ inlinned assembly routines
+
+( -- icell )
+\ push instruction cell size 
+rword icell inlined
+  ] 2 [
+  bxlr,
+
+( n -- n+icell )
+\ add instruction stack cell size to n
+rword icell+ inlined
+  ] 2+ [
+  bxlr,
+  
+( n -- n-icell )
+\ subtract instruction stack cell size from n
+rword icell- inlined
+  ] 2- [
+  bxlr,
+
+( n -- n*icell )
+\ multiply n by instruction stack cell size 
+rword icell* inlined
+  ] 2* [
+  bxlr,
+
+( -- dcell )
+\ push data stack cell size 
+rword dcell inlined
+  ] 4 [
+  bxlr,
+
+( n -- n+dcell )
+\ add data stack cell size to n
+rword dcell+ inlined
+  ] 4+ [
+  bxlr,
+
+( n -- n-dcell )
+\ subtract data stack cell size from n
+rword dcell- inlined
+  ] 4- [
+  bxlr,
+
+( n -- n*dcell )
+\ multiply n by data stack cell size 
+rword dcell* inlined
+  ] 4* [
+  bxlr,
+
 ( -- ) ( C: "<spaces>name" -- )
 \ Dictionary
 \ create a dictionary header that will push the address of the

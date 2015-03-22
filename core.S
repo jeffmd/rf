@@ -422,6 +422,12 @@ Forthword_ TWO, INLINE_OPT, "2"
   two_
   bx lr
 
+@ ( -- 4 )
+@ place a value 4 on TOS
+Forthword_ FOUR, INLINE_OPT, "4"
+  four_
+  bx lr
+
 @ ( -- 10 )
 @ place a value 10 on TOS
 Forthword_ TEN, INLINE_OPT, "10"
