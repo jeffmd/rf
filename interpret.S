@@ -481,10 +481,13 @@ Forthword_ DOSLIT, 0, "(slit)"
   poptos_
   bx lr
 
-@ ( addr len -- [n] f )
+@ ( addr len -- [n] [addr len] f )
 @ recognizer for integer numbers
 Forthword_ REC_NUM, 0, "rec#"
     push {lr}
+    bl TWOOVER
+    to_r_
+    to_r_
     @ try converting to a number
     bl NUMBER              @ ( [n] f )
     zerosense_
@@ -496,24 +499,36 @@ Forthword_ REC_NUM, 0, "rec#"
         bl LIT
 
 REC_NUMBER_OK:
+      r_drop_
+      r_drop_
       true_                @ ( n true )
       pop {pc}
 
 REC_NONUMBER:
+    r_from_
+    r_from_
     zero_                  @ ( 0 )
     pop {pc}
 
 
-@ ( addr len -- f )
+@ ( addr len -- ** [addr len] f )
 @ recognize a word in the dictionary
 Forthword_ REC_WORD, 0, "recw"
     push {lr}
+    bl TWOOVER
+    to_r_
+    to_r_
     bl FINDW
     dupzerosense_
     bne.n REC_WORD_FOUND
+      r_from_
+      r_from_
+      bl ROT
       pop {pc}
 
 REC_WORD_FOUND:
+    r_drop_
+    r_drop_
     bl NFATOXTF
     @ check if compile only word
     @sbrc tosh, COMPILE_ONLY_FB
@@ -561,29 +576,13 @@ REC_WORD_OK:
 @ recognize and execute name of word in ram using recognizer list.
 Forthword_ RECX, 0, "recx"
     push {lr}
-    bl TWOOVER            @ ( addr len addr len  )
-    @ put addr and len on return stack so that
-    @ stack can be manipulated by interpreted word
-    to_r_                 @ ( addr len addr ) (R: len )
-    to_r_                 @ ( addr len ) (R: len addr )
     @ test if its a word
     bl REC_WORD           @ ( flag ) ( R: len addr )
-    toa_                  @ ( ) A: flag
-    r_from_               @ ( addr ) (R: n len )
-    r_from_               @ ( addr len ) (R: n )
-    geta_                 @ ( addr len flag ) A:
     @ <if>
     zerosense_            @ ( addr len )
     bne.n RECX_DONE
-    bl TWOOVER            @ ( addr len addr len  )
-    to_r_                 @ ( addr len addr ) (R: len )
-    to_r_                 @ ( addr len ) (R: len addr )
     @ test if its a number
     bl REC_NUM            @ ( flag ) ( R: len addr )
-    toa_                  @ ( ) A: flag
-    r_from_               @ ( addr ) (R: n len )
-    r_from_               @ ( addr len ) (R: n )
-    geta_                 @ ( addr len flag ) A:
     zerosense_            @ ( addr len )
     bne.n RECX_DONE
     @ not recognized so throw
@@ -598,7 +597,6 @@ Forthword_ RECX, 0, "recx"
     pop {pc}
 
 RECX_DONE:
-    ddrop_               @ ( )
     pop {pc}
 
 
