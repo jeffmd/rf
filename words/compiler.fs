@@ -66,6 +66,12 @@
     lit
 ; :ic
 
+( addr -- )
+\ store address of the next free dictionary cell
+: dp!
+    dp# !
+;
+
 ( C:"<spaces>name" -- 0 | nfa )
 \ Dictionary
 \ search dictionary for name, returns nfa if found or 0 if not found

@@ -50,14 +50,6 @@ Forthword_ DP, 0, "dp"
     fetch_
     pop {pc}
 
-@ ( addr -- )
-@ store address of the next free dictionary cell
-Forthword_ DPSTORE, 0, "dp!"
-    push {lr}
-    bl DPSHARP
-    bl STORE
-    pop {pc}
-
 @ ( offset -- )
 @ add offset to 16 bit (dictionary pointer) DP
 Forthword_ DPPLUS, 0, "dp+"
