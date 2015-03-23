@@ -106,6 +106,42 @@
 
 \ inlinned assembly routines
 
+( n -- n+1 )
+\ optimized 1 increment
+rword 1+ inlined
+  1 tos addi,
+  bxlr,
+
+( n -- n-1 )
+\ optimized 1 decrement
+rword 1- inlined
+  1 tos subi,
+  bxlr,
+
+( n -- n+2 )
+\ optimized 2 increment
+rword 2+ inlined
+  2 tos addi,
+  bxlr,
+
+( n -- n-2 )
+\ optimized 2 decrement
+rword 2- inlined
+  2 tos subi,
+  bxlr,
+
+( n -- n+4 )
+\ optimized 4 increment
+rword 4+ inlined
+  4 tos addi,
+  bxlr,
+
+( n -- n-4 )
+\ optimized 4 decrement
+rword 4- inlined
+  4 tos subi,
+  bxlr,
+
 ( -- icell )
 \ push instruction cell size 
 rword icell inlined

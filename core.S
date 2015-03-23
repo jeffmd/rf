@@ -215,42 +215,6 @@ Forthword_ MULU, INLINE_OPT,  "*"
   muls tos, r0
   bx lr
 
-@ ( n1|u1 -- n2|u2 )
-@ optimized increment
-Forthword_ ONEPLUS, INLINE_OPT, "1+"
-  oneplus_
-  bx lr
-
-@ (S: n1 -- n2 )
-@ optimized decrement
-Forthword_ ONEMINUS, INLINE_OPT, "1-"
-  oneminus_
-  bx lr
-
-@ ( n1|u1 -- n2|u2 )
-@ optimized two increment
-Forthword_ TWOPLUS, INLINE_OPT, "2+"
-  twoplus_
-  bx lr
-
-@ (S: n1 -- n2 )
-@ optimized decrement
-Forthword_ TWOMINUS, INLINE_OPT, "2-"
-  twominus_
-  bx lr
-
-@ ( n1|u1 -- n2|u2 )
-@ optimized four increment
-Forthword_ FOURPLUS, INLINE_OPT, "4+"
-  fourplus_
-  bx lr
-
-@ (S: n1 -- n2 )
-@ optimized decrement
-Forthword_ FOURMINUS, INLINE_OPT, "4-"
-  fourminus_
-  bx lr
-
 @ ( n1 -- n1*2 )
 @ shift left to give * 2
 Forthword_ TWOSTAR, INLINE_OPT, "2*"

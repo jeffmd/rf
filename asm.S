@@ -32,7 +32,51 @@ Forthword_ LR_G, INLINE_OPT, "lr>"
     mov tos, lr
     bx lr
 
+@ ( 8n reg -- )
+@ subtract imediate 8 bit value from reg
+Forthword_ TOS, 0, "tos"
+    dolit8_ 0x6
+    bx lr
+    
+@ ( 8n reg -- )
+@ subtract imediate 8 bit value from reg
+Forthword_ SUBI_C, 0, "subi,"
+    dolit8_ 0x38
+    b.n MCASI_C
 
+@ ( 8n reg -- )
+@ subtract imediate 8 bit value from reg
+Forthword_ MOVI_C, 0, "movi,"
+    dolit8_ 0x20
+    b.n MCASI_C
+
+@ ( 8n reg -- )
+@ subtract imediate 8 bit value from reg
+Forthword_ CMPI_C, 0, "cmpi,"
+    dolit8_ 0x2E
+    b.n MCASI_C
+
+@ ( 8n reg -- )
+@ add imediate 8 bit value to reg
+@ reg is 0 -7 corresponding to r0 - r7
+@ r6 is tos
+@ r7 is dsp
+Forthword_ ADDI_C, 0, "addi,"
+    dolit8_ 0x30
+
+MCASI_C:    
+    push {lr}
+    ldm dsp!, {r0}
+    ands r0, #0xF
+    orrs tos, r0
+    ldm dsp!, {r0}
+    ands r0, #0xFF
+    lsls tos, #8
+    orrs tos, r0
+    bl COMMA
+    pop {pc}
+
+    
 @ calc relative distance in half word alignment
 @ ( dest start  -- distance )
 Forthword_ RELDST, 0, "reldst"
