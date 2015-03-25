@@ -37,6 +37,13 @@ PFA_QDUP1:
 Forthword_ SWAP, INLINE_OPT, "swap"
     swap_
     bx lr
+    
+@ ( n1 n2 -- n2)
+@ drop NOS, one before TOS.
+@ same as SWAP DROP
+Forthword_ NIP, INLINE_OPT, "nip"
+    adds dsp, #4 
+    bx lr
 
 @ ( x1 x2 -- x1 x2 x1 )
 @ Place a copy of x1 on top of the stack
@@ -62,18 +69,6 @@ Forthword_ DDROP, INLINE_OPT, "2drop"
     ddrop_
     bx lr
 
-@ ( n1 n2 -- n2)
-@ drop NOS, one before TOS.
-@ same as SWAP DROP
-Forthword_ NIP, INLINE_OPT, "nip"
-    nip_
-    bx lr
-
-@ ( n1 n2 n3 -- n3)
-@ drop NOS twice, two cells before TOS.
-Forthword_ DNIP, INLINE_OPT, "2nip"
-    dnip_
-    bx lr
 
 @ ( n1 n2 -- n2 n1 n2)
 @ tuck TOS before NOS, same as SWAP OVER
@@ -215,29 +210,6 @@ Forthword_ MULU, INLINE_OPT,  "*"
   muls tos, r0
   bx lr
 
-@ ( n1 -- n1*2 )
-@ shift left to give * 2
-Forthword_ TWOSTAR, INLINE_OPT, "2*"
-  twostar_
-  bx lr
-
-@ ( n1 -- n1/2 )
-@ arithmetic shift right to give / 2
-Forthword_ TWOSLASH, INLINE_OPT, "2/"
-  twoslash_
-  bx lr
-
-@ ( n1 -- n1*4 )
-@ shift left to give * 4
-Forthword_ FOURSTAR, INLINE_OPT, "4*"
-  fourstar_
-  bx lr
-
-@ ( n1 -- n1/4 )
-@ shift right to give / 4
-Forthword_ FOURSLASH, INLINE_OPT, "4/"
-  fourslash_
-  bx lr
 
 Forthword_ NEGATE, INLINE_OPT, "neg"
   neg_

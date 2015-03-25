@@ -23,6 +23,7 @@ Forthword_ BXLR_C, 0, "bxlr,"
     push {lr}
     dolit16_ 0x4770
     bl COMMA
+    bl CLRCACHE
     pop {pc}
 
 @ ( -- lr )
@@ -51,20 +52,20 @@ Forthword_ R2, 0, "r2"
     bx lr
 
 @ ( -- 3 )
-@ r3
-Forthword_ R3, 0, "r3"
+@ b register
+Forthword_ RB, 0, "b"
     dolit8_ 0x3
     bx lr
 
 @ ( -- 4 )
-@  r4
-Forthword_ R4, 0, "r4"
+@  sysvar
+Forthword_ R4, 0, "sysvar"
     dolit8_ 0x4
     bx lr
 
 @ ( -- 5 )
-@ r4
-Forthword_ R5, 0, "r5"
+@ a register
+Forthword_ RA, 0, "a"
     dolit8_ 0x5
     bx lr
 
@@ -80,49 +81,40 @@ Forthword_ DSP, 0, "dsp"
     dolit8_ 0x7
     bx lr
      
-@ ( 8n reg -- )
+@ ( val8 Rd -- )
 @ subtract imediate 8 bit value from reg
-Forthword_ SUBI_C, 0, "subi,"
-    dolit8_ 0x38
+Forthword_ MOVI_C, 0, "movs#,"
+    dolit8_ 0x0
     b.n MCASI_C
 
-@ ( 8n reg -- )
+@ ( val8 Rd -- )
 @ subtract imediate 8 bit value from reg
-Forthword_ MOVI_C, 0, "movi,"
-    dolit8_ 0x20
+Forthword_ CMPI_C, 0, "cmp#,"
+    dolit8_ 0x1
     b.n MCASI_C
 
-@ ( 8n reg -- )
-@ subtract imediate 8 bit value from reg
-Forthword_ CMPI_C, 0, "cmpi,"
-    dolit8_ 0x2E
-    b.n MCASI_C
-
-@ ( 8n reg -- )
+@ ( val8 Rd -- )
 @ add imediate 8 bit value to reg
 @ reg is 0 -7 corresponding to r0 - r7
-Forthword_ ADDI_C, 0, "addi,"
-    dolit8_ 0x30
+Forthword_ ADDI_C, 0, "adds#,"
+    dolit8_ 0x2
+    b.n MCASI_C
 
-@ ( 8n reg Op -- )
+@ ( val8 Rd -- )
+@ subtract imediate 8 bit value from reg
+Forthword_ SUBI_C, 0, "subs#,"
+    dolit8_ 0x3
+
+@ ( val8 Rd Op -- )
 @ instruction bit pattern
-@ 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-@  0  0  1| Op  |  Rd  |   Offset8     |
+@  15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+@ |       Op     |  Rd  |     val8      |
 @ move, cmp, add, sub operations with immediate
 MCASI_C:    
     push {lr}
-    @ mask Rd with 7
-    ldm dsp!, {r0}
-    movs r1, #0x7
-    ands r0, r1
+    movs r0, #4
     orrs tos, r0
-    @ mask offset with 255
-    ldm dsp!, {r0}
-    movs r1, #0xFF
-    ands r0, r1
-    lsls tos, #8
-    orrs tos, r0
-    bl COMMA
+    bl OPRDVAL_C
     pop {pc}
 
 @ ( Rd Rs -- )
@@ -198,24 +190,12 @@ Forthword_ RSBS_C, 0, "rsbs,"
 @ 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
 @  0  1  0  0  0  0|   op  |  Rs |  Rd |
 @ ALU operations: and, eor, lsl, lsr, asr, adc, sbc, ror, tst, rsbs
-ALU_C:    
-    push {lr}
-    @ mask Rs with 7
-    ldm dsp!, {r0}
-    movs r1, #0x7
-    ands r0, r1
-    lsls r0, #3
+ALU_C:
+    push {lr}    
     movs r1, #64
     lsls r1, #2
     orrs tos, r1
-    @ shift left Op 6 bits
-    lsls tos, #6
-    orrs tos, r0
-    ldm dsp!, {r0}
-    movs r1, #0x7
-    ands r0, r1
-    orrs tos, r0
-    bl COMMA
+    bl OPRSRD_C
     pop {pc}
     
 @ ( Rd Rs -- )
@@ -260,6 +240,97 @@ Forthword_ MVNS_C, 0, "mvns,"
     dolit8_ 0xF
     b.n ALU_C
 
+@ ( Rd Rs val5 -- )
+@ Rd = Rs << val5
+@ logical shift left Rs by immediate val5 bits and put result in Rd
+Forthword_ LSLI_C, 0, "lsls#,"
+    dolit8_ 0x0
+    b.n OPVALRSRD_C
+
+@ ( Rd Rs val5 -- )
+@ Rd = Rs >> val5
+@ logical shift right Rs by immediate val5 bits and put result in Rd
+Forthword_ LSRI_C, 0, "lsrs#,"
+    dolit8_ 0x1
+    b.n OPVALRSRD_C
+
+@ ( Rd Rs val5 -- )
+@ Rd = Rs >> val5
+@ arithmetic shift right Rs by immediate val5 bits and put result in Rd
+Forthword_ ASRI_C, 0, "asrs#,"
+    dolit8_ 0x2
+    b.n OPVALRSRD_C
+
+@ ( Rd Rs val5 op -- )
+@ instruction bit pattern
+@  15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+@ |      op      |   val5   |  Rs |  Rd |
+@ compile arm thumb assembler instruction    
+Forthword_ OPVALRSRD_C, 0, "opvalrsrd,"
+    ldm dsp!, {r0}
+    movs r1, #31
+    ands r0, r1
+    lsls tos, #5
+    orrs tos, r0
+    b.n OPRSRD_C
+
+@ ( Rd Rs val3 op -- )
+@ instruction bit pattern
+@  15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+@ |        op         | val3|  Rs |  Rd |
+@ compile arm thumb assembler instruction  
+Forthword_ OPVRRSRD_C, 0, "opvrrsrd,"
+    ldm dsp!, {r0}
+    movs r1, #7
+    ands r0, r1
+    lsls tos, #3
+    orrs tos, r0
+    b.n OPRSRD_C
+
+@ ( Rd Rs op -- )
+@ instruction bit pattern
+@  15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+@ |            op           |  Rs |  Rd |
+@ compile arm thumb assembler instruction   
+Forthword_ OPRSRD_C, 0, "oprsrd,"
+    push {lr}
+    @ shift left Op 6 bits
+    lsls tos, #6
+    @ mask Rs with 7
+    ldm dsp!, {r0}
+    movs r1, #0x7
+    ands r0, r1
+    lsls r0, #3
+    orrs tos, r0
+    ldm dsp!, {r0}
+    movs r1, #0x7
+    ands r0, r1
+    orrs tos, r0
+    bl COMMA
+    pop {pc}
+
+@ ( val8 Rd op -- )
+@ instruction bit pattern
+@  15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+@ |       op     |  Rd  |  8 bit val    |
+@ compile arm thumb assembler instruction    
+Forthword_ OPRDVAL_C, 0, "oprdval,"
+    push {lr}
+    lsls tos, #3
+    @ mask Rd with 7
+    ldm dsp!, {r0}
+    movs r1, #0x7
+    ands r0, r1
+    orrs tos, r0
+    @ mask val with 255
+    ldm dsp!, {r0}
+    movs r1, #0xFF
+    ands r0, r1
+    lsls tos, #8
+    orrs tos, r0
+    bl COMMA
+    pop {pc}
+    
 @ calc relative distance in half word alignment
 @ ( dest start  -- distance )
 Forthword_ RELDST, 0, "reldst"
