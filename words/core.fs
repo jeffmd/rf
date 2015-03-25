@@ -47,7 +47,7 @@
 ( n1 n2 n3 -- n3)
 \ drop NOS twice, two cells before TOS.
 rword 2nip inlined
-    8 dsp adds#,
+    dsp 8 adds#,
     bxlr,
 
 ( n1 -- n1*2 )
@@ -77,37 +77,37 @@ rword 4/ inlined
 ( n -- n+1 )
 \ optimized 1 increment
 rword 1+ inlined
-    1 tos adds#,
+    tos 1 adds#,
     bxlr,
 
 ( n -- n-1 )
 \ optimized 1 decrement
 rword 1- inlined
-    1 tos subs#,
+    tos 1 subs#,
     bxlr,
 
 ( n -- n+2 )
 \ optimized 2 increment
 rword 2+ inlined
-    2 tos adds#,
+    tos 2 adds#,
     bxlr,
 
 ( n -- n-2 )
 \ optimized 2 decrement
 rword 2- inlined
-    2 tos subs#,
+    tos 2 subs#,
     bxlr,
 
 ( n -- n+4 )
 \ optimized 4 increment
 rword 4+ inlined
-    4 tos adds#,
+    tos 4 adds#,
     bxlr,
 
 ( n -- n-4 )
 \ optimized 4 decrement
 rword 4- inlined
-    4 tos subs#,
+    tos 4 subs#,
     bxlr,
 
 ( -- icell )

@@ -81,37 +81,41 @@ Forthword_ DSP, 0, "dsp"
     dolit8_ 0x7
     bx lr
      
-@ ( val8 Rd -- )
+@ ( Rd val8 -- )
 @ subtract imediate 8 bit value from reg
 Forthword_ MOVI_C, 0, "movs#,"
     dolit8_ 0x0
     b.n MCASI_C
 
-@ ( val8 Rd -- )
+@ ( Rd val8 -- )
 @ subtract imediate 8 bit value from reg
 Forthword_ CMPI_C, 0, "cmp#,"
     dolit8_ 0x1
     b.n MCASI_C
 
-@ ( val8 Rd -- )
+@ ( Rd val8 -- )
 @ add imediate 8 bit value to reg
 @ reg is 0 -7 corresponding to r0 - r7
 Forthword_ ADDI_C, 0, "adds#,"
     dolit8_ 0x2
     b.n MCASI_C
 
-@ ( val8 Rd -- )
+@ ( Rd val8 -- )
 @ subtract imediate 8 bit value from reg
 Forthword_ SUBI_C, 0, "subs#,"
     dolit8_ 0x3
 
-@ ( val8 Rd Op -- )
+@ ( Rd val8 Op -- )
 @ instruction bit pattern
 @  15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
 @ |       Op     |  Rd  |     val8      |
 @ move, cmp, add, sub operations with immediate
 MCASI_C:    
     push {lr}
+    @ flip Rd and val8 around
+    to_r_
+    swap_
+    r_from_
     movs r0, #4
     orrs tos, r0
     bl OPRDVAL_C
