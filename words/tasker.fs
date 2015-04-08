@@ -70,7 +70,7 @@ maxtask dcell* allot
 : tidx+
   tidx@ 2* 1+ 
   \ if slot count is odd then 1+
-  tidx@ cnt@
+  count
   1 and +
   tidx c!
 ;
