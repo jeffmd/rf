@@ -27,6 +27,7 @@ USER_BASE: .space 2
 USER_PAUSE: .space 4
 USER_KEY: .space 4
 USER_KEYFILE: .space 4
+USER_EMIT: .space 4
 USER_ARGC: .space 4
 USER_ARGV: .space 4
 USER_HERE: .space 4

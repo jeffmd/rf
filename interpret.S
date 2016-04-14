@@ -45,6 +45,11 @@ Forthword_ PAUSEADDR, 0, "pause#"
 Forthword_ KEYADDR, 0, "key#"
     douser_ USER_KEY
 
+@ ( -- emitaddr )
+@ get ram address of emit defer
+Forthword_ EMITADDR, 0, "emit#"
+    douser_ USER_EMIT
+
 @ ( -- keyfileaddr )
 @ get ram address of key file descriptor
 Forthword_ KEYFILEADDR, 0, "keyf#"
@@ -62,11 +67,20 @@ Forthword_ ARGVADDR, 0, "argv#"
 
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
-Forthword_ EMIT, 0, "emit"
+Forthword_ PUTCHAR, 0, "putchar"
   push {lr}
   mov r0, tos
   poptos_
   bl putchar
+  pop {pc}
+
+@ ( c -- )
+@ fetch the emit vector and EXEC it. Will emit a character from TOS
+Forthword_ EMIT, 0, "emit"
+  push {lr}
+  bl EMITADDR
+  fetch_
+  bl EXEC
   pop {pc}
 
 @ ( -- )
@@ -753,13 +767,18 @@ Forthword_ RESET, 0, "reset"
     bl SMUDGE
     bl ZEROSTORE
 
-    @ reset input buffer
-    bl INRESET
-
-    @ reset input source
+    @ reset input source for key
     dolit32_ STDIN
     bl KEYADDR
     bl STORE
+
+    @ reset output source for emit
+    dolit32_ PUTCHAR
+    bl EMITADDR
+    bl STORE
+
+    @ reset input buffer
+    bl INRESET
 
     @ switch to interpret mode
     bl LBRACKET
