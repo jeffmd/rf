@@ -78,9 +78,8 @@ Forthword_ WARM, 0, "warm"
     mov tos, sp
     bl RP0
     bl STORE
-
-    bl RESET
     bl ONLY
+    bl RESET
     bl DECIMAL           @ default to decimal base
     type_ "rf 0.1\n"
     @ check if command line args need to be loaded
