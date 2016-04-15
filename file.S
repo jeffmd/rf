@@ -98,5 +98,22 @@ Forthword_ DLERROR, 0, "dlerror"
   mov tos, r0
   pop {pc}
 
+@ ( calladdr -- [] )
+@ call a dl symbol with no call arguments  
+Forthword_ DLCALL0, 0, "dlcall0"
+  push {lr}
+  blx tos
+  mov tos, r0
+  pop {pc}
 
+@ ( arg1 calladdr -- [] )
+@ call a dl symbol with no call arguments  
+Forthword_ DLCALL1, 0, "dlcall1"
+  push {lr}
+  mov r1, tos @ call addr
+  poptos_
+  mov r0, tos @ arg1
+  blx r1
+  mov tos, r0
+  pop {pc}
 
