@@ -4,7 +4,7 @@ INCS = *.S
 all: rf
 
 rf : rf.o input.o
-	gcc -Os -ldl -o $@ $+
+	gcc -Os -ldl -lm -o $@ $+
 
 rf.o : main.S $(INCS)
 	as -o $@ $<
