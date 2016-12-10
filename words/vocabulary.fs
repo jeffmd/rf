@@ -20,12 +20,18 @@
   context# !
 ;
 
-
+\ make a wordlist record in data ram
+\ worlist record fields:
+\ [0] word: address to nfa of last word added to this wordlist
+\ [1] Name: address to nfa of vocabulary name 
 : wordlist ( -- wid )
   here dup 0! \ get head address in ram and set to zero
-  2 dcell* allot \ allocate  2 words in ram
+  2 dcell* allot \ allocate  2 words in ram for record fields
 ;
 
+\ similar to dup : duplicate current wordlist in vocabulary search list
+\ normally used to add another vocabulary to search list
+\ ie: also MyWords
 : also ( -- )
   context@
   \ increment index
@@ -35,6 +41,8 @@
 ; immediate
 
 
+\ similar to drop but for vocabulary search list
+\ removes most recently added wordlist from vocabulary search list
 : previous ( -- )
   \ get current index and decrement by 1
   contidx dup h@ 1- dup
@@ -49,9 +57,10 @@
 
 \ Used in the form:
 \ cccc DEFINITIONS
-\ Set the CURRENT vocabulary to the CONTEXT vocabulary. In the
+\ Set the CURRENT vocabulary to the CONTEXT vocabulary - where new
+\ definitions are put in the CURRENT word list. In the
 \ example, executing vocabulary name cccc made it the CONTEXT
-\ vocabulary and executing DEFINITIONS made both specify vocabulary
+\ vocabulary (for word searches) and executing DEFINITIONS made both specify vocabulary
 \ cccc.
 
 : definitions

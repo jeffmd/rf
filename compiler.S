@@ -24,13 +24,13 @@ Forthword_ CONTEXT, 0, "context"
     douser_ ram_CONTEXT
 
 @ ( -- addr )
-@ system LATEST. Get flash program address of latest word being compiled.
+@ system LATEST. Get flash program address of most recent word successfuly compiled.
 Forthword_ LATEST, 0, "latest"
     douser_ ram_LATEST
 
 
 @ ( -- addr )
-@ system SMUDGE. Get flash program address of latest word being compiled.
+@ system SMUDGE. Get flash program address of latest word currently being compiled.
 Forthword_ SMUDGE, 0, "smudge"
     douser_ COLON_SMUDGE
 
@@ -85,10 +85,12 @@ TAILOPT_OPT:
 @ clear data cache to force reload when executed as instructions
 Forthword_ CLRCACHE, 0, "clrcache"
     push {lr}
+    @ r0 = start address: will be current last word defined
     bl CURRENT
     fetch_
     mov r0, tos
     poptos_
+    @ r1 = end address
     bl DP
     mov r1, tos
     poptos_
@@ -104,10 +106,12 @@ Forthword_ UWID, 0, "uwid"
     bl QDUP
     zerosense_
     beq.n UWID_end
+       @ wid.last = smudge
        bl CURRENT
        fetch_
        bl STORE
        bl CLRCACHE
+       @ set smudge to zero indicating no longer compiling a word
        bl SMUDGE
        bl ZEROSTORE
 UWID_end:
@@ -123,7 +127,7 @@ Forthword_ LBRACKET, IMMEDIATE_EN, "["
     pop {pc}
 
 @ ( n -- )
-@ compile 16 bit into ram at (dictionary pointer) DP
+@ store 16 bit value on TOS into ram at (dictionary pointer) DP
 Forthword_ COMMA, 0, ","
     push {lr}
     bl DP
@@ -132,7 +136,7 @@ Forthword_ COMMA, 0, ","
     pop {pc}
 
 @ ( n -- )
-@ compile 32 bit into ram at (dictionary pointer) DP
+@ store 32 bit value on TOS into ram at (dictionary pointer) DP
 Forthword_ DCOMMA, 0, "d,"
     push {lr}
     bl DP
@@ -142,7 +146,7 @@ Forthword_ DCOMMA, 0, "d,"
     pop {pc}
 
 @ ( addr len len' -- )
-@ compiles a string from RAM to program ram
+@ copies a string from RAM to program ram
 Forthword_ DOSCOMMA, 0, "(s,)"
     push {lr}
     bl COMMA           @ ( addr len )

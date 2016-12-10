@@ -107,7 +107,7 @@ Forthword_ DLCALL0, 0, "dlcall0"
   pop {pc}
 
 @ ( arg1 calladdr -- [] )
-@ call a dl symbol with no call arguments  
+@ call a dl symbol with one call arguments  
 Forthword_ DLCALL1, 0, "dlcall1"
   push {lr}
   mov r1, tos @ call addr
@@ -116,4 +116,5 @@ Forthword_ DLCALL1, 0, "dlcall1"
   blx r1
   mov tos, r0
   pop {pc}
+  
 
