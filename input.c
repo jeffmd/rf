@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <termios.h>
+#include <math.h>
 
 /* Use this variable to remember original terminal attributes. */
 
@@ -65,3 +66,4 @@ void set_input_mode (void)
   tattr.c_cc[VTIME] = 0;
   tcsetattr (STDIN_FILENO, TCSAFLUSH, &tattr);
 }
+
