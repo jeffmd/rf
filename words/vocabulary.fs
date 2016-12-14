@@ -20,13 +20,27 @@
   context# !
 ;
 
+\ address to head of linked list of wordlists
+var vocabList vocabList 0!
+
 \ make a wordlist record in data ram
-\ worlist record fields:
-\ [0] word: address to nfa of last word added to this wordlist
-\ [1] Name: address to nfa of vocabulary name 
+\ wordlist record fields:
+\ [0] word:dcell: address to nfa of most recent word added to this wordlist
+\ [1] Name:dcell: address to nfa of vocabulary name 
+\ [2] link:dcell: address to previous wordlist to form vocabulary linked list
 : wordlist ( -- wid )
-  here dup 0! \ get head address in ram and set to zero
-  2 dcell* allot \ allocate  2 words in ram for record fields
+  \ get next available ram from here and use as wid
+  here ( wid )
+  \ get word field address in ram and set to zero
+  dup 0! ( wid )
+  \ allocate  3 data cells in ram for the 3 fields
+  3 dcell* allot  ( wid )
+  \ update link field with contents of vocabList
+  vocabList @     ( wid oldwid )
+  over dcell+ dcell+ ( wid oldwid wid+2*dcell )
+  ! ( wid )
+  \ update vocabList with new wid
+  dup vocabList !
 ;
 
 \ similar to dup : duplicate current wordlist in vocabulary search list
@@ -103,7 +117,7 @@ context @ dcell+
 ! 
 
 \ print name field
-: ?nf ( nfa -- )
+: .nf ( nfa -- )
       $l $FF and             ( cnt addr addr n ) \ mask immediate bit
       type space             ( cnt addr )
 ;
@@ -115,7 +129,7 @@ context @ dcell+
       ?dup                   ( cnt addr addr )
     while                    ( cnt addr ) \ is nfa = counted string
       dup                    ( cnt addr addr )
-      ?nf                    ( cnt addr )
+      .nf                    ( cnt addr )
       nfa>lfa                ( cnt lfa )
       @                      ( cnt addr )
       swap                   ( addr cnt )
@@ -142,8 +156,8 @@ context @ dcell+
   lwords
 ;
 
-\ list active vocabularies
-: vocabs ( -- )
+\ print out search list of active vocabularies
+: order ( -- )
   ." Search: "
   \ get context index and use as counter
   contidx h@
@@ -157,7 +171,7 @@ context @ dcell+
     ?dup if
       \ next cell has name field address 
       dcell+ @
-      ?nf
+      .nf
     then
     \ decrement index
     1-
@@ -165,6 +179,26 @@ context @ dcell+
   drop
   ." Forth Root" cr
   ." definitions: "
-  cur@ dcell+ @ ?nf cr
+  cur@ dcell+ @ .nf cr
 ;
 
+\ print out all existing vocabularies
+\ order is newest to oldest
+: vocs ( -- )
+  \ most recent vocabulary address is in vocabList
+  \ it is the head of the vocabulary linked list
+  \ get head link of linked list
+  vocabList @  ( link )
+  begin
+  \ while link is not zero
+  ?while  ( link )
+    \ get name from name field
+    dcell+ dup @ ( link+dcell name )
+    \ print name
+    .nf ( link+dcell )
+    \ get next link from link field
+    dcell+ @ ( link )
+  repeat
+  drop
+  ." Forth Root" cr
+;
