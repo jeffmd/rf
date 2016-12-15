@@ -106,7 +106,7 @@ Forthword_ UWID, 0, "uwid"
     bl QDUP
     zerosense_
     beq.n UWID_end
-       @ wid.last = smudge
+       @ wid.word = smudge
        bl CURRENT
        fetch_
        bl STORE

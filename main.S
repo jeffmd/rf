@@ -45,6 +45,8 @@ ram_tib: .space TIBSIZE
 EE_FORTHWORDLIST:
   .space 4 @ head pointer
   .space 4 @ name pointer
+  .space 4 @ sibling link pointer
+  .space 4 @ child pointer
 
 @ start of user ram area
 HERESTART:

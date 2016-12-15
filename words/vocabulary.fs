@@ -20,27 +20,56 @@
   context# !
 ;
 
-\ address to head of linked list of wordlists
-var vocabList vocabList 0!
+\ get a valid wid from the context
+\ tries to get the top vocabulary
+\ if no valid entries then defaults to Forth wid
+: wid@ ( -- wid )
+  context@
+  ?if else drop context @ then
+;
 
-\ make a wordlist record in data ram
+\ address to head of linked list of wordlists
+\ var vocabList vocabList 0!
+
 \ wordlist record fields:
 \ [0] word:dcell: address to nfa of most recent word added to this wordlist
 \ [1] Name:dcell: address to nfa of vocabulary name 
-\ [2] link:dcell: address to previous wordlist to form vocabulary linked list
+\ [2] link:dcell: address to previous sibling wordlist to form vocabulary linked list
+\ [3] child:dcell: address to head of child wordlist
+
+\ add link field offset
+: wid:link ( wid -- wid:link) dcell+ dcell+ ;
+\ add child field offset
+: wid:child ( wid -- wid:child ) 3 dcell* + ;
+
+\ initialize wid fields of definitions vocabulary
+: widinit ( wid -- wid )
+  \ wid.word = 0
+  dup 0! ( wid )
+
+  \ parent wid child field is in cur@->child
+  dup cur@ wid:child  ( wid wid parentwid.child )
+  2over ( wid wid parentwid.child wid parentwid.child )
+  @   ( wid wid parentwid.child wid childLink )
+  swap wid:link ( wid wid parentwid.child childLink wid.link )
+
+  \ wid.child = 0
+  dup dcell+ 0! ( wid wid parentwid.child childLink wid.link )
+  \ wid.link = childLink
+  ! ( wid wid parentwid.child )
+  \ parentwid.child = wid
+  ! ( wid )
+;
+
+\ make a wordlist record in data ram
+\ and initialize the fields
 : wordlist ( -- wid )
   \ get next available ram from here and use as wid
-  here ( wid )
-  \ get word field address in ram and set to zero
-  dup 0! ( wid )
-  \ allocate  3 data cells in ram for the 3 fields
-  3 dcell* allot  ( wid )
-  \ update link field with contents of vocabList
-  vocabList @     ( wid oldwid )
-  over dcell+ dcell+ ( wid oldwid wid+2*dcell )
-  ! ( wid )
-  \ update vocabList with new wid
-  dup vocabList !
+  here ( wid )   
+  \ allocate  4 data cells in ram for the 4 fields
+  4 dcell* allot  ( wid )
+
+  widinit ( wid )
 ;
 
 \ similar to dup : duplicate current wordlist in vocabulary search list
@@ -65,7 +94,7 @@ var vocabList vocabList 0!
   if
     0 context! swap h!
   else
-    2drop
+    2drop [compile] only
   then
 ; immediate
 
@@ -95,8 +124,8 @@ var vocabList vocabList 0!
   create
   [compile] immediate
   \ allocate space in ram for head and tail of vocab word list
-  wordlist dup d,
-  \ get nfa and store in second field of wordlist record 
+  wordlist dup d, ( wid )
+  \ wid.name = vocabulary.nfa  
   cur@ @ swap dcell+ !
   does>
    @ \ get header address
@@ -110,11 +139,16 @@ var vocabList vocabList 0!
 
 \ setup forth name pointer in forth wid name field
 \ get forth nfa - its the most recent word created
-cur@ @
-\ get the forth wid and adjust to name field 
-context @ dcell+
-\ write forth nfa to name field
-! 
+cur@ @ ( nfa )
+\ get the forth wid, initialize it and set name field
+\ forthwid.word is already initialized
+context @ dcell+ ( nfa forthwid.name )
+\ forthwid.name = nfa
+tuck ! ( forthwid.name )
+\ forthwid.link = 0
+dcell+ dup 0! ( forthwid.link )
+\ forthwid.child = 0
+dcell+ 0! ( )
 
 \ print name field
 : .nf ( nfa -- )
@@ -144,9 +178,8 @@ context @ dcell+
 \ Does not list other linked vocabularies.
 \ Use words to see all words in the top context search.
 : words ( -- )
-    context@
-    ?if else drop context @ then
-    @                       ( 0 addr )
+    wid@ ( wid )
+    @    ( nfa )
     lwords
 ;
 
@@ -182,23 +215,28 @@ context @ dcell+
   cur@ dcell+ @ .nf cr
 ;
 
-\ print out all existing vocabularies
+\ print child vocabularies
+\ : .childvocs ( wid -- )
+
+\ ;
+
+\ list all child vocabularies in the context vocabulary
 \ order is newest to oldest
 : vocs ( -- )
-  \ most recent vocabulary address is in vocabList
+  \ get top search vocabulary address
   \ it is the head of the vocabulary linked list
-  \ get head link of linked list
-  vocabList @  ( link )
+  wid@  ( wid )
+  \ get child link of linked list
+  wid:child @ ( linkwid )
   begin
   \ while link is not zero
-  ?while  ( link )
+  ?while  ( linkwid )
     \ get name from name field
-    dcell+ dup @ ( link+dcell name )
+    dcell+ dup @ ( linkwid.name name )
     \ print name
     .nf ( link+dcell )
     \ get next link from link field
-    dcell+ @ ( link )
+    dcell+ @ ( linkwid )
   repeat
   drop
-  ." Forth Root" cr
 ;
