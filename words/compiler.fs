@@ -263,12 +263,12 @@
 
 ( -- )
 \ Compiler
+\ perform a recursive call to the word currently being defined
 \ compile the XT of the word currently
 \ being defined into the dictionary
-\ : recurse
-\    latest  \ ;****FIXME******
-\    @ $0400 cxt
-\ ; :ic
+: recurse
+  smudge @ nfa>xtf cxt  
+; :ic
 
 ( n cchar -- )
 \ Compiler
