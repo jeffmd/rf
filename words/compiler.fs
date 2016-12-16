@@ -70,16 +70,16 @@
     \  skip over push {lr}
     icell+                    ( retaddr xt+2 )
     \ temp save dp on return stack
-    dp# @ >r
+    dp >r
     \ set dp to xt+2
-    dup dp# !                 ( retaddr xt+2 )
+    dup dp!                   ( retaddr xt+2 )
     \ modify the bl
     \ calc displacement
     reldst                    ( dst )
     \ compile a bl instruction
     bl,                       ( )
     \ restore dp
-    r> dp# !                  ( )
+    r> dp!                    ( )
 ;
 
 ( -- )
