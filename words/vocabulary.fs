@@ -228,8 +228,9 @@ dcell+ 0! ( )
     .nf cr ( spaces link.name )
     \ get link field
     dcell+ ( spaces linkwid.link )
+    \ increase spaces for indenting child vocabularies
     over 2+ over ( spaces linkwid.link spaces+2 linkwid.link )
-    \ get child link and recurse
+    \ get child link and recurse: print child vocabularies
     dcell+ @ recurse ( spaces linkwid.link )
     \ get link for next sibling
     @
@@ -240,7 +241,7 @@ dcell+ 0! ( )
 \ list all child vocabularies in the context vocabulary
 \ order is newest to oldest
 : vocs ( -- )
-  \ start spaces at 0
+  \ start spaces at 2
   2
   \ get top search vocabulary address
   \ it is the head of the vocabulary linked list
