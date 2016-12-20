@@ -216,27 +216,36 @@ dcell+ 0! ( )
 ;
 
 \ print child vocabularies
-\ : .childvocs ( wid -- )
-
-\ ;
+: .childvocs ( spaces wid -- )
+  begin
+  \ while link is not zero
+  ?while  ( spaces linkwid )
+    \ print indent
+    over spaces
+    \ get name from name field
+    dcell+ dup @ ( spaces linkwid.name name )
+    \ print name and line feed
+    .nf cr ( spaces link.name )
+    \ get link field
+    dcell+ ( spaces linkwid.link )
+    over 2+ over ( spaces linkwid.link spaces+2 linkwid.link )
+    \ get child link and recurse
+    dcell+ @ recurse ( spaces linkwid.link )
+    \ get link for next sibling
+    @
+  repeat
+  2drop
+;
 
 \ list all child vocabularies in the context vocabulary
 \ order is newest to oldest
 : vocs ( -- )
+  \ start spaces at 0
+  2
   \ get top search vocabulary address
   \ it is the head of the vocabulary linked list
   wid@  ( wid )
   \ get child link of linked list
   wid:child @ ( linkwid )
-  begin
-  \ while link is not zero
-  ?while  ( linkwid )
-    \ get name from name field
-    dcell+ dup @ ( linkwid.name name )
-    \ print name
-    .nf ( link+dcell )
-    \ get next link from link field
-    dcell+ @ ( linkwid )
-  repeat
-  drop
+  .childvocs cr
 ;
