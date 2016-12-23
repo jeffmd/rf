@@ -665,5 +665,5 @@ MCPY_B:
     b.n MCPY_B
 
 MCPY_END:
-    bl DDROP
-    pop {pc}
+    pop_lr_
+    b DDROP

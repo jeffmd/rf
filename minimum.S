@@ -23,8 +23,8 @@ Forthword_ BASE, 0, "base"
 Forthword_ BASESTORE, 0, "base!"
     push {lr}
     bl BASE
-    bl HSTORE
-    pop {pc}
+    pop_lr_
+    b HSTORE
 
 @ ( n -- )
 @ load base
@@ -95,8 +95,8 @@ NHEX_NEXT:
 Forthword_ PNIB, 0, ".h"
     push {lr}
     bl NHEX
-    bl EMIT
-    pop {pc}
+    pop_lr_
+    b EMIT
 
 @ ( n -- )
 @ simple 32 bit hex print
@@ -116,8 +116,8 @@ PHEX_BEGIN:
     dup_
     bl PNIB
     movs tos, #32
-    bl EMIT
-    pop {pc}
+    pop_lr_
+    b EMIT
 
 @ ( n1 -- u1 )
 @ get the absolute value
@@ -394,8 +394,8 @@ PFA_NUMBER4:
 
 PFA_NUMBER5:
   r_from_                 @ ( n true base ) (R: )
-  bl BASESTORE            @ ( n true )
-  pop {pc}
+  pop_lr_
+  b BASESTORE            @ ( n true )
 
 
 Forthword_ DSWAP, 0, "2swap"
@@ -895,11 +895,9 @@ Forthword_, DIV, 0, "/"
 @ ( n -- )
 @ sleep for n micro seconds
 Forthword_ USLEEP, 0, "usleep"
-  push {lr}
   mov r0, tos
   poptos_
-  bl usleep
-  pop {pc}
+  b usleep
 
 
 @ dodefer - execute a deferred word
@@ -968,8 +966,8 @@ Forthword_ DOINCLUDE, 0, "doinclude"
       @ restore FFLAGS
       r_from_
       bl FFLAGS
-      bl HSTORE
-      pop {pc}
+      pop_lr_
+      b HSTORE
        
 DOINCLUDE_EXIT:
     drop_
@@ -986,8 +984,8 @@ Forthword_ INCLUDEF, 0, "include"
     over_         
     plus_
     bl ZEROCSTORE
-    bl DOINCLUDE
-    pop {pc}
+    pop_lr_
+    b DOINCLUDE
 
 @ ( nx* -- ) (R: ny* -- )
 @ initialize rf further. EXECs turnkey operation and go to quit
@@ -1047,5 +1045,5 @@ Forthword_ WIPE, 0, "WIPE"
     dolit32_ HERESTART
     bl HEREADDR
     bl STORE
-    bl ONLY    
-    pop {pc}
+    pop_lr_
+    b ONLY    

@@ -68,11 +68,9 @@ Forthword_ ARGVADDR, 0, "argv#"
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ PUTCHAR, 0, "putchar"
-  push {lr}
   mov r0, tos
   poptos_
-  bl putchar
-  pop {pc}
+  b putchar
 
 @ ( c -- )
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
@@ -80,8 +78,8 @@ Forthword_ EMIT, 0, "emit"
   push {lr}
   bl EMITADDR
   fetch_
-  bl EXEC
-  pop {pc}
+  pop_lr_
+  b EXEC
 
 @ ( -- )
 @ cause subsequent output appear at the beginning of the next line
@@ -90,8 +88,8 @@ Forthword_ CR, 0, "cr"
   dolit8_ 13
   bl EMIT
   ten_
-  bl EMIT
-  pop {pc}
+  pop_lr_ 
+  b EMIT
 
 @ ( -- 32 )
 @ put ascii code of the blank/space character to the stack
@@ -139,15 +137,13 @@ Forthword_ KEY, 0, "key"
   push {lr}
   bl KEYADDR
   fetch_
-  bl EXEC
-  pop {pc}
+  pop_lr_
+  b EXEC
 
 @ ( -- f )
 @ refills the input buffer
 Forthword_ REFILL, 0, "refill"
-  push {lr}
-  bl REFILLTIB
-  pop {pc}
+  b REFILLTIB
 
 @ ( addr n -- )
 @ print a counted string
@@ -322,8 +318,8 @@ Forthword_ SRCIN, 0, "srcin"
     bl STIB            @ ( srcaddr len )
     bl G_IN            @ ( srcaddr len ginaddr )
     hfetch_            @ ( srcaddr len gin)
-    bl SLASHSTRING     @ ( srcaddr' len' )
-    pop {pc}
+    pop_lr_
+    b SLASHSTRING     @ ( srcaddr' len' )
 
 
 @ ( -- )
@@ -336,8 +332,8 @@ Forthword_ SKIPBL, 0, "skipbl"
 
     @ adjust >IN
     bl G_IN              @ ( n2 ginaddr )
-    bl PLUSHSTORE        @ (  )
-    pop {pc}
+    pop_lr_
+    b PLUSHSTORE        @ (  )
 
 @ ( char "ccc<char>" -- c-addr u )
 @ in input buffer parse ccc delimited string by the delimiter char.
@@ -349,8 +345,8 @@ Forthword_ PARSE, 0, "parse"
     dup_             @ ( -- addr' len'' len'')
     oneplus_         @ ( -- addr' len'' len''+1 )
     bl G_IN          @ ( -- addr' len'' len''+1 >in)
-    bl PLUSHSTORE    @ ( -- addr' len'')
-    pop {pc}
+    pop_lr_
+    b PLUSHSTORE    @ ( -- addr' len'')
 
 
 @ ( "<name>" -- c-addr len )
@@ -359,8 +355,8 @@ Forthword_ PNAME, 0, "pname"
     push {lr}
     bl SKIPBL
     bl_
-    bl PARSE
-    pop {pc}
+    pop_lr_
+    b PARSE
 
 @ ( c-addr len wid -- [ 0 | nfa ] )
 @ find a word in the dictionary
@@ -430,8 +426,8 @@ FINDWI:
 
 FINDLAST:
       drop_
-      bl FINDROOT
-      pop {pc}
+      pop_lr_
+      b FINDROOT
 
 @ ( addr len --  0 | nfa )
 @ search wordlists for the name from string addr/len
@@ -606,9 +602,7 @@ Forthword_ RECX, 0, "recx"
     @doliteral_ 0xBAD
     
     $lit_ " Unknown!"
-    
     bl THROW
-    pop {pc}
 
 RECX_DONE:
     pop {pc}
@@ -675,12 +669,13 @@ Forthword_ QP_RD, 0, "?prd"
     @ <-if>
     zerosense_
     bne.n QP_RD_exit
-      bl PROMPTRDY
-      pop {pc}
+      pop_lr_
+      b PROMPTRDY
+
 QP_RD_exit:
     @ <then>
-      bl PROMPTCOMPILE
-      pop {pc}
+      pop_lr_
+      b PROMPTCOMPILE
 
 @ ( -- )
 @ Reset the input buffer
@@ -691,8 +686,8 @@ Forthword_ INRESET, 0, "in_"
   @ reset input buffer cursor position
   bl SHARPTIB            @ ( #tibaddr )
   bl ZEROHSTORE          @ ( )
-  bl QP_RD
-  pop {pc}
+  pop_lr_
+  b QP_RD
 
 @ ( -- )
 @ wait for the input buffer to be refilled then interpret
@@ -703,8 +698,8 @@ Forthword_ DOREFILL, 0, "(refill)"
   hfetch_                  @ ( >in )
   zerosense_               @ ( )
   beq.n DOREFILL_do
-    bl INRESET
-    pop {pc}
+    pop_lr_
+    b INRESET
 
 DOREFILL_do:
   @ refill the input buffer
@@ -729,8 +724,8 @@ Forthword_ BYE, 0, "bye"
     hfetch_
     or_
     bl FFLAGS
-    bl HSTORE
-    pop {pc}
+    pop_lr_
+    b HSTORE
 
 @ ( -- )
 @ Fetch pause vector and EXEC it. may make a context/task switch
@@ -738,8 +733,8 @@ Forthword_ DOPAUSE, 0, "(pause)"
     push {lr}
     bl PAUSEADDR
     fetch_
-    bl EXEC
-    pop {pc}
+    pop_lr_
+    b EXEC
 
 @ ( -- )
 @ main loop - iterate through scheduled tasks
@@ -781,8 +776,8 @@ Forthword_ RESET, 0, "reset"
     bl INRESET
 
     @ switch to interpret mode
-    bl LBRACKET
-    pop {pc}
+    pop_lr_
+    b LBRACKET
     
 @ ( -- )
 @ reset stacks and start over again
@@ -796,8 +791,8 @@ Forthword_ QUIT, 0, "quit"
     fetch_
     bl RP_STORE
     bl RESET
-    bl DOTASKS
-    pop {pc}
+    pop_lr_
+    b DOTASKS
 
 @ ( -- )
 @ interpret what is in the input buffer
@@ -820,8 +815,8 @@ DOINTERPRET_ok:
   @ make sure in buf pointer is not at zero
   bl G_IN               @ ( 1 >inaddr )
   bl ONEPLUSHSTORE      @ ( )
-  bl PROMPTOK
-  pop {pc}
+  pop_lr_
+  b PROMPTOK
 
 
 @ ( -- flag )

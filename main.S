@@ -85,9 +85,9 @@ Forthword_ WARM, 0, "warm"
     bl DECIMAL           @ default to decimal base
     type_ "rf 0.1\n"
     @ check if command line args need to be loaded
-    bl DOCMDARG    
-    bl QUIT
-    pop {pc}
+    bl DOCMDARG
+    pop_lr_  
+    b QUIT
 
 @ ( -- addr)
 @ start address of the data stack

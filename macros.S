@@ -49,6 +49,11 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
     pop {r0}
 .endm
 
+.macro pop_lr_ @ pop lr from return stack into lr
+  pop {r0}
+  mov lr, r0 
+.endm
+
 .macro pushtos_ @ save tos, (dup)
   subs dsp, #4
   str tos, [dsp]

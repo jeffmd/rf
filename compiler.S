@@ -55,8 +55,8 @@ Forthword_ DP, 0, "dp"
 Forthword_ DPPLUS, 0, "dp+"
     push {lr}
     bl DPSHARP
-    bl PLUSSTORE
-    pop {pc}
+    pop_lr_
+    b PLUSSTORE
 
 @ ( -- )
 @ increment 32 bit (dictionary pointer) DP by one thumb cell
@@ -77,8 +77,8 @@ Forthword_ TAILOPT, 0, ";opt"
 
 TAILOPT_OPT:
     @ don't optimize tail call, just compile a ret.
-    bl POPPC_C          @ ( )
-    pop {pc}
+    pop_lr_
+    b POPPC_C          @ ( )
 
 
 @ ( -- )
@@ -94,6 +94,7 @@ Forthword_ CLRCACHE, 0, "clrcache"
     bl DP
     mov r1, tos
     poptos_
+    @ can't tail call optimize here since calling c code in arm not thumb
     bl __clear_cache
     pop {pc}
     
@@ -123,8 +124,8 @@ UWID_end:
 Forthword_ LBRACKET, IMMEDIATE_EN, "["
     push {lr}
     bl STATE
-    bl ZEROHSTORE
-    pop {pc}
+    pop_lr_
+    b ZEROHSTORE
 
 @ ( n -- )
 @ store 16 bit value on TOS into ram at (dictionary pointer) DP
@@ -132,8 +133,8 @@ Forthword_ COMMA, 0, ","
     push {lr}
     bl DP
     bl HSTORE
-    bl DPPLUSONE
-    pop {pc}
+    pop_lr_
+    b DPPLUSONE
 
 @ ( n -- )
 @ store 32 bit value on TOS into ram at (dictionary pointer) DP
@@ -142,8 +143,8 @@ Forthword_ DCOMMA, 0, "d,"
     bl DP
     bl STORE
     bl DPPLUSONE
-    bl DPPLUSONE
-    pop {pc}
+    pop_lr_
+    b DPPLUSONE
 
 @ ( addr len len' -- )
 @ copies a string from RAM to program ram
@@ -221,8 +222,8 @@ Forthword_ INLINE, 0, "inline"
     swap_                    @ ( start dp count )
     dup_                     @ ( start dp count count )
     bl DPPLUS                @ ( start dp count )
-    bl MCPY                  @ ( )
-    pop {pc}
+    pop_lr_
+    b MCPY                  @ ( )
 
 @ ( nfa -- lfa )
 @ get the link field address from the name field address
@@ -274,5 +275,5 @@ Forthword_ ONLY, IMMEDIATE_EN, "only"
     @ make second slot have no vocab
     bl CONTEXT
     fourplus_
-    bl ZEROSTORE
-    pop {pc}
+    pop_lr_
+    b ZEROSTORE
