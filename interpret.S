@@ -421,8 +421,8 @@ FINDWI:
       bl CONTEXT         @ ( addr len idx*4 context )
       plus_              @ ( addr len context' )
       fetch_             @ ( addr len wid )
-      bl FINDNFA         @ ( nfa)
-      pop {pc}
+      pop_lr_
+      b FINDNFA         @ ( nfa)
 
 FINDLAST:
       drop_
@@ -533,8 +533,8 @@ Forthword_ REC_WORD, 0, "recw"
     bne.n REC_WORD_FOUND
       r_from_
       r_from_
-      bl ROT
-      pop {pc}
+      pop_lr_
+      b ROT
 
 REC_WORD_FOUND:
     r_drop_
@@ -860,8 +860,8 @@ ACCEPT_checkdelete:
     bne.n ACCEPT_dodelete
     @ at the beginning of the line, ignore this character
     drop_
-    bl ZERO
-    pop {pc}
+    pop_lr_
+    b ZERO
 
 ACCEPT_dodelete:
     movs r0, #8
@@ -907,13 +907,13 @@ ACCEPT_checkmaxinput:
     @ <if>
     zerosense_           @ ( )
     beq.n ACCEPT_atmaxinput
-    bl ZERO
-    pop {pc}
+    pop_lr_
+    b ZERO
 
 ACCEPT_atmaxinput:
     @ max number of characters in input buffer so have it processed
-    bl TRUE
-    pop {pc}
+    pop_lr_
+    b TRUE
 
 @ ( -- f )
 @ refills the input buffer - flag is true if buffer has something

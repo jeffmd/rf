@@ -5,8 +5,8 @@
 Forthword_ POPPC_C, 0, "poppc,"
     push {lr}
     dolit16_ 0xbd00
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
 
 
 @ ( -- )
@@ -14,8 +14,8 @@ Forthword_ POPPC_C, 0, "poppc,"
 Forthword_ PUSHLR_C, 0, "pushlr,"
     push {lr}
     dolit16_ 0xb500
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
 
 @ ( -- )
 @ compile assembler bx lr
@@ -23,8 +23,8 @@ Forthword_ BXLR_C, 0, "bxlr,"
     push {lr}
     dolit16_ 0x4770
     bl COMMA
-    bl CLRCACHE
-    pop {pc}
+    pop_lr_
+    b CLRCACHE
 
 @ ( -- lr )
 @ move link register onto top of data stack
@@ -118,8 +118,8 @@ MCASI_C:
     r_from_
     movs r0, #4
     orrs tos, r0
-    bl OPRDVAL_C
-    pop {pc}
+    pop_lr_
+    b OPRDVAL_C
 
 @ ( Rd Rs -- )
 @ Rd = Rd and Rs
@@ -195,12 +195,10 @@ Forthword_ RSBS_C, 0, "rsbs,"
 @  0  1  0  0  0  0|   op  |  Rs |  Rd |
 @ ALU operations: and, eor, lsl, lsr, asr, adc, sbc, ror, tst, rsbs
 ALU_C:
-    push {lr}    
     movs r1, #64
     lsls r1, #2
     orrs tos, r1
-    bl OPRSRD_C
-    pop {pc}
+    b OPRSRD_C
     
 @ ( Rd Rs -- )
 @ condition codes = Rd - Rs
@@ -310,8 +308,8 @@ Forthword_ OPRSRD_C, 0, "oprsrd,"
     movs r1, #0x7
     ands r0, r1
     orrs tos, r0
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
 
 @ ( val8 Rd op -- )
 @ instruction bit pattern
@@ -332,8 +330,8 @@ Forthword_ OPRDVAL_C, 0, "oprdval,"
     ands r0, r1
     lsls tos, #8
     orrs tos, r0
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
     
 @ calc relative distance in half word alignment
 @ ( dest start  -- distance )
@@ -366,8 +364,8 @@ Forthword_ BRANCH, 0, "b."
 Forthword_ BC, 0, "b,"
     push {lr}
     bl BRANCH
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
 
 @ compile branch at start address
 @ ( start dest -- )
@@ -377,8 +375,8 @@ Forthword_ RJMPC, 0, "rjmpc"
     bl RELDST            @ ( start reldst )
     bl BRANCH            @ ( start branchinst )
     swap_                @ ( branchinst start )
-    bl HSTORE            @ ( )
-    pop {pc}
+    pop_lr_
+    b HSTORE            @ ( )
 
 @ compile rcall to xt at the current dictionary position (DP) if relative distance is in range
 @ otherwise do long call to xt.  If word flag indicates inlining then the word is inlined.
@@ -401,8 +399,8 @@ DO_COMPILEXT:
     @ calculate relative distance in words from start to dest
     bl DP                @ ( xt dp )
     bl RELDST            @ ( distance )
-    bl BLC
-    pop {pc}
+    pop_lr_
+    b BLC
 
 @ compile call at start address
 @ ( dist -- )
@@ -431,8 +429,8 @@ Forthword_ BLC, 0, "bl,"
     movs r0, #0xF8
     lsls r0, #8
     orrs tos, r0             @ ( 0xF8dist )
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
 
 @ branch 1 word if not zero
 @ ( -- )
@@ -443,8 +441,8 @@ Forthword_ BRNZ1_COMPILE, 0, "bne1,"
     movs tos, #0xD1
     lsls tos, #8
     adds tos, #0x00
-    bl COMMA
-    pop {pc}
+    pop_lr_
+    b COMMA
 
 @ ( -- 32b )
 @ fetch a 32 bit inlinned constant pointed to by lr onto the top of stack
@@ -466,5 +464,5 @@ Forthword_ LIT, 0, "lit"
     bl NFATOXTF
     bl COMPILEXT
     @ store 32 bit val from tos
-    bl DCOMMA
-    pop {pc}
+    pop_lr_
+    b DCOMMA
