@@ -50,18 +50,35 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .endm
 
 .macro pop_lr_ @ pop lr from return stack into lr
+.if rpi2
+  pop {lr}
+.else
   pop {r0}
-  mov lr, r0 
+  mov lr, r0
+.endif
 .endm
 
 .macro pushtos_ @ save tos, (dup)
+.if rpi2
+  str.w tos, [dsp, #-4]!
+.else
   subs dsp, #4
   str tos, [dsp]
+.endif
 .endm
 
 .macro dup_
   pushtos_
 .endm
+
+.macro poptos_ @ load tos, (drop)
+  ldmia dsp!, {tos}
+.endm
+
+.macro drop_
+  poptos_
+.endm
+
 
 .macro sysv_ sym
     #(\sym - sysvar_base)
@@ -110,14 +127,6 @@ dsp .req r7 @ holds the Forth VM Parameter/Data stack pointer
 .macro dolit32_ val
   bl ICFETCH
   .word \val
-.endm
-
-.macro poptos_ @ load tos, (drop)
-  ldm dsp!, {tos}
-.endm
-
-.macro drop_
-  poptos_
 .endm
 
 
