@@ -98,10 +98,7 @@
 \ Compiler
 \ create an unnamed entry in the dictionary
 : :noname
-    dp
-    dup
-    latest
-    ! ]
+    dp ]
 ;
 
 ( -- start )

@@ -28,9 +28,6 @@
   ?if else drop context @ then
 ;
 
-\ address to head of linked list of wordlists
-\ var vocabList vocabList 0!
-
 \ wordlist record fields:
 \ [0] word:dcell: address to nfa of most recent word added to this wordlist
 \ [1] Name:dcell: address to nfa of vocabulary name 

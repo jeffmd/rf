@@ -37,7 +37,6 @@ ram_CONTEXT: .space 4 * 10 @ 10 wordlists max
 fflags: .space 2
 ram_dp: .space 4
 rstack0: .space 4
-ram_LATEST: .space 4
 ram_handler: .space 4
 ram_sharptib: .space 2
 ram_tib: .space TIBSIZE

@@ -23,11 +23,6 @@ Forthword_ CURRENT, 0, "current"
 Forthword_ CONTEXT, 0, "context"
     douser_ ram_CONTEXT
 
-@ ( -- addr )
-@ system LATEST. Get flash program address of most recent word successfuly compiled.
-Forthword_ LATEST, 0, "latest"
-    douser_ ram_LATEST
-
 
 @ ( -- addr )
 @ system SMUDGE. Get flash program address of latest word currently being compiled.

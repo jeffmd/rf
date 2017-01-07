@@ -344,7 +344,7 @@ Forthword_ RELDST, 0, "reldst"
     twoslash_            @ ( dist/2 )
     bx lr
 
-@ compile assembler instruction b - unconditional branch
+@ build assembler instruction b - unconditional short branch
 @ ( reldist -- branchrel )
 @ reldist: relative distance as 2's compliment
 Forthword_ BRANCH, 0, "b."

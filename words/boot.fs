@@ -2,7 +2,6 @@ dp
 pname header dup $FF00 or (s,)
   current @ @ d, 
   smudge !
-  dp latest !
     pushlr, 
     1 state h!
       dp >r >r dup $FF00 or (s,) r> @ d, r>
@@ -12,7 +11,6 @@ pname header dup $FF00 or (s,)
 
 pname (create) current @ header
   smudge !
-  dp latest !
     pushlr, 
     1 state h!
       pname current @ header
@@ -22,7 +20,6 @@ pname (create) current @ header
 
 (create) ] 
   smudge !
-  dp latest !
     pushlr, 
     1 state h!
       1 state h!
@@ -32,10 +29,9 @@ pname (create) current @ header
 
 (create) :
   smudge !
-  dp latest !
     pushlr,
     ]
-      (create) smudge ! dp latest ! pushlr, ]
+      (create) smudge ! pushlr, ]
     [
     poppc,
   uwid
