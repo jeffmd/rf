@@ -51,7 +51,8 @@
 ; immediate
 
 ( -- )
-\ replace the instruction written by CREATE to call the code that follows does>
+\ replace the instruction written by CREATE to call
+\ the code that follows does>
 \ does not return to caller
 \ this is the runtime portion of does>
 : (does>)

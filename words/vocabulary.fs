@@ -29,9 +29,11 @@
 ;
 
 \ wordlist record fields:
-\ [0] word:dcell: address to nfa of most recent word added to this wordlist
+\ [0] word:dcell: address to nfa of most recent word
+\     added to this wordlist
 \ [1] Name:dcell: address to nfa of vocabulary name 
-\ [2] link:dcell: address to previous sibling wordlist to form vocabulary linked list
+\ [2] link:dcell: address to previous sibling wordlist to form
+\     vocabulary linked list
 \ [3] child:dcell: address to head of child wordlist
 
 \ add link field offset
@@ -100,7 +102,8 @@
 \ Set the CURRENT vocabulary to the CONTEXT vocabulary - where new
 \ definitions are put in the CURRENT word list. In the
 \ example, executing vocabulary name cccc made it the CONTEXT
-\ vocabulary (for word searches) and executing DEFINITIONS made both specify vocabulary
+\ vocabulary (for word searches) and executing DEFINITIONS
+\ made both specify vocabulary
 \ cccc.
 
 : definitions
