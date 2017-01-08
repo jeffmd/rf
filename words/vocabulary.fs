@@ -218,7 +218,7 @@ dcell+ 0! ( )
   \ while link is not zero
   ?while  ( spaces linkwid )
     \ print indent
-    over spaces
+    over spaces ." |- "
     \ get name from name field
     dcell+ dup @ ( spaces linkwid.name name )
     \ print name and line feed
@@ -235,7 +235,7 @@ dcell+ 0! ( )
   2drop
 ;
 
-\ list all child vocabularies in the context vocabulary
+\ list context vocabulary and all child vocabularies
 \ order is newest to oldest
 : vocs ( -- )
   \ start spaces at 2
@@ -243,6 +243,8 @@ dcell+ 0! ( )
   \ get top search vocabulary address
   \ it is the head of the vocabulary linked list
   wid@  ( wid )
+  \ print context vocabulary
+  dup dcell+ @ .nf cr
   \ get child link of linked list
   wid:child @ ( linkwid )
   .childvocs cr
