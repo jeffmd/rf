@@ -8,10 +8,9 @@
 
 /* Use this variable to remember original terminal attributes. */
 
-struct termios saved_attributes;
-int fdm, fds, rc;
+static struct termios saved_attributes;
 
-void reset_input_mode (void)
+static void reset_input_mode (void)
 {
   tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
   fprintf (stdout, "\nstdin terminal attributes restored\n");
@@ -20,36 +19,7 @@ void reset_input_mode (void)
 void set_input_mode (void)
 {
   struct termios tattr;
-#if 0
-  fdm = posix_openpt(O_RDWR); 
-  if (fdm < 0) 
-  { 
-    fprintf(stderr, "Error %d on posix_openpt()\n", errno); 
-    // return 1; 
-  } 
 
-  rc = grantpt(fdm); 
-  if (rc != 0) 
-  { 
-    fprintf(stderr, "Error %d on grantpt()\n", errno); 
-    // return 1; 
-  } 
-
-  rc = unlockpt(fdm); 
-  if (rc != 0) 
-  { 
-    fprintf(stderr, "Error %d on unlockpt()\n", errno); 
-    // return 1; 
-  } 
-
-  fprintf(stdout, "remote connect to %s\n", ptsname(fdm));
-  
-  // The slave side of the PTY becomes the standard input and outputs of the child process 
-  close(0); // Close standard input (current terminal) 
-  close(1); // Close standard output (current terminal) 
-  dup(fdm); // PTY becomes standard input (0) 
-  dup(fdm); // PTY becomes standard output (1) 
-#endif
   /* Make sure stdin is a terminal. */
   if (!isatty (STDIN_FILENO))
     {
@@ -67,3 +37,12 @@ void set_input_mode (void)
   tcsetattr (STDIN_FILENO, TCSAFLUSH, &tattr);
 }
 
+float getCos( float val )
+{
+	return cosf(val);
+}
+
+void doCos( void )
+{
+	 float cosresult = getCos(25.0f);
+}
