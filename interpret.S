@@ -151,7 +151,7 @@ Forthword_ TYPE, 0, "type"
    push {lr}
    niptoa_           @ Address of string
    dupzerosense_
-   b.n TYPE2
+   beq.n TYPE_END
 
 TYPE1:
    acfetch_
@@ -161,7 +161,8 @@ TYPE1:
 
 TYPE2:
    bne.n TYPE1
-
+   
+TYPE_END:
    drop_
    pop {pc}
 

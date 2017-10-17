@@ -60,7 +60,7 @@ Forthword_ DPPLUSONE, 0, "dp+1"
     b.n DPPLUS
 
 @ ( -- )
-@ tail call optimize: change last rcall/call into rjmp/jmp
+@ tail call optimize: change last branch with link (bl) into a branch (b)
 Forthword_ TAILOPT, 0, ";opt"
     push {lr}
     @ optimize only if smudge is not zero
