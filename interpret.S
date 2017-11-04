@@ -690,8 +690,9 @@ Forthword_ INRESET, 0, "in_"
   pop_lr_
   b QP_RD
 
-@ ( -- )
-@ wait for the input buffer to be refilled then interpret
+@ ( -- flag )
+@ refill the input buffer
+@ flag is true if buffer needs processing ie full or enter pressed
 Forthword_ DOREFILL, 0, "(refill)"
   push {lr}
   @ if just starting new input line then check prompt and reset input position
@@ -699,21 +700,11 @@ Forthword_ DOREFILL, 0, "(refill)"
   hfetch_                  @ ( >in )
   zerosense_               @ ( )
   beq.n DOREFILL_do
-    pop_lr_
-    b INRESET
+    bl INRESET
 
 DOREFILL_do:
   @ refill the input buffer
   bl REFILL                @ ( f )
-  @ <if>
-  zerosense_
-  beq.n DOREFILL_end
-
-    @ there is something in the input buffer, try interpreting it
-    bl DOINTERPRET
-
-DOREFILL_end:
-  @ <then>
   pop {pc}
 
 @ ( -- )
@@ -732,6 +723,7 @@ Forthword_ BYE, 0, "bye"
 @ Fetch pause vector and EXEC it. may make a context/task switch
 Forthword_ DOPAUSE, 0, "(pause)"
     push {lr}
+    bl SLEEP @@ temp fix for cpu hogging
     bl PAUSEADDR
     fetch_
     pop_lr_
@@ -743,7 +735,13 @@ Forthword_ DOTASKS, 0, "(tasks)"
     @ <begin>
     push {lr}
 DOTASKS1:
-    bl DOREFILL
+    bl DOREFILL      @ ( flag )
+    @ <if>
+    zerosense_
+    beq.n DOTASK_N1
+      @ there is something in the input buffer, try interpreting it
+      bl DOINTERPRET
+DOTASK_N1:
     bl DOPAUSE
     
 
@@ -776,6 +774,7 @@ Forthword_ RESET, 0, "reset"
     @ reset input buffer
     bl INRESET
 
+    bl SLEEPON
     @ switch to interpret mode
     pop_lr_
     b LBRACKET

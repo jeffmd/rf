@@ -3,18 +3,14 @@
 @ ( -- )
 @ compile assembler pop {pc}
 Forthword_ POPPC_C, 0, "poppc,"
-    push {lr}
     dolit16_ 0xbd00
-    pop_lr_
     b COMMA
 
 
 @ ( -- )
 @ compile assembler push {lr}
 Forthword_ PUSHLR_C, 0, "pushlr,"
-    push {lr}
     dolit16_ 0xb500
-    pop_lr_
     b COMMA
 
 @ ( -- )
@@ -111,14 +107,12 @@ Forthword_ SUBI_C, 0, "subs#,"
 @ |       Op     |  Rd  |     val8      |
 @ move, cmp, add, sub operations with immediate
 MCASI_C:    
-    push {lr}
     @ flip Rd and val8 around
     to_r_
     swap_
     r_from_
     movs r0, #4
     orrs tos, r0
-    pop_lr_
     b OPRDVAL_C
 
 @ ( Rd Rs -- )
@@ -295,7 +289,6 @@ Forthword_ OPVRRSRD_C, 0, "opvrrsrd,"
 @ |            op           |  Rs |  Rd |
 @ compile arm thumb assembler instruction   
 Forthword_ OPRSRD_C, 0, "oprsrd,"
-    push {lr}
     @ shift left Op 6 bits
     lsls tos, #6
     @ mask Rs with 7
@@ -308,7 +301,6 @@ Forthword_ OPRSRD_C, 0, "oprsrd,"
     movs r1, #0x7
     ands r0, r1
     orrs tos, r0
-    pop_lr_
     b COMMA
 
 @ ( val8 Rd op -- )
@@ -317,7 +309,6 @@ Forthword_ OPRSRD_C, 0, "oprsrd,"
 @ |       op     |  Rd  |  8 bit val    |
 @ compile arm thumb assembler instruction    
 Forthword_ OPRDVAL_C, 0, "oprdval,"
-    push {lr}
     lsls tos, #3
     @ mask Rd with 7
     ldm dsp!, {r0}
@@ -330,7 +321,6 @@ Forthword_ OPRDVAL_C, 0, "oprdval,"
     ands r0, r1
     lsls tos, #8
     orrs tos, r0
-    pop_lr_
     b COMMA
     
 @ calc relative distance in half word alignment
@@ -435,13 +425,10 @@ Forthword_ BLC, 0, "bl,"
 @ branch 1 word if not zero
 @ ( -- )
 Forthword_ BRNZ1_COMPILE, 0, "bne1,"
-    push {lr}
     pushtos_
     @compile bne #00 : 0xD100
     movs tos, #0xD1
     lsls tos, #8
-    adds tos, #0x00
-    pop_lr_
     b COMMA
 
 @ ( -- 32b )

@@ -14,6 +14,27 @@ Forthword_ HERE, 0, "here"
     pop {pc}
 
 @ ( -- a-addr )
+@ address of idletime
+Forthword_ IDLETIMEADDR, 0, "idletime#"
+  douser_ USER_IDLETIME
+
+@ ( n -- )
+@ set idletime
+Forthword_ IDLETIMESTORE, 0, "idletime!"
+  push {lr}
+  bl IDLETIMEADDR
+  pop_lr_
+  b STORE
+
+@ ( -- n )
+@ get idletime
+Forthword_ IDLETIMEFETCH, 0, "idletime@"
+  push {lr}
+  bl IDLETIMEADDR
+  fetch_
+  pop {pc}
+
+@ ( -- a-addr )
 @ location of the cell containing the number conversion radix
 Forthword_ BASE, 0, "base"
     douser_ USER_BASE
@@ -900,6 +921,32 @@ Forthword_ USLEEP, 0, "usleep"
   b usleep
 
 
+@ ( -- )
+@ sleep for n micro seconds
+Forthword_ SLEEP, 0, "sleep"
+  push {lr}
+  bl IDLETIMEFETCH
+  dupzerosense_
+  beq.n NO_IDLESLEEP
+    pop_lr_
+    b USLEEP
+NO_IDLESLEEP:
+  drop_
+  pop {pc}
+
+@ ( -- )
+@ turn sleep off
+Forthword_ SLEEPOFF, 0, "sleepoff"
+  zero_
+  b IDLETIMESTORE
+ 
+@ ( -- )
+@ turn sleep on
+Forthword_ SLEEPON, 0, "sleepon"
+  dolit16_ 5000
+  b IDLETIMESTORE
+ 
+
 @ dodefer - execute a deferred word
 @ defer setup as:
 @ push {lr}
@@ -931,6 +978,9 @@ Forthword_ DOINCLUDE, 0, "doinclude"
     zerosense_
     
     beq.n DOINCLUDE_EXIT
+  	  bl IDLETIMEFETCH
+	    to_r_
+	    bl SLEEPOFF
       @ push FFLAGS on tor
       bl FFLAGS
       hfetch_
@@ -966,8 +1016,10 @@ Forthword_ DOINCLUDE, 0, "doinclude"
       @ restore FFLAGS
       r_from_
       bl FFLAGS
+      bl HSTORE
+  		r_from_
       pop_lr_
-      b HSTORE
+	  	b IDLETIMESTORE
        
 DOINCLUDE_EXIT:
     drop_
