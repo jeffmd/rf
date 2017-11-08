@@ -69,7 +69,7 @@ Forthword_ ARGVADDR, 0, "argv#"
 @ fetch the emit vector and EXEC it. Will emit a character from TOS
 Forthword_ PUTCHAR, 0, "putchar"
   mov r0, tos
-  poptos_
+  drop_
   b putchar
 
 @ ( c -- )
@@ -104,7 +104,7 @@ Forthword_ BL, 0, "bl"
 Forthword_ STDIN, 0, "stdin"
   push {lr}
   bl getchar
-  pushtos_
+  dup_
   mov tos, r0
   pop {pc}
 
@@ -117,11 +117,11 @@ Forthword_ KEYFILE, 0, "keyfile"
   fetch_
   movs r0, tos
   movs tos, #0
-  pushtos_
+  dup_
   mov r1, dsp
   movs r2, #1
   bl read 
-  poptos_
+  drop_
   @ was one key read from the file?
   cmp r0, #1
   beq.n KEYEND
@@ -219,7 +219,7 @@ MCMP_LOOP:
     @ that means: if the flash cell is less $0100, than mask the
     @ high byte in the ram cell
     dup_                     @ ( r-addr r-cc f-cc f-cc )
-    pushtos_
+    dup_
     movs tos, #80             @ ( r-addr r-cc f-cc f-cc 0x100 )
     adds tos, tos
     bl ULESS                 @ ( r-addr r-cc f-cc flag)
@@ -472,7 +472,7 @@ FINDW_NEXT:
 Forthword_ DOSLIT, 0, "(slit)"
   @ get return address to get string length, calculate string address start,
   @ and calculate return address
-  pushtos_
+  dup_
   mov tos, lr    @ ( raddr )  (R: raddr -- )
   dup_           @ ( raddr raddr )
   @ get the string length
@@ -489,7 +489,7 @@ Forthword_ DOSLIT, 0, "(slit)"
   @ also skip string length
   twoplus_       @ ( straddr slength raddr+k+2 )
   mov lr, tos
-  poptos_
+  drop_
   bx lr
 
 @ ( addr len -- [n] [addr len] f )

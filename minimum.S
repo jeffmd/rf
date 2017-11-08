@@ -362,7 +362,7 @@ TO_NUMBER_CONV:
         bl BASEFETCH         @ ( adr len u base)
         @bl STAR             @ ( adr len u*base)
         mov r0, tos
-        poptos_
+        drop_
         muls tos, r0
         getb_                @ ( adr len u' digit)
         plus_                @ ( adr len u')
@@ -424,7 +424,7 @@ Forthword_ DSWAP, 0, "2swap"
   ldm dsp!, {r0, r1, r2}
   subs dsp, #4
   str r0, [dsp]
-  pushtos_
+  dup_
   subs dsp, #4
   str r2, [dsp]
   movs tos, r1
@@ -816,7 +816,7 @@ Forthword_ U_DIVMOD, 0, "u/mod"
   lsrs r2, #1      @ bitmask(r2) >>= 1
   bne.n 3b
 
-  pushtos_
+  dup_
   movs tos, r3
   bx lr
   .endif
@@ -853,25 +853,25 @@ divmod_minus:
 
 divmod_minus_minus:
       rsbs r0, r0, #0
-      pushtos_
+      dup_
       movs tos, r0
       bl U_DIVMOD
       movs r0, tos
       ldm dsp!, {tos}
       rsbs tos, tos, #0
-      pushtos_
+      dup_
       movs tos, r0
       pop {pc}
 
 divmod_minus_plus:
-      pushtos_
+      dup_
       mov tos, r0
       bl U_DIVMOD
       movs r0, tos
       ldm dsp!, {tos}
       rsbs r0, r0, #0
       rsbs tos, tos, #0
-      pushtos_
+      dup_
       movs tos, r0
       pop {pc}
 
@@ -881,14 +881,14 @@ divmod_plus:
 
 divmod_plus_minus:
       rsbs r0, r0, #0
-      pushtos_
+      dup_
       movs tos, r0
       bl U_DIVMOD
       rsbs tos, tos, #0
       pop {pc}
 
 divmod_plus_plus:
-      pushtos_
+      dup_
       mov tos, r0
       bl U_DIVMOD
       pop {pc}
@@ -917,7 +917,7 @@ Forthword_, DIV, 0, "/"
 @ sleep for n micro seconds
 Forthword_ USLEEP, 0, "usleep"
   mov r0, tos
-  poptos_
+  drop_
   b usleep
 
 
@@ -954,7 +954,7 @@ Forthword_ SLEEPON, 0, "sleepon"
 @ .word deferptr
 @ does not return to defer callee
 Forthword_ DODEFER, 0, "(def)"
-  pushtos_
+  dup_
   mov tos, lr
   subs tos, #1 @ doing memory access, do not want thumb bit
   ldr tos, [tos]
@@ -1064,14 +1064,14 @@ DOCMDARG_EXIT:
 @ gives the number of seconds and microseconds since the Epoch
 Forthword_ TIME, 0, "time"
     push {lr}
-    pushtos_
+    dup_
     movs tos, #0
-    pushtos_
-    pushtos_
+    dup_
+    dup_
     mov r0, dsp
     movs r1, #0
     bl gettimeofday
-    poptos_
+    drop_
     pop {pc}
     
 @ must be last word in core

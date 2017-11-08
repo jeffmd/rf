@@ -7,7 +7,7 @@
 Forthword_ OPENF, 0, "open"
   push {lr}
   mov r0, tos @ path
-  poptos_
+  drop_
   mov r1, tos @ flags
   bl open
   mov tos, r0
@@ -19,7 +19,7 @@ Forthword_ OPENF, 0, "open"
 Forthword_ CLOSEF, 0, "close"
   push {lr}
   mov r0, tos @ filedes
-  poptos_
+  drop_
   bl close
   pop {pc}
 
@@ -29,9 +29,9 @@ Forthword_ CLOSEF, 0, "close"
 Forthword_ READF, 0, "read"
   push {lr}
   movs r2, tos @ length
-  poptos_
+  drop_
   mov r1, tos @ buffer
-  poptos_
+  drop_
   movs r0, tos @ filedes
   bl read 
   mov tos, r0
@@ -43,9 +43,9 @@ Forthword_ READF, 0, "read"
 Forthword_ WRITEF, 0, "write"
   push {lr}
   movs r2, tos @ length
-  poptos_
+  drop_
   mov r1, tos @ buffer
-  poptos_
+  drop_
   movs r0, tos @ filedes
   bl write 
   mov tos, r0
@@ -58,7 +58,7 @@ Forthword_ WRITEF, 0, "write"
 Forthword_ DLOPEN, 0, "dlopen"
   push {lr}
   mov r0, tos @ path
-  poptos_
+  drop_
   mov r1, tos @ mode
   bl dlopen
   mov tos, r0
@@ -71,7 +71,7 @@ Forthword_ DLOPEN, 0, "dlopen"
 Forthword_ DLSYM, 0, "dlsym"
   push {lr}
   mov r0, tos @ handle
-  poptos_
+  drop_
   mov r1, tos @ symname
   bl dlsym
   mov tos, r0
@@ -94,7 +94,7 @@ Forthword_ DLCLOSE, 0, "dlclose"
 Forthword_ DLERROR, 0, "dlerror"
   push {lr}
   bl dlerror
-  pushtos_
+  dup_
   mov tos, r0
   pop {pc}
 
@@ -111,7 +111,7 @@ Forthword_ DLCALL0, 0, "dlcall0"
 Forthword_ DLCALL1, 0, "dlcall1"
   push {lr}
   mov r1, tos @ call addr
-  poptos_
+  drop_
   mov r0, tos @ arg1
   blx r1
   mov tos, r0

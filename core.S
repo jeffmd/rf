@@ -6,7 +6,7 @@ Forthword_ EXEC, 0, "exec"
     movs r0, #1
     @ make sure its a thumb address mode
     orrs r0, tos
-    poptos_
+    drop_
     bx r0
 
 @ ( xt -- )
@@ -20,7 +20,7 @@ Forthword_ NOOP, INLINE_OPT, "noop"
 @ ( n -- n n )
 @ duplicate TOS
 Forthword_ DUP, INLINE_OPT, "dup"
-    pushtos_
+    dup_
     bx lr
 
 @ ( n1 -- [ n1 n1 ] | 0)
@@ -28,7 +28,7 @@ Forthword_ DUP, INLINE_OPT, "dup"
 Forthword_ QDUP, 0, "?dup"
     cmp tos, #0
     beq.n PFA_QDUP1
-    pushtos_
+    dup_
 PFA_QDUP1:
     bx lr
 
@@ -171,7 +171,7 @@ Forthword_ RP_STORE, INLINE_OPT, "rp!"
 @ pop return onto data stack and exit caller
 @ used if data in program mem and need an address to it
 Forthword_ POPRET, 0, "popret"
-    pushtos_
+    dup_
     mov tos, lr
     subs tos, #1
     pop {pc}
@@ -181,7 +181,7 @@ Forthword_ POPRET, 0, "popret"
 @ assumes TOR content will be used for 32 bit memory access so
 @ removes thumb bit flag
 Forthword_ RTORPLUS, 0, "r>r+"
-    pushtos_
+    dup_
     pop {tos}
     adds tos, #0x04
     push {tos}
@@ -425,7 +425,7 @@ STORE_it:
 Forthword_ ZEROSTORE, 0, "0!"
   movs r0, #0
   str r0, [tos]
-  poptos_
+  drop_
   bx lr
 
 
@@ -466,7 +466,7 @@ Forthword_ HSTORE, 0, "h!"
 Forthword_ ZEROHSTORE, 0, "0h!"
   movs r0, #0
   strh r0, [tos]
-  poptos_
+  drop_
   bx lr
 
 @ ( n16 a-addr -- )
@@ -506,7 +506,7 @@ Forthword_ CSTORE, 0, "c!"
 Forthword_ ZEROCSTORE, 0, "0c!"
   movs r0, #0
   strb r0, [tos]
-  poptos_
+  drop_
   bx lr
 
 @ ( c a-addr -- )
@@ -585,7 +585,7 @@ Forthword_ AFETCH, INLINE_OPT, "a@"
 @ store a word to RAM address pointed to by areg
 Forthword_ ASTORE, 0, "a!"
   str tos, [areg]
-  poptos_
+  drop_
   bx lr
 
 @ ( -- n )
@@ -598,7 +598,7 @@ Forthword_ AHFETCH, INLINE_OPT, "ah@"
 @ store a half word to RAM address pointed to by areg
 Forthword_ AHSTORE, 0, "ah!"
   strh tos, [areg]
-  poptos_
+  drop_
   bx lr
 
 @ ( -- n )
@@ -611,7 +611,7 @@ Forthword_ ACFETCH, INLINE_OPT, "ac@"
 @ store a single byte to RAM address pointed to by areg
 Forthword_ ACSTORE, 0, "ac!"
   strb tos, [areg]
-  poptos_
+  drop_
   bx lr
 
 @ ( -- )

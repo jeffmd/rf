@@ -32,7 +32,7 @@ Forthword_ SMUDGE, 0, "smudge"
 @ ( -- f-addr )
 @ get address of the dictionary cell
 Forthword_ DPSHARP, 0, "dp#"
-    pushtos_
+    dup_
     movs tos, #(ram_dp-sysvar_base)
     adds tos, sysvar
     bx lr
@@ -84,11 +84,11 @@ Forthword_ CLRCACHE, 0, "clrcache"
     bl CURRENT
     fetch_
     mov r0, tos
-    poptos_
+    drop_
     @ r1 = end address
     bl DP
     mov r1, tos
-    poptos_
+    drop_
     @ can't tail call optimize here since calling c code in arm not thumb
     bl __clear_cache
     pop {pc}
@@ -206,7 +206,7 @@ Forthword_ INLINE, 0, "inline"
     push {lr}
     @ find the bx lr instruction, want count to bx lr
     @ count will be number of half words to inline
-    pushtos_
+    dup_
     movs tos, #0x47
     lsls tos, #8
     adds tos, #0x70

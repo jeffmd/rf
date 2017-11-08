@@ -25,7 +25,7 @@ Forthword_ BXLR_C, 0, "bxlr,"
 @ ( -- lr )
 @ move link register onto top of data stack
 Forthword_ LR_G, INLINE_OPT, "lr>"
-    pushtos_
+    dup_
     mov tos, lr
     bx lr
 
@@ -425,7 +425,7 @@ Forthword_ BLC, 0, "bl,"
 @ branch 1 word if not zero
 @ ( -- )
 Forthword_ BRNZ1_COMPILE, 0, "bne1,"
-    pushtos_
+    dup_
     @compile bne #00 : 0xD100
     movs tos, #0xD1
     lsls tos, #8
@@ -435,7 +435,7 @@ Forthword_ BRNZ1_COMPILE, 0, "bne1,"
 @ fetch a 32 bit inlinned constant pointed to by lr onto the top of stack
 @ assumes caller was in thumb mode
 Forthword_ ICFETCH, 0, "ic@"
-    pushtos_
+    dup_
     mov r0, lr
     subs r0, #1     @ clear bit 0 which is thumb indicator
     ldr tos, [r0]
